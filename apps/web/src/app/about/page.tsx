@@ -8,7 +8,7 @@ import { buildPageMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildPageMetadata({
-	title: "Sobre a Plastlima — nossa história",
+	title: "Sobre a Plastlima — Nossa história",
 	description:
 		"Conheça a história da PlastLima: de um box de 30m² na Ceasa de Teresina em 2002 a uma rede de franquias com 14 lojas em três estados do Nordeste.",
 	path: "/about",
