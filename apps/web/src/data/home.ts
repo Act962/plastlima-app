@@ -33,6 +33,18 @@ export const COMPANY_STATS: Stat[] = [
 
 export const OFFER_HIGHLIGHTS: MediaItem[] = [
 	{
+		src: "/offers/offer-09.jpg",
+		alt: "A embalagem certa faz toda diferença — embalagens Plastlima para seus produtos",
+	},
+	{
+		src: "/offers/offer-10.jpg",
+		alt: "Petisco no copo: copo PIC 040 com espetinho, ideal para mini degustações",
+	},
+	{
+		src: "/offers/offer-11.jpg",
+		alt: "A qualidade da embalagem define o retorno do seu cliente — Plastlima",
+	},
+	{
 		src: "/offers/offer-01.jpg",
 		alt: "Promoção de produtos descartáveis Plastlima",
 	},
