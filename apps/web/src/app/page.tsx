@@ -1,30 +1,21 @@
-"use client";
+import { AboutPreviewSection } from "@/components/home/about-preview-section";
+import { CatalogCtaSection } from "@/components/home/catalog-cta-section";
+import { FranchisePreviewSection } from "@/components/home/franchise-preview-section";
+import { HeroCarousel } from "@/components/home/hero-carousel";
+import { OffersSection } from "@/components/home/offers-section";
+import { StatsBand } from "@/components/home/stats-band";
+import { DistributionCenterSection } from "@/components/sections/distribution-center-section";
 
-const TITLE_TEXT = `
- ██████╗ ███████╗████████╗████████╗███████╗██████╗
- ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
- ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
- ██╔══██╗██╔══╝     ██║      ██║   ██╔══╝  ██╔══██╗
- ██████╔╝███████╗   ██║      ██║   ███████╗██║  ██║
- ╚═════╝ ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝
-
- ████████╗    ███████╗████████╗ █████╗  ██████╗██╗  ██╗
- ╚══██╔══╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝
-    ██║       ███████╗   ██║   ███████║██║     █████╔╝
-    ██║       ╚════██║   ██║   ██╔══██║██║     ██╔═██╗
-    ██║       ███████║   ██║   ██║  ██║╚██████╗██║  ██╗
-    ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
- `;
-
-export default function Home() {
-  return (
-    <div className="container mx-auto max-w-3xl px-4 py-2">
-      <pre className="overflow-x-auto font-mono text-sm">{TITLE_TEXT}</pre>
-      <div className="grid gap-6">
-        <section className="rounded-lg border p-4">
-          <h2 className="mb-2 font-medium">API Status</h2>
-        </section>
-      </div>
-    </div>
-  );
+export default function HomePage() {
+	return (
+		<>
+			<HeroCarousel />
+			<StatsBand />
+			<AboutPreviewSection />
+			<DistributionCenterSection eyebrow="02 — Logística" />
+			<CatalogCtaSection />
+			<FranchisePreviewSection />
+			<OffersSection />
+		</>
+	);
 }

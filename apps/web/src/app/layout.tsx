@@ -1,40 +1,59 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Manrope } from "next/font/google";
 
 import "../index.css";
-import Header from "@/components/header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { WhatsappFloatingButton } from "@/components/layout/whatsapp-floating-button";
 import Providers from "@/components/providers";
+import { SITE } from "@/data/site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const manrope = Manrope({
+	variable: "--font-manrope",
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const archivo = Archivo({
+	variable: "--font-archivo",
+	subsets: ["latin"],
+	weight: ["500", "600", "700", "800"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+	variable: "--font-ibm-plex-mono",
+	subsets: ["latin"],
+	weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "plastlima-app",
-  description: "plastlima-app",
+	title: {
+		default: `${SITE.name} — Descartáveis e embalagens`,
+		template: `%s | ${SITE.name}`,
+	},
+	description: SITE.description,
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
-        </Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html
+			className={`${manrope.variable} ${archivo.variable} ${ibmPlexMono.variable}`}
+			lang="pt-BR"
+		>
+			<body>
+				<Providers>
+					<div className="flex min-h-svh flex-col">
+						<SiteHeader />
+						<main className="flex-1">{children}</main>
+						<SiteFooter />
+					</div>
+					<WhatsappFloatingButton />
+				</Providers>
+			</body>
+		</html>
+	);
 }

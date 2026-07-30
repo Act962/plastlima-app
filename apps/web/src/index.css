@@ -1,1 +1,108 @@
 @import "@plastlima-app/ui/globals.css";
+
+/* Plastlima brand theme — tokens extracted from the Claude Design source.
+   Names are prefixed away from shadcn tokens (accent/muted/border/...) on purpose,
+   so the shared UI package keeps working untouched. */
+@theme {
+	--font-sans: var(--font-manrope), system-ui, sans-serif;
+	--font-display: var(--font-archivo), system-ui, sans-serif;
+	--font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+
+	--color-canvas: #fafaf8;
+	--color-surface: #ffffff;
+	--color-surface-muted: #f2f2ee;
+
+	--color-ink: #101418;
+	--color-ink-muted: #2a3138;
+	--color-body: #454f5b;
+	--color-body-muted: #5a6470;
+	--color-label: #59616b;
+
+	--color-line: #e4e4df;
+	--color-line-strong: #d6d6d0;
+	--color-line-soft: #edede8;
+
+	--color-brand: #a0111a;
+	--color-brand-dark: #7a0c12;
+	--color-brand-deep: #8e0d14;
+
+	--color-yellow: #ebe742;
+	--color-yellow-soft: #fff69a;
+	--color-yellow-pale: #ffefa8;
+	--color-yellow-bright: #fff06b;
+	--color-on-yellow: #2e2400;
+	--color-on-yellow-muted: #3e3208;
+
+	--color-online: #4ade80;
+
+	--container-site: 1240px;
+	--container-reading: 900px;
+}
+
+/* Type scale.
+   These deliberately live outside the `text-*` namespace: tailwind-merge (used by
+   `cn`) cannot tell a custom `text-<name>` font size from a text colour, and would
+   drop whichever came first. `type-*` classes are passed through untouched. */
+@utility type-display {
+	font-size: clamp(38px, 6vw, 60px);
+	line-height: 1.06;
+}
+
+@utility type-heading {
+	font-size: clamp(30px, 4.4vw, 44px);
+	line-height: 1.1;
+}
+
+@utility type-heading-sm {
+	font-size: clamp(28px, 4vw, 40px);
+	line-height: 1.12;
+}
+
+@utility type-body-lg {
+	font-size: clamp(18px, 1.8vw, 20px);
+	line-height: 1.62;
+}
+
+@utility type-lead {
+	font-size: 17.5px;
+	line-height: 1.68;
+}
+
+@utility type-eyebrow {
+	font-size: 11.5px;
+}
+
+/* Section rhythm from the design (clamped vertical padding). */
+@utility py-section {
+	padding-block: clamp(60px, 8vw, 104px);
+}
+
+@utility py-section-sm {
+	padding-block: clamp(56px, 7.5vw, 96px);
+}
+
+@utility py-section-xs {
+	padding-block: clamp(44px, 6vw, 72px);
+}
+
+@layer base {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply bg-canvas font-sans text-ink antialiased;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		@apply font-display tracking-[-0.02em];
+		text-wrap: balance;
+	}
+
+	p {
+		text-wrap: pretty;
+	}
+}
