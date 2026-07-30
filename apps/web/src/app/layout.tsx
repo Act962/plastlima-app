@@ -6,7 +6,10 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { WhatsappFloatingButton } from "@/components/layout/whatsapp-floating-button";
 import Providers from "@/components/providers";
+import { JsonLd } from "@/components/seo/json-ld";
 import { SITE } from "@/data/site";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo/metadata";
+import { organizationSchema, websiteSchema } from "@/lib/seo/schema";
 
 const manrope = Manrope({
 	variable: "--font-manrope",
@@ -27,11 +30,40 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL(SITE.url),
 	title: {
-		default: `${SITE.name} — Descartáveis e embalagens`,
+		default: `${SITE.name} — Descartáveis e embalagens no Piauí e Maranhão`,
 		template: `%s | ${SITE.name}`,
 	},
 	description: SITE.description,
+	applicationName: SITE.name,
+	referrer: "origin-when-cross-origin",
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			"max-image-preview": "large",
+			"max-snippet": -1,
+			"max-video-preview": -1,
+		},
+	},
+	openGraph: {
+		type: "website",
+		locale: "pt_BR",
+		siteName: SITE.name,
+		title: `${SITE.name} — Descartáveis e embalagens`,
+		description: SITE.description,
+		url: "/",
+		images: [DEFAULT_OG_IMAGE],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: SITE.name,
+		description: SITE.description,
+		images: [DEFAULT_OG_IMAGE.url],
+	},
 };
 
 export default function RootLayout({
@@ -45,6 +77,7 @@ export default function RootLayout({
 			lang="pt-BR"
 		>
 			<body>
+				<JsonLd data={[organizationSchema(), websiteSchema()]} />
 				<Providers>
 					<div className="flex min-h-svh flex-col">
 						<SiteHeader />

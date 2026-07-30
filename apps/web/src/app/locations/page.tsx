@@ -1,19 +1,32 @@
 import type { Metadata } from "next";
 import { LocationsExplorer } from "@/components/locations/locations-explorer";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { PageHero } from "@/components/ui/page-hero";
 import { Section } from "@/components/ui/section";
 import { STORE_LOCATIONS } from "@/data/locations";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, storeListSchema } from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
-	title: "Unidades",
+export const metadata: Metadata = buildPageMetadata({
+	title: "Lojas em Teresina, Timon e região",
 	description:
-		"Encontre a loja PlastLima mais próxima de você no Piauí, Maranhão e Pernambuco: endereços, horários e contato.",
-};
+		"Encontre a loja PlastLima mais próxima: 14 unidades no Piauí, Maranhão e Pernambuco com endereços, horários de funcionamento e contato por WhatsApp.",
+	path: "/locations",
+});
 
 export default function LocationsPage() {
 	return (
 		<>
+			<JsonLd
+				data={[
+					breadcrumbSchema([
+						{ name: "Início", path: "/" },
+						{ name: "Unidades", path: "/locations" },
+					]),
+					storeListSchema(),
+				]}
+			/>
 			<PageHero
 				eyebrow="Unidades"
 				title="Encontre a unidade mais próxima de você"

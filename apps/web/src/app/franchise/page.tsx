@@ -5,16 +5,26 @@ import { FranchiseFormSection } from "@/components/franchise/franchise-form-sect
 import { FranchiseHero } from "@/components/franchise/franchise-hero";
 import { MarketDataSection } from "@/components/franchise/market-data-section";
 import { SegmentsSection } from "@/components/franchise/segments-section";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema } from "@/lib/seo/schema";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
 	title: "Seja um franqueado",
 	description:
-		"A primeira franquia no varejo de produtos descartáveis do Brasil. Conheça o modelo de negócio PlastLima e cadastre-se.",
-};
+		"Seja dono da primeira franquia no varejo de descartáveis do Brasil. Conheça o modelo de negócio Plastlima, o investimento e cadastre-se para ser um franqueado.",
+	path: "/franchise",
+});
 
 export default function FranchisePage() {
 	return (
 		<>
+			<JsonLd
+				data={breadcrumbSchema([
+					{ name: "Início", path: "/" },
+					{ name: "Seja um franqueado", path: "/franchise" },
+				])}
+			/>
 			<FranchiseHero />
 			<CompanyTimeline />
 			<FranchiseAboutSection />

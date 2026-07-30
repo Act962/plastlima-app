@@ -1,8 +1,18 @@
 import type { ExternalLink } from "@/types/navigation";
 import { DOCUMENTS, IMAGES } from "./images";
 
+/**
+ * Origem pública do site (sem barra final). Usada em canonical, OpenGraph,
+ * sitemap, robots e JSON-LD. Configurável por ambiente via NEXT_PUBLIC_SITE_URL
+ * (ex.: domínio próprio em produção); o padrão é a URL atual na Vercel.
+ */
+export const SITE_URL = (
+	process.env.NEXT_PUBLIC_SITE_URL ?? "https://plastlima-app-web.vercel.app"
+).replace(/\/$/, "");
+
 export const SITE = {
 	name: "Plastlima",
+	url: SITE_URL,
 	description:
 		"Distribuidora de descartáveis e embalagens com mais de 1.500 produtos, atendendo Piauí, Maranhão e Pernambuco desde 2002.",
 	tagline:
