@@ -3,11 +3,11 @@ import { DOCUMENTS, IMAGES } from "./images";
 
 /**
  * Origem pública do site (sem barra final). Usada em canonical, OpenGraph,
- * sitemap, robots e JSON-LD. Configurável por ambiente via NEXT_PUBLIC_SITE_URL
- * (ex.: domínio próprio em produção); o padrão é a URL atual na Vercel.
+ * sitemap, robots e JSON-LD. Configurável por ambiente via NEXT_PUBLIC_SITE_URL;
+ * o padrão é o domínio de produção (www).
  */
 export const SITE_URL = (
-	process.env.NEXT_PUBLIC_SITE_URL ?? "https://plastlima-app-web.vercel.app"
+	process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.plastlima.com.br"
 ).replace(/\/$/, "");
 
 export const SITE = {
