@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { SITE } from "@/data/site";
 
-/** Imagem padrão de compartilhamento (OpenGraph / Twitter). */
+/** Imagem padrão de compartilhamento (OpenGraph / Twitter). Proporção 1.91:1. */
 export const DEFAULT_OG_IMAGE = {
-	url: "/about/story-01.jpeg",
-	width: 680,
-	height: 510,
-	alt: `${SITE.name} — descartáveis e embalagens`,
+	url: "/og-image.jpg",
+	width: 1200,
+	height: 630,
+	alt: `${SITE.name} — a solução em descartáveis`,
 } as const;
 
 type PageMetadataInput = {

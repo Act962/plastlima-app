@@ -27,7 +27,7 @@ export function organizationSchema() {
 		legalName: "PlastLima",
 		url: SITE.url,
 		logo: `${SITE.url}${SITE.logoUrl}`,
-		image: `${SITE.url}/about/story-01.jpeg`,
+		image: `${SITE.url}/og-image.jpg`,
 		description: SITE.description,
 		email: SITE.email,
 		telephone: toTelephone(CONTACT.support.phone),
