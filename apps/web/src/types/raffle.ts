@@ -28,6 +28,13 @@ export type RaffleCampaignContent = {
 	confirmation: {
 		title: string;
 		message: string;
+		/**
+		 * Substitui `message` quando o mesmo WhatsApp se cadastra de novo.
+		 * `{count}` é trocado pelo número de participações acumuladas.
+		 */
+		repeatMessage: string;
+		/** Convite a voltar depois da próxima compra. Só aparece para quem é novo. */
+		repeatHint: string;
 		invitation: string;
 		ctaLabel: string;
 	};

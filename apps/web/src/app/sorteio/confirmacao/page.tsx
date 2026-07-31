@@ -5,6 +5,7 @@ import { ExternalActionLink } from "@/components/ui/external-action-link";
 import { Section } from "@/components/ui/section";
 import { RAFFLE_CAMPAIGN } from "@/data/raffle";
 import { EXTERNAL_LINKS } from "@/data/site";
+import { readParticipationCount } from "@/lib/raffle/participation-cookie";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = {
@@ -18,8 +19,13 @@ export const metadata: Metadata = {
 	robots: { index: false, follow: true },
 };
 
-export default function RaffleConfirmationPage() {
+export default async function RaffleConfirmationPage() {
 	const { confirmation, prize, drawDateLabel } = RAFFLE_CAMPAIGN;
+
+	// Quem já tinha cadastro não vira um segundo registro: o contador sobe. A
+	// tela precisa dizer isso, senão parece que o envio não valeu.
+	const participationCount = await readParticipationCount();
+	const isRepeat = participationCount !== null && participationCount > 1;
 
 	return (
 		<Section>
@@ -38,8 +44,18 @@ export default function RaffleConfirmationPage() {
 					{confirmation.title}
 				</h1>
 				<p className="type-lead mx-auto mb-3 max-w-[540px] text-body">
-					{confirmation.message}
+					{isRepeat
+						? confirmation.repeatMessage.replace(
+								"{count}",
+								String(participationCount),
+							)
+						: confirmation.message}
 				</p>
+				{!isRepeat && (
+					<p className="mx-auto mb-3 max-w-[540px] text-[15.5px] text-body-muted">
+						{confirmation.repeatHint}
+					</p>
+				)}
 				<p className="mx-auto mb-10 max-w-[540px] text-[15.5px] text-body-muted">
 					O sorteio do {prize} acontece em {drawDateLabel}. Se você for o
 					ganhador, entramos em contato pelo WhatsApp cadastrado.

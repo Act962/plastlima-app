@@ -33,7 +33,8 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 		{
 			id: "compre",
 			title: "Faça uma compra",
-			description: "Qualquer valor já garante sua participação.",
+			description:
+				"Qualquer valor já garante sua participação — e cada nova compra vale mais uma chance.",
 		},
 		{
 			id: "acesse",
@@ -57,12 +58,16 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 	form: {
 		title: "Faça seu cadastro e concorra",
 		description:
-			"Leva menos de um minuto. Usamos o WhatsApp apenas para avisar o ganhador — quem já se cadastrou não precisa preencher de novo.",
+			"Leva menos de um minuto. Usamos o WhatsApp apenas para avisar o ganhador. Comprou de novo? Cadastre outra vez com o mesmo número: cada compra vale mais uma chance.",
 	},
 
 	confirmation: {
 		title: "Parabéns!",
 		message: "Sua participação foi registrada com sucesso. Agora é só torcer!",
+		repeatMessage:
+			"Esta é a sua {count}ª participação. Quanto mais você compra e se cadastra, mais chances tem de ganhar!",
+		repeatHint:
+			"Comprou de novo? Volte aqui e preencha o formulário com o mesmo WhatsApp — cada compra vale mais uma chance.",
 		invitation:
 			"Enquanto isso, aproveite para conhecer nossa linha completa de produtos para churrasco, festas e eventos.",
 		ctaLabel: "Conheça nossos produtos",

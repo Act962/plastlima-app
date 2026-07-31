@@ -2,6 +2,7 @@
 
 import { raffleRegistrationSchema } from "@plastlima-app/core/schemas";
 import { redirect } from "next/navigation";
+import { rememberParticipationCount } from "@/lib/raffle/participation-cookie";
 import { createRegisterParticipation } from "@/lib/raffle/registration";
 
 export type RegistrationResult = {
@@ -61,6 +62,8 @@ export async function registerParticipationAction(
 			message: ERROR_MESSAGES[result.error.code] ?? FALLBACK_MESSAGE,
 		};
 	}
+
+	await rememberParticipationCount(result.value.participationCount);
 
 	redirect("/sorteio/confirmacao");
 }

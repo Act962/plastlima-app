@@ -22,10 +22,12 @@ do Ministério da Fazenda**. Operar sem o certificado de autorização é infra�
 administrativa.
 
 Isso é responsabilidade do cliente e **não bloqueia o desenvolvimento** — mas
-precisa estar confirmado antes de a página entrar no ar. O texto do regulamento
-entra como placeholder até ser fornecido; ele deve conter, no mínimo: período de
-participação, critério de apuração, descrição e valor do prêmio, data e forma do
-sorteio, e o número do certificado de autorização.
+precisa estar confirmado antes de a página entrar no ar.
+
+O cliente forneceu o regulamento oficial ("Ganhe um Kit Churrasco PlastLima"),
+que substituiu o rascunho em [`raffle-rules.ts`](../apps/web/src/data/raffle-rules.ts).
+Ele cobre período, prêmio, sorteio, entrega e desclassificação, mas **não cita
+número de certificado de autorização** — o único item legal ainda em aberto.
 
 ---
 
@@ -262,13 +264,31 @@ uma URL distinta é o que permite marcar a conversão em analytics.
 > **Parabéns!**
 > Sua participação foi registrada com sucesso. Agora é só torcer!
 >
+> Comprou de novo? Volte aqui e preencha o formulário com o mesmo WhatsApp —
+> cada compra vale mais uma chance.
+>
 > Enquanto isso, aproveite para conhecer nossa linha completa de produtos para
 > churrasco, festas e eventos.
 >
 > **[Conheça nossos produtos]** → `EXTERNAL_LINKS.onlineCatalog`
 
-**Participante repetido vê exatamente esta mesma tela.** Nada indica que ele já
-estava cadastrado — o requisito não funcional 2 pede que o fluxo continue normal.
+**O participante repetido vê a contagem.** A cláusula 5 do regulamento oficial
+promete mais chances a quem compra mais, então esconder o recadastro seria
+desonesto — e pior, quem reenvia o mesmo número acharia que não valeu. A partir
+da segunda vez o parágrafo de destaque troca:
+
+> Esta é a sua **2ª participação**. Quanto mais você compra e se cadastra, mais
+> chances tem de ganhar!
+
+O fluxo continua idêntico (mesma rota, mesmo redirect), como pede o requisito
+não funcional 2 — só o texto muda.
+
+**Como a contagem chega até a tela.** O `redirect` não carrega payload. A Server
+Action grava a contagem num cookie `httpOnly` de 5 minutos, com `path=/sorteio`,
+e a página apenas lê — apagar cookie durante o render não é permitido, por isso
+o prazo curto faz o descarte. Query string foi descartada: fica no histórico, é
+compartilhável e qualquer um edita o número. Sem cookie válido — visita direta,
+cookie expirado — a tela cai na versão de primeira participação.
 
 ---
 
@@ -434,28 +454,41 @@ comprimem melhor que esse pior caso.
 
 | # | Pendência | Por quê |
 | --- | --- | --- |
-| 1 | **Autorização da SPA/Ministério da Fazenda** e regulamento preenchido | Sorteio condicionado a compra é regido pela Lei 5.768/71. O [`raffle-rules.ts`](../apps/web/src/data/raffle-rules.ts) tem 8 marcadores `[A DEFINIR]`: valor do prêmio, critério de apuração, prazo de entrega, retenção de dados e o número do certificado |
+| 1 | **Autorização da SPA/Ministério da Fazenda** | Sorteio condicionado a compra é regido pela Lei 5.768/71. O regulamento oficial do cliente **não cita Certificado de Autorização** — ou ele existe e falta informar, ou a campanha está irregular. Único ponto do texto legal ainda em aberto |
 | 2 | **Não existe proteção anti-spam** | A [seção 2.6](#26-stack-complementar) previu honeypot, tempo mínimo de preenchimento e rate limit por IP — **nenhum foi implementado**. Hoje `/sorteio` grava direto no MongoDB sem limite: um script simples enche o banco e contamina o sorteio |
-| 3 | **Política de retenção LGPD** | Nome, WhatsApp e foto de cupom são dado pessoal. Falta definir prazo de descarte e quem executa depois do sorteio |
+| 3 | **Política de retenção LGPD** | Nome, WhatsApp e foto de cupom são dado pessoal. Falta definir prazo de descarte e quem executa depois do sorteio. O regulamento oficial ainda amplia o uso: autoriza "comunicações institucionais e promocionais", o que exige base legal própria |
+| 4 | **A apuração precisa usar `participationCount`** | Cláusula 5 do regulamento oficial promete mais chances a quem compra mais. O site já convida ao recadastro e a tela de confirmação mostra a contagem ([seção 5.5](#55-tela-de-confirmação)); falta o cliente confirmar que o sorteio vai **ponderar pelo campo**, e não sortear um registro por participante |
 
 ### Infraestrutura de produção
 
 | # | Pendência | Detalhe |
 | --- | --- | --- |
-| 4 | Cluster no MongoDB Atlas | Já é replica set, atende o Prisma. Liberar o IP de saída da Vercel e rodar `pnpm run db:push` uma vez |
-| 5 | **Dois** projetos na Vercel, não um | Mesmo repositório, *Root Directory* diferente: `apps/web` → `www.plastlima.com.br`, `apps/admin` → `admin.plastlima.com.br` |
-| 6 | Build command com `prisma generate` | A Vercel cacheia `node_modules` e pode pular o `postinstall`. Forçar `pnpm --filter @plastlima-app/infra db:generate && next build` |
-| 7 | Variáveis de ambiente | Ver os `.env.example` de cada app. `BETTER_AUTH_SECRET` novo (`openssl rand -base64 32`), nunca o de desenvolvimento |
-| 8 | Usuário real do painel | `pnpm run seed:admin -- --email=… --senha=…` apontando para o Atlas |
+| 5 | Cluster no MongoDB Atlas | Já é replica set, atende o Prisma. Liberar o IP de saída da Vercel e rodar `pnpm run db:push` uma vez |
+| 6 | **Dois** projetos na Vercel, não um | Mesmo repositório, *Root Directory* diferente: `apps/web` → `www.plastlima.com.br`, `apps/admin` → `admin.plastlima.com.br` |
+| 7 | Build command com `prisma generate` | A Vercel cacheia `node_modules` e pode pular o `postinstall`. Forçar `pnpm --filter @plastlima-app/infra db:generate && next build` |
+| 8 | Variáveis de ambiente | Ver os `.env.example` de cada app. `BETTER_AUTH_SECRET` novo (`openssl rand -base64 32`), nunca o de desenvolvimento |
+| 9 | Usuário real do painel | `pnpm run seed:admin -- --email=… --senha=…` apontando para o Atlas |
 
 ### Qualidade
 
 | # | Pendência | Detalhe |
 | --- | --- | --- |
-| 9 | Confirmar a data de encerramento | [`raffle.ts`](../apps/web/src/data/raffle.ts) assume 30/08, um dia antes do sorteio anunciado no banner |
 | 10 | Arte de OpenGraph em JPEG | Hoje é o banner de **2,3 MB em PNG**. É o preview no WhatsApp; 1200 × 630 em JPEG cai para ~150 KB |
 | 11 | Nenhum CI configurado | Não existe `.github/`. Um workflow com `biome ci` + `turbo run check-types test build` protege a campanha durante o ar |
 | 12 | `pnpm run check` reformata ~40 arquivos alheios | O repositório nunca passou pelo Biome por inteiro. Merece um commit de faxina isolado, antes de ligar o CI |
+| 13 | "Semana dos Pais" × "Mês dos Pais" | O regulamento oficial fala em Semana dos Pais; o site inteiro (hero, banner, SEO) diz Mês dos Pais. Alinhar a nomenclatura |
+
+### Resolvido pelo regulamento oficial do cliente
+
+O documento `REGULAMENTO.pdf` (campanha "Ganhe um Kit Churrasco PlastLima")
+substituiu o rascunho e fechou: início em **01/08/2026**, encerramento em
+**30/08/2026** — confirmando o valor já assumido em [`raffle.ts`](../apps/web/src/data/raffle.ts) —,
+sorteio em 31/08 em horário e formato definidos pela Plastlima, prazo de
+**7 dias corridos** para localizar o ganhador sob pena de novo sorteio, e a
+cláusula de substituição de itens do kit por outros de igual ou maior valor.
+Continuam sem definição, agora por escolha do cliente: valor e composição
+detalhada do prêmio, critério de apuração, prazo de retenção dos dados e se
+sócios e funcionários podem participar.
 
 ### Corrigido durante a revisão de deploy
 
@@ -470,8 +503,9 @@ Se a hospedagem virar Docker sobre Debian, o valor precisa voltar.
 
 | # | Questão |
 | --- | --- |
-| 1 | Texto do regulamento e número do certificado de autorização da SPA/MF |
+| 1 | Número do certificado de autorização da SPA/MF (o regulamento oficial não o menciona) |
 | 2 | Arte dedicada de OpenGraph para a campanha (1200 × 630) — hoje só existe a genérica |
-| 3 | Data e hora exatas de encerramento das inscrições (o banner diz "sorteio em 31 de agosto", que não é necessariamente o fim das inscrições) |
+| 3 | Como a apuração usa `participationCount` — o regulamento promete mais chances a quem compra mais |
 | 4 | O que fazer com os dados dos participantes após o sorteio — prazo de retenção pela LGPD |
 | 5 | Notificar o ganhador por WhatsApp a partir do painel, numa fase seguinte |
+| 6 | Valor e composição detalhada do Kit Churrasco, e se sócios e funcionários podem participar |
