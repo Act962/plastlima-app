@@ -9,7 +9,7 @@ export const metadata: Metadata = buildPageMetadata({
 	title: "Contato e atendimento",
 	description:
 		"Fale com a Plastlima: WhatsApp, e-mail e endereço do centro de distribuição em Teresina-PI. Tire dúvidas, envie sugestões ou fale com o atendimento.",
-	path: "/contact",
+	path: "/contato",
 });
 
 export default function ContactPage() {
@@ -18,7 +18,7 @@ export default function ContactPage() {
 			<JsonLd
 				data={breadcrumbSchema([
 					{ name: "Início", path: "/" },
-					{ name: "Contato", path: "/contact" },
+					{ name: "Contato", path: "/contato" },
 				])}
 			/>
 			<PageHero

@@ -25,7 +25,7 @@ export function AboutPreviewSection() {
 					<Eyebrow className="mb-[18px]">01 — Quem somos</Eyebrow>
 					<h2 className="type-heading mb-[22px] font-extrabold">Sobre nós</h2>
 					<p className="type-lead mb-[30px] text-body">{ABOUT_SUMMARY}</p>
-					<TextLink href="/about">Continue lendo →</TextLink>
+					<TextLink href="/sobre">Continue lendo →</TextLink>
 				</SplitLayout>
 			</Container>
 		</Section>

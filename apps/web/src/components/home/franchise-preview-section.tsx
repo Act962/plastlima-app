@@ -34,7 +34,7 @@ export function FranchisePreviewSection() {
 						origens quando teve a oportunidade de trabalhar e …
 					</p>
 					<div className="flex flex-wrap gap-3">
-						<ActionLink href="/franchise">
+						<ActionLink href="/franquias">
 							Saiba mais sobre as franquias
 						</ActionLink>
 						<ExternalActionLink

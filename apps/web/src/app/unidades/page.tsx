@@ -12,7 +12,7 @@ export const metadata: Metadata = buildPageMetadata({
 	title: "Lojas em Teresina, Timon e região",
 	description:
 		"Encontre a loja PlastLima mais próxima: 14 unidades no Piauí, Maranhão e Pernambuco com endereços, horários de funcionamento e contato por WhatsApp.",
-	path: "/locations",
+	path: "/unidades",
 });
 
 export default function LocationsPage() {
@@ -22,7 +22,7 @@ export default function LocationsPage() {
 				data={[
 					breadcrumbSchema([
 						{ name: "Início", path: "/" },
-						{ name: "Unidades", path: "/locations" },
+						{ name: "Unidades", path: "/unidades" },
 					]),
 					storeListSchema(),
 				]}

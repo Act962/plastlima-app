@@ -11,7 +11,7 @@ export const metadata: Metadata = buildPageMetadata({
 	title: "Sobre a Plastlima — Nossa história",
 	description:
 		"Conheça a história da PlastLima: de um box de 30m² na Ceasa de Teresina em 2002 a uma rede de franquias com 14 lojas em três estados do Nordeste.",
-	path: "/about",
+	path: "/sobre",
 });
 
 export default function AboutPage() {
@@ -20,7 +20,7 @@ export default function AboutPage() {
 			<JsonLd
 				data={breadcrumbSchema([
 					{ name: "Início", path: "/" },
-					{ name: "Sobre nós", path: "/about" },
+					{ name: "Sobre nós", path: "/sobre" },
 				])}
 			/>
 			<PageHero eyebrow="Sobre nós" title="A PlastLima" />

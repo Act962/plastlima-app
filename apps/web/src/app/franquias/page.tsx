@@ -13,7 +13,7 @@ export const metadata: Metadata = buildPageMetadata({
 	title: "Seja um franqueado",
 	description:
 		"Seja dono da primeira franquia no varejo de descartáveis do Brasil. Conheça o modelo de negócio Plastlima, o investimento e cadastre-se para ser um franqueado.",
-	path: "/franchise",
+	path: "/franquias",
 });
 
 export default function FranchisePage() {
@@ -22,7 +22,7 @@ export default function FranchisePage() {
 			<JsonLd
 				data={breadcrumbSchema([
 					{ name: "Início", path: "/" },
-					{ name: "Seja um franqueado", path: "/franchise" },
+					{ name: "Seja um franqueado", path: "/franquias" },
 				])}
 			/>
 			<FranchiseHero />
