@@ -6,7 +6,8 @@
 		"dev": "next dev --port 3001",
 		"build": "next build",
 		"check-types": "tsc --noEmit",
-		"start": "next start"
+		"start": "next start",
+		"vercel-build": "pnpm --filter @plastlima-app/infra db:generate && next build"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.5.7",
