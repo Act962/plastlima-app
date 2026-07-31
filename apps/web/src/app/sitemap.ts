@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { NAV_ITEMS } from "@/data/navigation";
+import { LEGAL_ITEMS, NAV_ITEMS } from "@/data/navigation";
 import { SITE } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const lastModified = new Date();
 
-	return NAV_ITEMS.map((item) => {
+	const mainRoutes: MetadataRoute.Sitemap = NAV_ITEMS.map((item) => {
 		const isHome = item.href === "/";
 
 		return {
@@ -15,4 +15,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: isHome ? 1 : 0.8,
 		};
 	});
+
+	const legalRoutes: MetadataRoute.Sitemap = LEGAL_ITEMS.map((item) => ({
+		url: `${SITE.url}${item.href}`,
+		lastModified,
+		changeFrequency: "yearly",
+		priority: 0.3,
+	}));
+
+	return [...mainRoutes, ...legalRoutes];
 }

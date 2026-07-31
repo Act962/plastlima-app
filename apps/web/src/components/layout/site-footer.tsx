@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NAV_ITEMS } from "@/data/navigation";
+import { LEGAL_ITEMS, NAV_ITEMS } from "@/data/navigation";
 import { CONTACT, EXTERNAL_LINKS, SITE, SOCIAL_LINKS } from "@/data/site";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { FooterColumn, FooterLink } from "./footer-links";
@@ -63,8 +63,19 @@ export function SiteFooter() {
 				</FooterColumn>
 			</div>
 
-			<div className="mx-auto w-full max-w-site border-yellow/35 border-t px-5 pt-6 pb-10 text-sm text-yellow sm:px-8">
-				{SITE.copyright}
+			<div className="mx-auto flex w-full max-w-site flex-col gap-4 border-yellow/35 border-t px-5 pt-6 pb-10 text-sm text-yellow sm:flex-row sm:items-center sm:justify-between sm:px-8">
+				<span>{SITE.copyright}</span>
+				<nav className="flex flex-wrap gap-x-6 gap-y-2">
+					{LEGAL_ITEMS.map((item) => (
+						<Link
+							className="text-yellow transition-colors hover:text-yellow-soft"
+							href={item.href}
+							key={item.href}
+						>
+							{item.label}
+						</Link>
+					))}
+				</nav>
 			</div>
 		</footer>
 	);
