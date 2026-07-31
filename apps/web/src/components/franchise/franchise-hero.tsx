@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { ExternalActionLink } from "@/components/ui/external-action-link";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -37,12 +38,16 @@ export function FranchiseHero() {
 					</div>
 				</div>
 
-				<div className="flex aspect-[4/3.2] items-center justify-center rounded-[20px] border border-white/15 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,.05)_0_11px,rgba(255,255,255,.02)_11px_22px)] px-6 text-center">
-					<span className="font-mono text-[12px] text-yellow-pale tracking-[0.06em]">
-						[ foto da loja franqueada
-						<br />
-						layout padronizado ]
-					</span>
+				<div className="overflow-hidden rounded-[20px] border border-white/15">
+					<Image
+						alt="Loja franqueada Plastlima com layout padronizado"
+						className="h-auto w-full"
+						height={1331}
+						priority
+						sizes="(max-width: 1024px) 100vw, 600px"
+						src="/seja-um-franqueado.png"
+						width={1182}
+					/>
 				</div>
 			</Container>
 		</Section>
