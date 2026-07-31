@@ -12,6 +12,9 @@ export function HeroCarousel() {
 		HERO_BANNERS.length,
 	);
 
+	// Com um único banner não há o que navegar: some com setas e indicadores.
+	const hasMultiple = HERO_BANNERS.length > 1;
+
 	return (
 		<section
 			aria-label="Destaques Plastlima"
@@ -41,21 +44,25 @@ export function HeroCarousel() {
 				))}
 			</div>
 
-			<CarouselArrow
-				direction="previous"
-				label="Banner anterior"
-				onClick={goToPrevious}
-			/>
-			<CarouselArrow
-				direction="next"
-				label="Próximo banner"
-				onClick={goToNext}
-			/>
-			<CarouselDots
-				activeIndex={activeIndex}
-				onSelect={goTo}
-				slideKeys={HERO_BANNERS.map((banner) => banner.src)}
-			/>
+			{hasMultiple ? (
+				<>
+					<CarouselArrow
+						direction="previous"
+						label="Banner anterior"
+						onClick={goToPrevious}
+					/>
+					<CarouselArrow
+						direction="next"
+						label="Próximo banner"
+						onClick={goToNext}
+					/>
+					<CarouselDots
+						activeIndex={activeIndex}
+						onSelect={goTo}
+						slideKeys={HERO_BANNERS.map((banner) => banner.src)}
+					/>
+				</>
+			) : null}
 		</section>
 	);
 }

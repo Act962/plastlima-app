@@ -2,26 +2,9 @@ import type { MediaItem, Stat } from "@/types/content";
 
 export const HERO_BANNERS: MediaItem[] = [
 	{
-		src: "/banners/banner-01.png",
-		alt: "Soluções Plastlima em descartáveis para o seu negócio",
+		src: "/banners/sorteio-dia-dos-pais.png",
+		alt: "Sorteio mês dos pais: compre na Plastlima e concorra a um Kit Churrasco. Sorteio em 31 de agosto.",
 	},
-	{
-		src: "/banners/banner-02.jpeg",
-		alt: "Linha de produtos e embalagens Plastlima",
-	},
-	{
-		src: "/banners/banner-03.jpeg",
-		alt: "Embalagens Plastlima para todos os segmentos",
-	},
-	{
-		src: "/banners/banner-04.jpeg",
-		alt: "Plastlima no atacado e no varejo",
-	},
-	{
-		src: "/banners/banner-05.jpeg",
-		alt: "Ofertas de descartáveis na Plastlima",
-	},
-	{ src: "/banners/banner-06.jpeg", alt: "Novidades e lançamentos Plastlima" },
 ];
 
 export const COMPANY_STATS: Stat[] = [
