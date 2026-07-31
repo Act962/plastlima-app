@@ -1,0 +1,27 @@
+{
+	"name": "@plastlima-app/infra",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check-types": "tsc --noEmit",
+		"db:generate": "prisma generate",
+		"db:push": "prisma db push",
+		"postinstall": "prisma generate",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@plastlima-app/core": "workspace:*",
+		"@prisma/client": "catalog:"
+	},
+	"devDependencies": {
+		"@plastlima-app/config": "workspace:*",
+		"@types/node": "^22.20.1",
+		"prisma": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

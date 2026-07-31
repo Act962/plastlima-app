@@ -23,5 +23,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		priority: 0.3,
 	}));
 
-	return [...mainRoutes, ...legalRoutes];
+	/**
+	 * Rotas de campanha. Ficam fora de NAV_ITEMS de propósito — são temporárias e
+	 * não devem entrar no menu — mas precisam ser indexadas enquanto no ar.
+	 * Ao encerrar a campanha, remova a entrada daqui junto com a página.
+	 */
+	const campaignRoutes: MetadataRoute.Sitemap = [
+		{
+			url: `${SITE.url}/sorteio`,
+			lastModified,
+			changeFrequency: "daily",
+			priority: 0.9,
+		},
+		{
+			url: `${SITE.url}/sorteio/regulamento`,
+			lastModified,
+			changeFrequency: "monthly",
+			priority: 0.2,
+		},
+	];
+
+	return [...mainRoutes, ...legalRoutes, ...campaignRoutes];
 }

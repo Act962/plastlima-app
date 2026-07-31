@@ -109,8 +109,8 @@ precisa mudar.
 
 Dois pontos de atenção a respeitar:
 
-- **Transação interativa (`$transaction`) exige replica set.** O Atlas já é um;
-  nos testes, o `mongodb-memory-server` precisa ser iniciado com `replSet`.
+- **Transação interativa (`$transaction`) exige replica set.** O Atlas já é um; em
+  desenvolvimento e nos testes, o `docker-compose.yml` da raiz sobe um de um nó só.
 - **Não há migrations reais no provider Mongo.** O fluxo é `prisma db push` +
   índices declarados no schema. Versionamento de shape de conteúdo é feito pelos
   schemas Zod, não pelo Prisma — ver [seção 5.2](#52-versionamento-de-shape).
@@ -167,7 +167,7 @@ não reordena blocos estruturais. Ele troca o conteúdo dentro de posições fix
 | Necessidade | Escolha | Por quê |
 | --- | --- | --- |
 | Testes | **Vitest** + `@vitest/coverage-v8` | Config base compartilhada em `packages/config` |
-| Integração com Mongo | **`mongodb-memory-server`** com `replSet` | Roda no Windows sem Docker Desktop; Testcontainers exigiria Docker rodando |
+| Integração com Mongo | **MongoDB do `docker-compose.yml`**, banco `plastlima_test` | Mesmo servidor do desenvolvimento, sem baixar binário nem gravar dados dentro do projeto (que aqui fica no OneDrive) |
 | Teste de UI | Testing Library + jsdom | Formulários e componentes do admin |
 | Formulários | `react-hook-form` + `@hookform/resolvers/zod` | Reusa **os mesmos** schemas Zod do core |
 | Mutações | **Server Actions** chamando os casos de uso | Evita duplicar uma camada REST; a action fica fina e o teste vai no caso de uso |
@@ -608,7 +608,7 @@ documento ganha um bloco `seo: { title, description }` consumido por
 | Camada | Onde | Como |
 | --- | --- | --- |
 | **Unitário** | `packages/core` | Sem mock de framework. Os test doubles são **repositórios in-memory** (`InMemoryContentRepository`) que implementam as mesmas interfaces que a produção. Cada invariante da [seção 4.2](#42-invariantes-de-domínio) vira um teste nomeado. |
-| **Integração** | `packages/infra` | Mongo real via `mongodb-memory-server` com replica set. Valida mappers, índices únicos, sequência de `version` e concorrência de publicação — coisas que o teste unitário por definição não pega. |
+| **Integração** | `packages/infra` | Mongo real do `docker-compose.yml` (`pnpm run db:up`). Valida mappers, índices únicos, sequência de `version` e concorrência de publicação — coisas que o teste unitário por definição não pega. |
 | **Server actions** | `apps/admin` | Chamadas diretamente, com casos de uso reais e repositórios in-memory. |
 | **Componentes** | `apps/admin` | Testing Library nos formulários: validação, estado de erro, estado desabilitado do botão *Publicar*. |
 

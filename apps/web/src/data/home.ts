@@ -4,6 +4,7 @@ export const HERO_BANNERS: MediaItem[] = [
 	{
 		src: "/banners/sorteio-dia-dos-pais.png",
 		alt: "Sorteio mês dos pais: compre na Plastlima e concorra a um Kit Churrasco. Sorteio em 31 de agosto.",
+		href: "/sorteio",
 	},
 	{
 		src: "/banners/qualidade-embalagem.jpg",

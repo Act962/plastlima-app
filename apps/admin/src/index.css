@@ -1,0 +1,17 @@
+@import "@plastlima-app/ui/globals.css";
+
+/**
+ * O painel usa a paleta neutra do shadcn de propósito: se ele parecesse o site,
+ * o editor confundiria a tela de edição com uma prévia do resultado. O vermelho
+ * da marca entra só como acento.
+ */
+@theme {
+	--color-brand: #a0111a;
+	--color-brand-dark: #7a0c12;
+}
+
+@layer base {
+	body {
+		@apply bg-background text-foreground antialiased;
+	}
+}

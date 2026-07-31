@@ -1,29 +1,36 @@
 {
-  "name": "plastlima-app",
-  "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "type": "module",
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "check-types": "turbo run check-types",
-    "dev:web": "turbo run dev -F web",
-    "check": "biome check --write ."
-  },
-  "dependencies": {
-    "@plastlima-app/env": "workspace:*",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.6",
-    "@plastlima-app/config": "workspace:*",
-    "@types/node": "^22.20.1",
-    "turbo": "^2.10.7",
-    "typescript": "catalog:"
-  },
-  "packageManager": "pnpm@10.24.0"
+	"name": "plastlima-app",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"type": "module",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"check-types": "turbo run check-types",
+		"dev:web": "turbo run dev -F web",
+		"db:up": "docker compose up -d --wait",
+		"db:down": "docker compose down",
+		"db:reset": "docker compose down -v",
+		"db:push": "pnpm --filter @plastlima-app/infra db:push",
+		"dev:admin": "turbo run dev -F admin",
+		"seed:admin": "pnpm --filter admin seed:admin",
+		"test": "turbo run test",
+		"check": "biome check --write ."
+	},
+	"dependencies": {
+		"@plastlima-app/env": "workspace:*",
+		"dotenv": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.6",
+		"@plastlima-app/config": "workspace:*",
+		"@types/node": "^22.20.1",
+		"turbo": "^2.10.7",
+		"typescript": "catalog:"
+	},
+	"packageManager": "pnpm@10.24.0"
 }

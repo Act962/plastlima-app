@@ -9,7 +9,10 @@
 		"start": "next start"
 	},
 	"dependencies": {
+		"@hookform/resolvers": "^5.5.7",
+		"@plastlima-app/core": "workspace:*",
 		"@plastlima-app/env": "workspace:*",
+		"@plastlima-app/infra": "workspace:*",
 		"@plastlima-app/ui": "workspace:*",
 		"@swc/helpers": "^0.5.23",
 		"babel-plugin-react-compiler": "^1.0.0",
@@ -19,6 +22,7 @@
 		"next-themes": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"react-hook-form": "^7.83.0",
 		"react-icons": "^5.7.0",
 		"sonner": "catalog:",
 		"zod": "catalog:"

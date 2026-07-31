@@ -1,0 +1,35 @@
+# MongoDB de desenvolvimento e de teste.
+#
+# Precisa ser replica set mesmo com um nó só: é exigência do provider `mongodb`
+# do Prisma. O healthcheck faz as vezes de script de inicialização — na primeira
+# subida ele executa o `rs.initiate`, e nas seguintes apenas confirma o status.
+#
+#   pnpm run db:up     sobe e espera ficar pronto
+#   pnpm run db:down   derruba (os dados ficam no volume)
+#   pnpm run db:reset  derruba e apaga o volume
+services:
+  mongo:
+    image: mongo:8
+    container_name: plastlima-mongo
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - plastlima-mongo-data:/data/db
+    healthcheck:
+      # O membro é registrado como `localhost:27017` de propósito: o mapeamento
+      # de porta usa o mesmo número, então o endereço que o driver descobre
+      # continua alcançável a partir da máquina host.
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }
+        "
+      interval: 5s
+      timeout: 30s
+      start_period: 10s
+      retries: 30
+
+volumes:
+  plastlima-mongo-data:

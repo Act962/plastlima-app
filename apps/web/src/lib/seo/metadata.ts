@@ -9,6 +9,14 @@ export const DEFAULT_OG_IMAGE = {
 	alt: `${SITE.name} — a solução em descartáveis`,
 } as const;
 
+/** Imagem de compartilhamento de uma página específica. Proporção próxima de 1.91:1. */
+export type OgImage = {
+	url: string;
+	width: number;
+	height: number;
+	alt: string;
+};
+
 type PageMetadataInput = {
 	/** Título da aba; recebe o sufixo "| Plastlima" salvo quando `titleAbsolute`. */
 	title: string;
@@ -17,6 +25,11 @@ type PageMetadataInput = {
 	path: string;
 	/** Usa o título exatamente como informado, sem o sufixo da marca (home). */
 	titleAbsolute?: boolean;
+	/**
+	 * Substitui a arte padrão de compartilhamento. Vale a pena em campanhas, que
+	 * circulam por WhatsApp — a prévia genérica derruba o clique.
+	 */
+	image?: OgImage;
 };
 
 /**
@@ -29,8 +42,10 @@ export function buildPageMetadata({
 	description,
 	path,
 	titleAbsolute = false,
+	image,
 }: PageMetadataInput): Metadata {
 	const socialTitle = titleAbsolute ? title : `${title} | ${SITE.name}`;
+	const ogImage: OgImage = image ?? DEFAULT_OG_IMAGE;
 
 	return {
 		title: titleAbsolute ? { absolute: title } : title,
@@ -43,13 +58,13 @@ export function buildPageMetadata({
 			title: socialTitle,
 			description,
 			url: path,
-			images: [DEFAULT_OG_IMAGE],
+			images: [ogImage],
 		},
 		twitter: {
 			card: "summary_large_image",
 			title: socialTitle,
 			description,
-			images: [DEFAULT_OG_IMAGE.url],
+			images: [ogImage.url],
 		},
 	};
 }

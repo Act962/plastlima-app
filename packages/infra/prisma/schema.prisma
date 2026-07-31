@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+  // Sem `output`: o cliente vai para node_modules/.prisma/client, o local que
+  // `serverExternalPackages` do Next reconhece. Gerar dentro de src/ fazia o
+  // rastreio de dependências do Turbopack empacotar o projeto inteiro.
+  //
+  // "native" cobre a máquina de desenvolvimento. O runtime serverless da Vercel
+  // é Amazon Linux (base RHEL), não Debian — com o alvo errado o build passa e o
+  // deploy quebra ao abrir a primeira conexão. Trocar por `debian-openssl-3.0.x`
+  // só se a hospedagem virar Docker sobre Debian.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/// Uma pessoa inscrita numa campanha de sorteio.
+///
+/// O índice único (campaignId, phone) é o que garante o requisito "uma pessoa se
+/// cadastra uma vez": a deduplicação é responsabilidade do banco, não apenas de
+/// uma checagem na aplicação, que perderia a corrida entre duas submissões
+/// simultâneas do mesmo número.
+model Participant {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  campaignId String
+
+  name         String
+  /// E.164 sem o "+", ex.: 5586988970955. Chave de deduplicação.
+  phone        String
+  /// Formato legível para a equipe copiar, ex.: (86) 98897-0955.
+  phoneDisplay String
+
+  /// Snapshot da loja no momento do cadastro. Renomear a loja depois não pode
+  /// reescrever onde a pessoa comprou de fato.
+  storeId   String
+  storeName String
+  city      String
+  state     String
+
+  /// Data URL da imagem do cupom, comprimida pelo navegador antes do envio.
+  receiptImage String?
+
+  /// Quantas vezes a pessoa se cadastrou. Métrica de engajamento — uma pessoa
+  /// continua valendo uma chance no sorteio.
+  participationCount Int @default(1)
+
+  acceptedTermsAt    DateTime
+  createdAt          DateTime @default(now())
+  lastParticipatedAt DateTime
+
+  @@unique([campaignId, phone])
+  @@index([campaignId, createdAt])
+  @@index([campaignId, name])
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth — acesso ao painel administrativo.
+// Não há cadastro público: os usuários são criados pelo seed (`db:seed-admin`).
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String  @unique
+  emailVerified Boolean @default(false)
+  image         String?
+  /// "owner" gerencia usuários; "editor" só consulta os participantes.
+  role          String  @default("editor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(auto()) @map("_id") @db.ObjectId
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  /// Hash da senha (provider "credential"). Nunca a senha em texto.
+  password              String?
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([identifier])
+}
