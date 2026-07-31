@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { LuMenu, LuX } from "react-icons/lu";
 import { ExternalActionLink } from "@/components/ui/external-action-link";
 import { NAV_ITEMS } from "@/data/navigation";
 import { EXTERNAL_LINKS, SITE } from "@/data/site";
@@ -59,11 +60,16 @@ export function SiteHeader() {
 				<button
 					aria-controls="mobile-menu"
 					aria-expanded={isMenuOpen}
-					className="ml-auto inline-flex cursor-pointer items-center rounded-full border-[1.5px] border-line-strong bg-surface px-5 py-3 font-bold text-ink text-sm min-[981px]:hidden"
+					aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+					className="ml-auto inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-line-strong bg-surface text-ink transition-colors hover:border-ink min-[981px]:hidden"
 					onClick={() => setIsMenuOpen((open) => !open)}
 					type="button"
 				>
-					{isMenuOpen ? "Fechar" : "Menu"}
+					{isMenuOpen ? (
+						<LuX className="size-5" />
+					) : (
+						<LuMenu className="size-5" />
+					)}
 				</button>
 			</div>
 

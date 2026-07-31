@@ -3,6 +3,7 @@ import { NAV_ITEMS } from "@/data/navigation";
 import { CONTACT, EXTERNAL_LINKS, SITE, SOCIAL_LINKS } from "@/data/site";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { FooterColumn, FooterLink } from "./footer-links";
+import { SocialIcon } from "./social-icon";
 
 export function SiteFooter() {
 	return (
@@ -17,14 +18,19 @@ export function SiteFooter() {
 					</p>
 					<ul className="flex flex-wrap gap-2.5">
 						{SOCIAL_LINKS.map((social) => (
-							<li key={social.label}>
+							<li key={social.platform}>
 								<a
-									className="inline-flex rounded-full border border-yellow/60 px-4 py-2.5 font-semibold text-sm text-yellow transition-colors hover:border-yellow hover:text-yellow-soft"
+									aria-label={social.label}
+									className="inline-flex size-11 items-center justify-center rounded-full border border-yellow/60 text-yellow transition-colors hover:border-yellow hover:bg-yellow hover:text-brand"
 									href={social.href}
 									rel="noreferrer"
 									target="_blank"
+									title={social.label}
 								>
-									{social.label}
+									<SocialIcon
+										className="size-[18px]"
+										platform={social.platform}
+									/>
 								</a>
 							</li>
 						))}

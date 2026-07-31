@@ -1,4 +1,4 @@
-import type { ExternalLink } from "@/types/navigation";
+import type { SocialLink } from "@/types/navigation";
 import { DOCUMENTS, IMAGES } from "./images";
 
 /**
@@ -36,11 +36,20 @@ export const EXTERNAL_LINKS = {
 		"https://maps.google.com/maps?q=Plastlima-Centro%20de%20Distribui%C3%A7%C3%A3o&t=m&z=16&output=embed&iwloc=near",
 } as const;
 
-export const SOCIAL_LINKS: ExternalLink[] = [
+export const SOCIAL_LINKS: SocialLink[] = [
 	{
+		platform: "facebook",
 		label: "Facebook",
 		href: "https://www.facebook.com/profile.php?id=100076293463203&mibextid=LQQJ4d",
 	},
-	{ label: "Instagram", href: "https://www.instagram.com/plast.lima" },
-	{ label: "Whatsapp", href: "https://wa.me/5586995548646" },
+	{
+		platform: "instagram",
+		label: "Instagram",
+		href: "https://www.instagram.com/plastlima",
+	},
+	{
+		platform: "whatsapp",
+		label: "Whatsapp",
+		href: "https://wa.me/5586995548646",
+	},
 ];
