@@ -39,6 +39,26 @@ if (password.length < MIN_PASSWORD_LENGTH) {
 	process.exit(1);
 }
 
+// Anuncia o destino antes de gravar: o `.env` local aponta para o Docker, e sem
+// isso é fácil "criar o usuário de produção" no banco da própria máquina e só
+// descobrir na hora de entrar no painel publicado.
+function describeTarget() {
+	const url = process.env.DATABASE_URL;
+
+	if (!url) {
+		return "(DATABASE_URL não definida)";
+	}
+
+	try {
+		// `new URL` já descarta usuário e senha, então nada de credencial no log.
+		return new URL(url).host;
+	} catch {
+		return "(DATABASE_URL em formato inválido)";
+	}
+}
+
+console.info(`Gravando em: ${describeTarget()}`);
+
 const prisma = new PrismaClient();
 
 try {

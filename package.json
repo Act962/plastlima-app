@@ -17,6 +17,7 @@
 		"db:push": "pnpm --filter @plastlima-app/infra db:push",
 		"dev:admin": "turbo run dev -F admin",
 		"seed:admin": "pnpm --filter admin seed:admin",
+		"seed:admin:prod": "pnpm --filter admin seed:admin:prod",
 		"test": "turbo run test",
 		"check": "biome check --write ."
 	},
