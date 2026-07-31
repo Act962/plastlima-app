@@ -5,6 +5,10 @@ export const HERO_BANNERS: MediaItem[] = [
 		src: "/banners/sorteio-dia-dos-pais.png",
 		alt: "Sorteio mês dos pais: compre na Plastlima e concorra a um Kit Churrasco. Sorteio em 31 de agosto.",
 	},
+	{
+		src: "/banners/qualidade-embalagem.jpg",
+		alt: "A qualidade do produto começa pela embalagem. Qualidade e praticidade só a Plastlima oferece.",
+	},
 ];
 
 export const COMPANY_STATS: Stat[] = [
