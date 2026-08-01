@@ -2,13 +2,9 @@ import type { MediaItem, Stat } from "@/types/content";
 
 export const HERO_BANNERS: MediaItem[] = [
 	{
-		src: "/banners/sorteio-dia-dos-pais.png",
-		alt: "Sorteio mês dos pais: compre na Plastlima e concorra a um Kit Churrasco. Sorteio em 31 de agosto.",
+		src: "/banners/sorteio-kit-churrasco.jpg",
+		alt: "Sorteio mês dos pais: compre na Plastlima, cadastre-se e concorra a um Kit Churrasco com caixa térmica, grelha, garrafa térmica, tábua e facas. Sorteio em 31 de agosto.",
 		href: "/sorteio",
-	},
-	{
-		src: "/banners/qualidade-embalagem.jpg",
-		alt: "A qualidade do produto começa pela embalagem. Qualidade e praticidade só a Plastlima oferece.",
 	},
 ];
 
