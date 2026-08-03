@@ -4,7 +4,10 @@ import type {
 	StoreDirectory,
 } from "../domain/raffle/store-directory";
 
+export { InMemoryContentRepository } from "./in-memory-content-repository";
 export { InMemoryParticipantRepository } from "./in-memory-participant-repository";
+export { RecordingAuditLogger } from "./recording-audit-logger";
+export { RecordingCacheInvalidator } from "./recording-cache-invalidator";
 
 /** Relógio parado, para posicionar o teste antes ou depois do encerramento. */
 export class FixedClock implements Clock {
