@@ -1,15 +1,23 @@
-import type { MediaItem, Stat } from "@/types/content";
+import type { HeroBanner, MediaItem, Stat } from "@/types/content";
 
-export const HERO_BANNERS: MediaItem[] = [
+// `aspect` é a dimensão real do arquivo: é ela que define a altura da faixa.
+export const HERO_BANNERS: HeroBanner[] = [
 	{
 		src: "/banners/sorteio-kit-churrasco.jpeg",
 		alt: "Sorteio mês dos pais: compre na Plastlima, cadastre-se e concorra a um Kit Churrasco com caixa térmica, grelha, garrafa térmica, tábua e facas. Sorteio em 31 de agosto.",
 		href: "/sorteio",
+		aspect: 1800 / 600,
+		mobile: { src: "/banners/sorteio-popup.jpeg", aspect: 1080 / 1350 },
 	},
 	{
 		src: "/banners/sorteio-como-participar.jpeg",
 		alt: "Como participar do sorteio Kit Churrasco: realize uma compra, acesse plastlima.com.br, preencha o formulário e anexe o cupom de compra.",
 		href: "/sorteio",
+		aspect: 1800 / 600,
+		mobile: {
+			src: "/banners/sorteio-como-participar-mobile.jpeg",
+			aspect: 1122 / 1402,
+		},
 	},
 ];
 

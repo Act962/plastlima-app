@@ -19,3 +19,18 @@ export type MediaItem = {
 	/** Destino ao clicar. Sem isso a imagem é apenas ilustrativa. */
 	href?: Route;
 };
+
+export type HeroBanner = MediaItem & {
+	/**
+	 * Proporção da arte (largura ÷ altura). A faixa do carrossel adota essa
+	 * proporção, então a imagem aparece inteira e sem moldura em volta.
+	 * Sem isso, a faixa cai no padrão de 1,92:1.
+	 */
+	aspect?: number;
+	/**
+	 * Arte alternativa para telas estreitas, com a proporção dela. Sem isso, o
+	 * celular recebe a arte padrão. A proporção é obrigatória aqui porque é ela
+	 * que dá a altura da faixa no celular.
+	 */
+	mobile?: { src: string; aspect: number };
+};
