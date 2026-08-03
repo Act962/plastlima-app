@@ -79,6 +79,21 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 			"O prazo de cadastro para o sorteio do Kit Churrasco terminou. Fique de olho nas nossas redes: o resultado sai em breve e novas promoções estão a caminho.",
 	},
 
+	popup: {
+		eyebrow: "Promoção mês dos pais",
+		title: "Ganhe um Kit Churrasco!",
+		message:
+			"Compre em qualquer loja Plastlima e cadastre-se para concorrer. Sorteio em 31 de agosto.",
+		ctaLabel: "Quero participar",
+		dismissLabel: "Agora não",
+		image: {
+			src: "/banners/sorteio-popup.jpeg",
+			alt: "Sorteio mês dos pais: compre na Plastlima e concorra a um Kit Churrasco com caixa térmica, grelha, garrafa térmica, tábua e facas. Sorteio em 31 de agosto.",
+			width: 1080,
+			height: 1350,
+		},
+	},
+
 	seo: {
 		title: "Sorteio Kit Churrasco",
 		description:

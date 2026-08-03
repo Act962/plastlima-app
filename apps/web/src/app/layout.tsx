@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { WhatsappFloatingButton } from "@/components/layout/whatsapp-floating-button";
 import Providers from "@/components/providers";
+import { RafflePopup } from "@/components/raffle/raffle-popup";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE } from "@/data/site";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo/metadata";
@@ -85,6 +86,7 @@ export default function RootLayout({
 						<SiteFooter />
 					</div>
 					<WhatsappFloatingButton />
+					<RafflePopup />
 				</Providers>
 			</body>
 		</html>

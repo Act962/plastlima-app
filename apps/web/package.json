@@ -15,6 +15,7 @@
 		"@plastlima-app/env": "workspace:*",
 		"@plastlima-app/infra": "workspace:*",
 		"@plastlima-app/ui": "workspace:*",
+		"@radix-ui/react-dialog": "^1.1.23",
 		"@swc/helpers": "^0.5.23",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"dotenv": "catalog:",

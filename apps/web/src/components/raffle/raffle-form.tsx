@@ -71,6 +71,7 @@ export function RaffleForm() {
 				autoComplete="name"
 				error={errors.name?.message}
 				label="Nome completo"
+				placeholder="Como está no seu documento"
 				{...register("name")}
 			/>
 

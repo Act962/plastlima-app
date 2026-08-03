@@ -42,6 +42,15 @@ export type RaffleCampaignContent = {
 		title: string;
 		message: string;
 	};
+	/** Pop-up de anúncio, exibido em todo o site enquanto as inscrições estiverem abertas. */
+	popup: {
+		eyebrow: string;
+		title: string;
+		message: string;
+		ctaLabel: string;
+		dismissLabel: string;
+		image: { src: string; alt: string; width: number; height: number };
+	};
 	seo: {
 		title: string;
 		description: string;
