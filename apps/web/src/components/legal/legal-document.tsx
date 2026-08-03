@@ -7,10 +7,7 @@ import { PolicySection } from "./policy-section";
 export function LegalDocument({ document }: { document: LegalDocumentData }) {
 	return (
 		<Section>
-			<Container
-				className="py-[clamp(48px,6.5vw,80px)]"
-				width="reading"
-			>
+			<Container className="py-[clamp(48px,6.5vw,80px)]" width="reading">
 				<p className="type-eyebrow mb-8 text-body-muted">
 					Última atualização: {document.updatedAt}
 				</p>

@@ -10,7 +10,7 @@ export const PRIVACY_POLICY: LegalDocument = {
 	updatedAt: "31 de julho de 2026",
 	intro: [
 		`A ${SITE.name} valoriza a privacidade e a proteção dos dados pessoais de seus clientes, parceiros e visitantes. Esta Política de Privacidade descreve como coletamos, utilizamos, armazenamos e protegemos as informações obtidas por meio deste site, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD).`,
-		`Ao navegar e utilizar nossos canais, você declara estar ciente das práticas descritas neste documento. Recomendamos a leitura atenta de todas as seções.`,
+		"Ao navegar e utilizar nossos canais, você declara estar ciente das práticas descritas neste documento. Recomendamos a leitura atenta de todas as seções.",
 	],
 	sections: [
 		{

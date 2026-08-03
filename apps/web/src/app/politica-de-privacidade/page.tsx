@@ -22,10 +22,7 @@ export default function PrivacyPolicyPage() {
 					{ name: "Política de Privacidade", path: "/politica-de-privacidade" },
 				])}
 			/>
-			<PageHero
-				eyebrow="Privacidade"
-				title="Política de Privacidade"
-			/>
+			<PageHero eyebrow="Privacidade" title="Política de Privacidade" />
 			<LegalDocument document={PRIVACY_POLICY} />
 		</>
 	);

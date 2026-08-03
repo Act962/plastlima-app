@@ -13,10 +13,7 @@ export function PolicyBlock({ block }: { block: PolicyBlockData }) {
 			) : null}
 			<ul className="flex flex-col gap-2.5">
 				{block.items.map((item) => (
-					<li
-						className="type-body-lg flex gap-3 text-body-muted"
-						key={item}
-					>
+					<li className="type-body-lg flex gap-3 text-body-muted" key={item}>
 						<span
 							aria-hidden
 							className="mt-[10px] size-1.5 shrink-0 rounded-full bg-brand"

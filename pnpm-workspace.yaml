@@ -12,6 +12,7 @@ catalog:
   zod: ^4.4.3
   typescript: ^6.0.3
   vitest: ^4.1.10
+  "@vitest/coverage-v8": ^4.1.10
   # Prisma 7 ainda não suporta MongoDB — a própria documentação manda usar a 6.19
   # até o suporte sair. Subir para a 7 antes disso quebra o `prisma generate`.
   prisma: ^6.19.3

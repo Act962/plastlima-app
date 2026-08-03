@@ -1,0 +1,58 @@
+# Integração contínua do monorepo.
+#
+# Espelha o portão local (spec §2.6 e §12, fase 0): `biome ci` + `turbo run
+# check-types test build`. Os testes de integração de `packages/infra` precisam
+# de um MongoDB replica set — o mesmo `docker-compose.yml` do desenvolvimento é
+# subido aqui, e o healthcheck dele faz o `rs.initiate`.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancela execuções antigas do mesmo branch/PR quando um novo push chega.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    env:
+      # `next build` roda sem os segredos de runtime — validar o env aqui só
+      # faria o build falhar por algo que não é responsabilidade do CI.
+      SKIP_ENV_VALIDATION: "1"
+      DATABASE_URL: mongodb://localhost:27017/plastlima?replicaSet=rs0
+      TEST_DATABASE_URL: mongodb://localhost:27017/plastlima_test?replicaSet=rs0
+      # Valores de fachada, só para o build passar; nada real depende deles no CI.
+      BETTER_AUTH_SECRET: ci-placeholder-secret-nao-usar-em-producao
+      BETTER_AUTH_URL: http://localhost:3002
+      CORS_ORIGIN: http://localhost:3001
+      NEXT_PUBLIC_SITE_URL: http://localhost:3001
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint e formatação (Biome)
+        run: pnpm exec biome ci .
+
+      - name: Sobe o MongoDB (replica set de um nó)
+        run: pnpm run db:up
+
+      - name: Tipos, testes e build
+        run: pnpm turbo run check-types test build

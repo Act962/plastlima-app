@@ -1,5 +1,14 @@
 {
-  "name": "@plastlima-app/config",
-  "version": "0.0.0",
-  "private": true
+	"name": "@plastlima-app/config",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./tsconfig.base.json": "./tsconfig.base.json",
+		"./vitest": "./vitest.base.ts"
+	},
+	"dependencies": {
+		"@vitest/coverage-v8": "catalog:",
+		"vitest": "catalog:"
+	}
 }
