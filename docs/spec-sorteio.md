@@ -486,9 +486,10 @@ substituiu o rascunho e fechou: início em **01/08/2026**, encerramento em
 sorteio em 31/08 em horário e formato definidos pela Plastlima, prazo de
 **7 dias corridos** para localizar o ganhador sob pena de novo sorteio, e a
 cláusula de substituição de itens do kit por outros de igual ou maior valor.
+O cliente também definiu depois que **está vedada a participação de colaboradores
+do Grupo Plastlima** — a cláusula está na seção 3 do regulamento publicado.
 Continuam sem definição, agora por escolha do cliente: valor e composição
-detalhada do prêmio, critério de apuração, prazo de retenção dos dados e se
-sócios e funcionários podem participar.
+detalhada do prêmio, critério de apuração e prazo de retenção dos dados.
 
 ### Corrigido durante a revisão de deploy
 
@@ -508,4 +509,4 @@ Se a hospedagem virar Docker sobre Debian, o valor precisa voltar.
 | 3 | Como a apuração usa `participationCount` — o regulamento promete mais chances a quem compra mais |
 | 4 | O que fazer com os dados dos participantes após o sorteio — prazo de retenção pela LGPD |
 | 5 | Notificar o ganhador por WhatsApp a partir do painel, numa fase seguinte |
-| 6 | Valor e composição detalhada do Kit Churrasco, e se sócios e funcionários podem participar |
+| 6 | Valor e composição detalhada do Kit Churrasco |

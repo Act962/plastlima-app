@@ -61,6 +61,7 @@ export const RAFFLE_RULES: LegalDocument = {
 						"sejam residentes no Brasil;",
 						"tenham realizado compra em qualquer unidade Plastlima durante o período da campanha;",
 						"tenham concluído o cadastro na página oficial da campanha.",
+						"ESTÁ VEDADA A PARTICIPAÇÃO DE COLABORADORES DO GRUPO PLASTLIMA.",
 					],
 				},
 			],
