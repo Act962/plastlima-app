@@ -43,7 +43,7 @@ const CONTENT_ITEMS: NavItem[] = [
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
-	{ label: "Configurações", icon: Settings },
+	{ label: "Configurações", href: "/config", icon: Settings },
 	{ label: "Mídia", icon: ImageIcon },
 	{ label: "Leads", icon: Inbox },
 	{ label: "Participantes", href: "/participantes", icon: Ticket },

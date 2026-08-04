@@ -1,6 +1,7 @@
 import type { ZodType } from "zod";
 import type { ContentKeyValue } from "../../domain/content/value-objects/content-key";
 import { homeContentSchema } from "./home";
+import { siteContentSchema } from "./site";
 
 /** Um schema de documento e a versão de formato que ele representa. */
 export type ContentSchemaEntry = {
@@ -10,13 +11,14 @@ export type ContentSchemaEntry = {
 
 /**
  * Registro de schemas por `key` — a fonte da verdade do formato de cada
- * documento. Só `home` está modelado nesta fase; os outros seis entram conforme
- * a fatia vertical do piloto for replicada (spec §12, fase 5).
+ * documento. `home` e `site` modelados; os demais entram conforme a fatia
+ * vertical do piloto for replicada (spec §12, fase 5).
  */
 export const CONTENT_SCHEMAS: Partial<
 	Record<ContentKeyValue, ContentSchemaEntry>
 > = {
 	home: { schema: homeContentSchema, version: 1 },
+	site: { schema: siteContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -35,3 +37,8 @@ export {
 	type StatContent,
 	statSchema,
 } from "./home";
+export {
+	type SiteContent,
+	type SiteSocialLink,
+	siteContentSchema,
+} from "./site";

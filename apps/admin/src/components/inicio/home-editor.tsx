@@ -12,8 +12,10 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
 	createHomePreviewUrlAction,
+	listHomeRevisionsAction,
 	type PublishIssue,
 	publishHomeAction,
+	rollbackHomeAction,
 	saveHomeDraftAction,
 } from "@/app/(painel)/inicio/actions";
 import { HistoryDrawer } from "./history-drawer";
@@ -205,9 +207,11 @@ export function HomeEditor({
 			/>
 
 			<HistoryDrawer
+				listAction={listHomeRevisionsAction}
 				onClose={() => setHistoryOpen(false)}
 				onRestored={() => router.refresh()}
 				open={historyOpen}
+				rollbackAction={rollbackHomeAction}
 			/>
 
 			<div className="mx-auto w-full max-w-3xl px-6 py-8">
@@ -254,7 +258,6 @@ export function HomeEditor({
 							canMoveDown={index < home.banners.length - 1}
 							canMoveUp={index > 0}
 							issues={issues}
-							// biome-ignore lint/suspicious/noArrayIndexKey: banners não têm id estável; a ordem é a identidade e o índice reflete a posição editada.
 							key={index}
 							onChange={(patch) => updateBanner(index, patch)}
 							onMoveDown={() => moveBanner(index, 1)}

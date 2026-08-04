@@ -5,7 +5,7 @@ import {
 	NoChangesToPublishError,
 	RevisionNotFoundError,
 } from "@plastlima-app/core";
-import type { HomeContent } from "@plastlima-app/core/schemas";
+import type { SiteContent } from "@plastlima-app/core/schemas";
 import { createPreviewToken } from "@plastlima-app/infra";
 import { requireActor } from "@/lib/auth-actor";
 import {
@@ -15,42 +15,31 @@ import {
 	createSaveDraft,
 } from "@/lib/content";
 import type { RevisionSummary, RollbackResult } from "@/lib/revisions";
+import type {
+	PublishIssue,
+	PublishResult,
+	SaveDraftResult,
+} from "../inicio/actions";
 
-const HOME_KEY = "home";
+const SITE_KEY = "site";
 
-export type SaveDraftResult = { ok: true; savedAt: string };
-
-/**
- * Salva o rascunho da home (autosave da tela). Não valida o shape de propósito:
- * o rascunho pode estar no meio da edição (spec §6.3). A validação estrita é da
- * publicação.
- */
-export async function saveHomeDraftAction(
-	draft: HomeContent,
+/** Salva o rascunho das configurações (autosave). Não valida shape. */
+export async function saveSiteDraftAction(
+	draft: SiteContent,
 ): Promise<SaveDraftResult> {
 	const actor = await requireActor();
 
-	await createSaveDraft().execute({ key: HOME_KEY, draft, actor });
+	await createSaveDraft().execute({ key: SITE_KEY, draft, actor });
 
 	return { ok: true, savedAt: new Date().toISOString() };
 }
 
-/** Um problema de validação por campo, para a UI apontar onde corrigir. */
-export type PublishIssue = { path: string; message: string };
-
-export type PublishResult =
-	| { ok: true; version: number }
-	| { ok: false; message: string; issues?: PublishIssue[] };
-
-/**
- * Publica a home. Traduz os erros de domínio em mensagens pt-BR para a interface
- * — nada de código de erro cru chegando ao editor.
- */
-export async function publishHomeAction(): Promise<PublishResult> {
+/** Publica as configurações do site, traduzindo erros de domínio para pt-BR. */
+export async function publishSiteAction(): Promise<PublishResult> {
 	const actor = await requireActor();
 
 	const result = await createPublishDocument().execute({
-		key: HOME_KEY,
+		key: SITE_KEY,
 		actor,
 	});
 
@@ -64,10 +53,12 @@ export async function publishHomeAction(): Promise<PublishResult> {
 		return {
 			ok: false,
 			message: "Corrija os campos destacados antes de publicar.",
-			issues: error.issues.map((issue) => ({
-				path: issue.path,
-				message: issue.message,
-			})),
+			issues: error.issues.map(
+				(issue): PublishIssue => ({
+					path: issue.path,
+					message: issue.message,
+				}),
+			),
 		};
 	}
 
@@ -84,15 +75,11 @@ export async function publishHomeAction(): Promise<PublishResult> {
 	};
 }
 
-/**
- * Lista as revisões da home, da mais recente para a mais antiga — alimenta o
- * drawer de histórico (spec §6.5). Devolve só o que a UI mostra, não o JSON
- * inteiro de cada revisão.
- */
-export async function listHomeRevisionsAction(): Promise<RevisionSummary[]> {
+/** Revisões das configurações, da mais recente para a mais antiga. */
+export async function listSiteRevisionsAction(): Promise<RevisionSummary[]> {
 	await requireActor();
 
-	const result = await createListRevisions().execute(HOME_KEY);
+	const result = await createListRevisions().execute(SITE_KEY);
 
 	if (!result.ok) {
 		return [];
@@ -109,17 +96,14 @@ export async function listHomeRevisionsAction(): Promise<RevisionSummary[]> {
 	});
 }
 
-/**
- * Restaura a home para o conteúdo de uma revisão anterior. Cria uma revisão
- * nova (o histórico nunca encolhe — invariante 3) e revalida o site.
- */
-export async function rollbackHomeAction(
+/** Restaura as configurações para uma revisão anterior (cria revisão nova). */
+export async function rollbackSiteAction(
 	version: number,
 ): Promise<RollbackResult> {
 	const actor = await requireActor();
 
 	const result = await createRollbackToRevision().execute({
-		key: HOME_KEY,
+		key: SITE_KEY,
 		version,
 		actor,
 	});
@@ -142,15 +126,8 @@ export async function rollbackHomeAction(
 	};
 }
 
-/**
- * Monta a URL de pré-visualização do site em modo rascunho (spec §7.4).
- *
- * Devolve `null` quando o preview não está configurado (`PREVIEW_SECRET` ou
- * `PUBLIC_SITE_URL` ausentes) — a interface trata isso como indisponível em vez
- * de gerar um link quebrado. O token é assinado no servidor; o segredo nunca vai
- * para o cliente nem para a URL.
- */
-export async function createHomePreviewUrlAction(): Promise<string | null> {
+/** URL de pré-visualização do site (o rodapé reflete as configurações). */
+export async function createSitePreviewUrlAction(): Promise<string | null> {
 	await requireActor();
 
 	const secret = process.env.PREVIEW_SECRET;

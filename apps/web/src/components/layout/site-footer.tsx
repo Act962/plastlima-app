@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { LEGAL_ITEMS, NAV_ITEMS } from "@/data/navigation";
-import { CONTACT, EXTERNAL_LINKS, SITE, SOCIAL_LINKS } from "@/data/site";
+import { getSiteContent } from "@/lib/content/site";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { FooterColumn, FooterLink } from "./footer-links";
 import { SocialIcon } from "./social-icon";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+	const site = await getSiteContent();
+
 	return (
 		<footer className="bg-brand text-white">
 			<div className="mx-auto grid w-full max-w-site grid-cols-[repeat(auto-fit,minmax(min(230px,100%),1fr))] gap-[clamp(36px,4vw,64px)] px-5 pt-[clamp(48px,6.5vw,80px)] pb-10 sm:px-8">
@@ -14,10 +16,10 @@ export function SiteFooter() {
 						PLASTLIMA
 					</p>
 					<p className="mb-6 max-w-[340px] text-yellow leading-relaxed">
-						{SITE.tagline}
+						{site.tagline}
 					</p>
 					<ul className="flex flex-wrap gap-2.5">
-						{SOCIAL_LINKS.map((social) => (
+						{site.social.map((social) => (
 							<li key={social.platform}>
 								<a
 									aria-label={social.label}
@@ -47,24 +49,24 @@ export function SiteFooter() {
 							{item.label}
 						</Link>
 					))}
-					<FooterLink external href={EXTERNAL_LINKS.onlineCatalog}>
+					<FooterLink external href={site.externalLinks.onlineCatalog}>
 						Catálogo
 					</FooterLink>
 				</FooterColumn>
 
 				<FooterColumn title="Contatos">
-					<FooterLink href={`mailto:${SITE.email}`}>{SITE.email}</FooterLink>
-					<FooterLink external href={whatsappUrl(CONTACT.support.phone)}>
-						{CONTACT.support.display}
+					<FooterLink href={`mailto:${site.email}`}>{site.email}</FooterLink>
+					<FooterLink external href={whatsappUrl(site.contact.support.phone)}>
+						{site.contact.support.display}
 					</FooterLink>
-					<FooterLink href={`mailto:${SITE.franchiseEmail}`}>
-						{SITE.franchiseEmail}
+					<FooterLink href={`mailto:${site.franchiseEmail}`}>
+						{site.franchiseEmail}
 					</FooterLink>
 				</FooterColumn>
 			</div>
 
 			<div className="mx-auto flex w-full max-w-site flex-col gap-4 border-yellow/35 border-t px-5 pt-6 pb-10 text-sm text-yellow sm:flex-row sm:items-center sm:justify-between sm:px-8">
-				<span>{SITE.copyright}</span>
+				<span>{site.copyright}</span>
 				<nav className="flex flex-wrap gap-x-6 gap-y-2">
 					{LEGAL_ITEMS.map((item) => (
 						<Link

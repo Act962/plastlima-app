@@ -10,12 +10,17 @@ const PLATFORM_ICONS: Record<SocialPlatform, IconType> = {
 };
 
 type SocialIconProps = {
-	platform: SocialPlatform;
+	/** Texto vindo do conteúdo editável; só rendeiza se for uma rede conhecida. */
+	platform: string;
 	className?: string;
 };
 
 export function SocialIcon({ platform, className }: SocialIconProps) {
-	const Icon = PLATFORM_ICONS[platform];
+	const Icon = PLATFORM_ICONS[platform as SocialPlatform];
+
+	if (Icon === undefined) {
+		return null;
+	}
 
 	return <Icon aria-hidden className={className} />;
 }

@@ -4,11 +4,7 @@ import { Button } from "@plastlima-app/ui/components/button";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-	listHomeRevisionsAction,
-	type RevisionSummary,
-	rollbackHomeAction,
-} from "@/app/(painel)/inicio/actions";
+import type { RevisionSummary, RollbackResult } from "@/lib/revisions";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
 	dateStyle: "short",
@@ -21,14 +17,24 @@ type Props = {
 	onClose: () => void;
 	/** Chamado após uma restauração bem-sucedida, para a tela recarregar. */
 	onRestored: () => void;
+	/** Ações do documento em edição — o drawer serve qualquer `key`. */
+	listAction: () => Promise<RevisionSummary[]>;
+	rollbackAction: (version: number) => Promise<RollbackResult>;
 };
 
 /**
  * Drawer lateral com o histórico de revisões (spec §6.5): versão, autor, data e
  * nota, com *Restaurar* protegido por confirmação. Restaurar cria uma revisão
- * nova — o histórico nunca encolhe (invariante 3).
+ * nova — o histórico nunca encolhe (invariante 3). Recebe as ações por props,
+ * então serve tanto a home quanto as configurações e os demais documentos.
  */
-export function HistoryDrawer({ open, onClose, onRestored }: Props) {
+export function HistoryDrawer({
+	open,
+	onClose,
+	onRestored,
+	listAction,
+	rollbackAction,
+}: Props) {
 	const [revisions, setRevisions] = useState<RevisionSummary[] | null>(null);
 	const [confirming, setConfirming] = useState<number | null>(null);
 	const [restoring, setRestoring] = useState<number | null>(null);
@@ -42,8 +48,8 @@ export function HistoryDrawer({ open, onClose, onRestored }: Props) {
 
 		setRevisions(null);
 		setConfirming(null);
-		listHomeRevisionsAction().then(setRevisions);
-	}, [open]);
+		listAction().then(setRevisions);
+	}, [open, listAction]);
 
 	if (!open) {
 		return null;
@@ -52,7 +58,7 @@ export function HistoryDrawer({ open, onClose, onRestored }: Props) {
 	async function handleRestore(version: number) {
 		setRestoring(version);
 
-		const result = await rollbackHomeAction(version);
+		const result = await rollbackAction(version);
 
 		setRestoring(null);
 		setConfirming(null);

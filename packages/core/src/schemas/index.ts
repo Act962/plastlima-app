@@ -8,7 +8,10 @@ export {
 	homeContentSchema,
 	type MediaItemContent,
 	mediaItemSchema,
+	type SiteContent,
+	type SiteSocialLink,
 	type StatContent,
+	siteContentSchema,
 	statSchema,
 } from "./content";
 export {
