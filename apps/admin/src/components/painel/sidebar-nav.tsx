@@ -36,7 +36,7 @@ function isReady(item: NavItem): item is ReadyItem {
 
 const CONTENT_ITEMS: NavItem[] = [
 	{ label: "Início", href: "/inicio", icon: Home },
-	{ label: "Sobre", icon: Info },
+	{ label: "Sobre", href: "/sobre", icon: Info },
 	{ label: "Franquias", icon: Store },
 	{ label: "Unidades", icon: MapPin },
 	{ label: "Política de Privacidade", icon: FileText },

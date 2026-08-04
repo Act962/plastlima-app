@@ -1,5 +1,6 @@
 import type { ZodType } from "zod";
 import type { ContentKeyValue } from "../../domain/content/value-objects/content-key";
+import { aboutContentSchema } from "./about";
 import { homeContentSchema } from "./home";
 import { siteContentSchema } from "./site";
 
@@ -19,6 +20,7 @@ export const CONTENT_SCHEMAS: Partial<
 > = {
 	home: { schema: homeContentSchema, version: 1 },
 	site: { schema: siteContentSchema, version: 1 },
+	about: { schema: aboutContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -27,6 +29,13 @@ export function getContentSchema(
 	return CONTENT_SCHEMAS[key];
 }
 
+export {
+	type AboutContent,
+	type AboutRichTextSegment,
+	type AboutStoryBlock,
+	aboutContentSchema,
+	storyBlockSchema,
+} from "./about";
 export {
 	type HeroBannerContent,
 	type HomeContent,
@@ -37,6 +46,7 @@ export {
 	type StatContent,
 	statSchema,
 } from "./home";
+export { markdownToSegments, segmentsToMarkdown } from "./rich-text";
 export {
 	type SiteContent,
 	type SiteSocialLink,

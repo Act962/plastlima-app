@@ -1,4 +1,8 @@
 export {
+	type AboutContent,
+	type AboutRichTextSegment,
+	type AboutStoryBlock,
+	aboutContentSchema,
 	CONTENT_SCHEMAS,
 	type ContentSchemaEntry,
 	getContentSchema,
@@ -7,10 +11,12 @@ export {
 	heroBannerSchema,
 	homeContentSchema,
 	type MediaItemContent,
+	markdownToSegments,
 	mediaItemSchema,
 	type SiteContent,
 	type SiteSocialLink,
 	type StatContent,
+	segmentsToMarkdown,
 	siteContentSchema,
 	statSchema,
 } from "./content";
