@@ -9,6 +9,7 @@ import Providers from "@/components/providers";
 import { RafflePopup } from "@/components/raffle/raffle-popup";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE } from "@/data/site";
+import { getNavigation } from "@/lib/content/navigation";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo/metadata";
 import { organizationSchema, websiteSchema } from "@/lib/seo/schema";
 
@@ -67,11 +68,13 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const { main: mainNav } = await getNavigation();
+
 	return (
 		<html
 			className={`${manrope.variable} ${archivo.variable} ${ibmPlexMono.variable}`}
@@ -81,7 +84,7 @@ export default function RootLayout({
 				<JsonLd data={[organizationSchema(), websiteSchema()]} />
 				<Providers>
 					<div className="flex min-h-svh flex-col">
-						<SiteHeader />
+						<SiteHeader mainNav={mainNav} />
 						<main className="flex-1">{children}</main>
 						<SiteFooter />
 					</div>

@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { LEGAL_ITEMS, NAV_ITEMS } from "@/data/navigation";
+import { getNavigation } from "@/lib/content/navigation";
 import { getSiteContent } from "@/lib/content/site";
 import { whatsappUrl } from "@/lib/whatsapp";
 import { FooterColumn, FooterLink } from "./footer-links";
 import { SocialIcon } from "./social-icon";
 
 export async function SiteFooter() {
-	const site = await getSiteContent();
+	const [site, nav] = await Promise.all([getSiteContent(), getNavigation()]);
 
 	return (
 		<footer className="bg-brand text-white">
@@ -40,7 +40,7 @@ export async function SiteFooter() {
 				</div>
 
 				<FooterColumn title="Links Rápidos">
-					{NAV_ITEMS.map((item) => (
+					{nav.main.map((item) => (
 						<Link
 							className="w-fit text-[15.5px] text-yellow transition-colors hover:text-yellow-soft"
 							href={item.href}
@@ -68,7 +68,7 @@ export async function SiteFooter() {
 			<div className="mx-auto flex w-full max-w-site flex-col gap-4 border-yellow/35 border-t px-5 pt-6 pb-10 text-sm text-yellow sm:flex-row sm:items-center sm:justify-between sm:px-8">
 				<span>{site.copyright}</span>
 				<nav className="flex flex-wrap gap-x-6 gap-y-2">
-					{LEGAL_ITEMS.map((item) => (
+					{nav.legal.map((item) => (
 						<Link
 							className="text-yellow transition-colors hover:text-yellow-soft"
 							href={item.href}

@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { ExternalActionLink } from "@/components/ui/external-action-link";
-import { NAV_ITEMS } from "@/data/navigation";
 import { CONTACT, EXTERNAL_LINKS } from "@/data/site";
 import { whatsappUrl } from "@/lib/whatsapp";
+import type { NavItem } from "@/types/navigation";
 
 type MobileMenuProps = {
 	activePath: string;
+	items: NavItem[];
 	onNavigate: () => void;
 };
 
-export function MobileMenu({ activePath, onNavigate }: MobileMenuProps) {
+export function MobileMenu({ activePath, items, onNavigate }: MobileMenuProps) {
 	return (
 		<nav
 			aria-label="Menu principal"
@@ -17,7 +18,7 @@ export function MobileMenu({ activePath, onNavigate }: MobileMenuProps) {
 			id="mobile-menu"
 		>
 			<ul className="flex flex-col">
-				{NAV_ITEMS.map((item) => (
+				{items.map((item) => (
 					<li key={item.href}>
 						<Link
 							aria-current={activePath === item.href ? "page" : undefined}

@@ -6,12 +6,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { LuMenu, LuX } from "react-icons/lu";
 import { ExternalActionLink } from "@/components/ui/external-action-link";
-import { NAV_ITEMS } from "@/data/navigation";
 import { EXTERNAL_LINKS, SITE } from "@/data/site";
+import type { NavItem } from "@/types/navigation";
 import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+	mainNav: NavItem[];
+};
+
+export function SiteHeader({ mainNav }: SiteHeaderProps) {
 	const pathname = usePathname();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [menuPathname, setMenuPathname] = useState(pathname);
@@ -40,7 +44,7 @@ export function SiteHeader() {
 					aria-label="Menu principal"
 					className="ml-auto hidden items-center gap-1 min-[981px]:flex"
 				>
-					{NAV_ITEMS.map((item) => (
+					{mainNav.map((item) => (
 						<NavLink
 							isActive={pathname === item.href}
 							item={item}
@@ -77,6 +81,7 @@ export function SiteHeader() {
 				<div className="min-[981px]:hidden">
 					<MobileMenu
 						activePath={pathname}
+						items={mainNav}
 						onNavigate={() => setIsMenuOpen(false)}
 					/>
 				</div>

@@ -3,6 +3,7 @@ import type { ContentKeyValue } from "../../domain/content/value-objects/content
 import { aboutContentSchema } from "./about";
 import { homeContentSchema } from "./home";
 import { locationsContentSchema } from "./locations";
+import { navigationContentSchema } from "./navigation";
 import { siteContentSchema } from "./site";
 
 /** Um schema de documento e a versão de formato que ele representa. */
@@ -23,6 +24,7 @@ export const CONTENT_SCHEMAS: Partial<
 	site: { schema: siteContentSchema, version: 1 },
 	about: { schema: aboutContentSchema, version: 1 },
 	locations: { schema: locationsContentSchema, version: 1 },
+	navigation: { schema: navigationContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -59,6 +61,12 @@ export {
 	type StoreLocationContent,
 	storeLocationSchema,
 } from "./locations";
+export {
+	type NavigationContent,
+	type NavLinkContent,
+	navigationContentSchema,
+	navLinkSchema,
+} from "./navigation";
 export { markdownToSegments, segmentsToMarkdown } from "./rich-text";
 export {
 	type SiteContent,
