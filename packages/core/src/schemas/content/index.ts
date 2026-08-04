@@ -5,6 +5,7 @@ import { franchiseContentSchema } from "./franchise";
 import { homeContentSchema } from "./home";
 import { locationsContentSchema } from "./locations";
 import { navigationContentSchema } from "./navigation";
+import { privacyPolicyContentSchema } from "./privacy-policy";
 import { siteContentSchema } from "./site";
 
 /** Um schema de documento e a versão de formato que ele representa. */
@@ -27,6 +28,7 @@ export const CONTENT_SCHEMAS: Partial<
 	locations: { schema: locationsContentSchema, version: 1 },
 	navigation: { schema: navigationContentSchema, version: 1 },
 	franchise: { schema: franchiseContentSchema, version: 1 },
+	"privacy-policy": { schema: privacyPolicyContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -77,6 +79,22 @@ export {
 	navigationContentSchema,
 	navLinkSchema,
 } from "./navigation";
+export {
+	findUnknownPolicyTokens,
+	POLICY_TOKENS,
+	type PolicyTokenKey,
+	type PolicyTokenValues,
+	renderPolicyTokens,
+	resolvePolicyTokens,
+} from "./policy-tokens";
+export {
+	type PolicyBlockContent,
+	type PolicySectionContent,
+	type PrivacyPolicyContent,
+	policyBlockSchema,
+	policySectionSchema,
+	privacyPolicyContentSchema,
+} from "./privacy-policy";
 export { markdownToSegments, segmentsToMarkdown } from "./rich-text";
 export {
 	type SiteContent,

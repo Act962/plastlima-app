@@ -40,7 +40,11 @@ const CONTENT_ITEMS: NavItem[] = [
 	{ label: "Sobre", href: "/sobre", icon: Info },
 	{ label: "Franquias", href: "/franquias", icon: Store },
 	{ label: "Unidades", href: "/unidades", icon: MapPin },
-	{ label: "Política de Privacidade", icon: FileText },
+	{
+		label: "Política de Privacidade",
+		href: "/politica-de-privacidade",
+		icon: FileText,
+	},
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
