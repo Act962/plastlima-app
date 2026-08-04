@@ -1,6 +1,7 @@
 import type { ZodType } from "zod";
 import type { ContentKeyValue } from "../../domain/content/value-objects/content-key";
 import { aboutContentSchema } from "./about";
+import { franchiseContentSchema } from "./franchise";
 import { homeContentSchema } from "./home";
 import { locationsContentSchema } from "./locations";
 import { navigationContentSchema } from "./navigation";
@@ -25,6 +26,7 @@ export const CONTENT_SCHEMAS: Partial<
 	about: { schema: aboutContentSchema, version: 1 },
 	locations: { schema: locationsContentSchema, version: 1 },
 	navigation: { schema: navigationContentSchema, version: 1 },
+	franchise: { schema: franchiseContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -40,6 +42,14 @@ export {
 	aboutContentSchema,
 	storyBlockSchema,
 } from "./about";
+export {
+	type FranchiseContent,
+	franchiseContentSchema,
+	type MarketImageContent,
+	marketImageSchema,
+	type TimelineEntryContent,
+	timelineEntrySchema,
+} from "./franchise";
 export {
 	type HeroBannerContent,
 	type HomeContent,

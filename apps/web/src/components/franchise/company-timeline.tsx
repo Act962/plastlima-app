@@ -1,8 +1,12 @@
+import type { TimelineEntryContent } from "@plastlima-app/core/schemas";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
-import { COMPANY_TIMELINE } from "@/data/franchise";
 
-export function CompanyTimeline() {
+type CompanyTimelineProps = {
+	entries: TimelineEntryContent[];
+};
+
+export function CompanyTimeline({ entries }: CompanyTimelineProps) {
 	return (
 		<Section>
 			<Container className="py-section">
@@ -10,7 +14,7 @@ export function CompanyTimeline() {
 					Nossa trajetória até aqui
 				</h2>
 				<ol className="grid grid-cols-[repeat(auto-fit,minmax(min(430px,100%),1fr))]">
-					{COMPANY_TIMELINE.map((entry) => (
+					{entries.map((entry) => (
 						<li
 							className="flex gap-6 border-line border-t py-7 pr-8"
 							key={entry.year}

@@ -5,6 +5,8 @@ export {
 	aboutContentSchema,
 	CONTENT_SCHEMAS,
 	type ContentSchemaEntry,
+	type FranchiseContent,
+	franchiseContentSchema,
 	getContentSchema,
 	type HeroBannerContent,
 	type HomeContent,
@@ -15,8 +17,10 @@ export {
 	type LocationsContent,
 	locationStateSchema,
 	locationsContentSchema,
+	type MarketImageContent,
 	type MediaItemContent,
 	markdownToSegments,
+	marketImageSchema,
 	mediaItemSchema,
 	type NavigationContent,
 	type NavLinkContent,
@@ -32,6 +36,8 @@ export {
 	siteContentSchema,
 	statSchema,
 	storeLocationSchema,
+	type TimelineEntryContent,
+	timelineEntrySchema,
 } from "./content";
 export {
 	MAX_RECEIPT_DATA_URL_LENGTH,

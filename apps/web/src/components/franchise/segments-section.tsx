@@ -2,11 +2,14 @@ import { Container } from "@/components/ui/container";
 import { ExternalActionLink } from "@/components/ui/external-action-link";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
-import { SERVED_SEGMENTS } from "@/data/franchise";
 import { CONTACT } from "@/data/site";
 import { whatsappUrl } from "@/lib/whatsapp";
 
-export function SegmentsSection() {
+type SegmentsSectionProps = {
+	segments: string[];
+};
+
+export function SegmentsSection({ segments }: SegmentsSectionProps) {
 	return (
 		<Section tone="yellow">
 			<Container className="grid grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] items-center gap-[clamp(36px,4vw,64px)] py-section-sm">
@@ -21,7 +24,7 @@ export function SegmentsSection() {
 				</div>
 				<div>
 					<ul className="mb-9 flex flex-wrap gap-2.5">
-						{SERVED_SEGMENTS.map((segment) => (
+						{segments.map((segment) => (
 							<li
 								className="rounded-full border border-on-yellow/25 px-4 py-2.5 text-on-yellow text-sm"
 								key={segment}

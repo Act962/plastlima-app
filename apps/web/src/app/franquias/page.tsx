@@ -6,6 +6,7 @@ import { FranchiseHero } from "@/components/franchise/franchise-hero";
 import { MarketDataSection } from "@/components/franchise/market-data-section";
 import { SegmentsSection } from "@/components/franchise/segments-section";
 import { JsonLd } from "@/components/seo/json-ld";
+import { getFranchiseContent } from "@/lib/content/franchise";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema } from "@/lib/seo/schema";
 
@@ -16,7 +17,9 @@ export const metadata: Metadata = buildPageMetadata({
 	path: "/franquias",
 });
 
-export default function FranchisePage() {
+export default async function FranchisePage() {
+	const franchise = await getFranchiseContent();
+
 	return (
 		<>
 			<JsonLd
@@ -26,11 +29,11 @@ export default function FranchisePage() {
 				])}
 			/>
 			<FranchiseHero />
-			<CompanyTimeline />
-			<FranchiseAboutSection />
-			<MarketDataSection />
+			<CompanyTimeline entries={franchise.timeline} />
+			<FranchiseAboutSection paragraphs={franchise.about} />
+			<MarketDataSection images={franchise.marketImages} />
 			<FranchiseFormSection />
-			<SegmentsSection />
+			<SegmentsSection segments={franchise.segments} />
 		</>
 	);
 }
