@@ -8,8 +8,14 @@ export {
 } from "./application/ports/cache-invalidator";
 export type { Clock } from "./application/ports/clock";
 export type { ContentValidator } from "./application/ports/content-validator";
+export type { StorageProvider } from "./application/ports/storage-provider";
+export {
+	DeleteAsset,
+	type DeleteAssetInput,
+} from "./application/use-cases/delete-asset";
 export { GetDraft } from "./application/use-cases/get-draft";
 export { GetPublishedContent } from "./application/use-cases/get-published-content";
+export { ListAssets } from "./application/use-cases/list-assets";
 export {
 	ListParticipants,
 	type ListParticipantsInput,
@@ -34,6 +40,10 @@ export {
 	SaveDraft,
 	type SaveDraftInput,
 } from "./application/use-cases/save-draft";
+export {
+	UploadAsset,
+	type UploadAssetInput,
+} from "./application/use-cases/upload-asset";
 export {
 	ContentDocument,
 	type ContentDocumentSnapshot,
@@ -62,6 +72,16 @@ export {
 	type PublishStateValue,
 } from "./domain/content/value-objects/publish-state";
 export { RevisionNumber } from "./domain/content/value-objects/revision-number";
+export {
+	MediaAsset,
+	type MediaAssetSnapshot,
+} from "./domain/media/entities/media-asset";
+export {
+	InvalidMediaError,
+	type MediaError,
+	MediaNotFoundError,
+} from "./domain/media/errors";
+export type { MediaRepository } from "./domain/media/repositories/media-repository";
 export {
 	areEntriesOpen,
 	type RaffleCampaign,

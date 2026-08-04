@@ -50,7 +50,7 @@ const CONTENT_ITEMS: NavItem[] = [
 const SYSTEM_ITEMS: NavItem[] = [
 	{ label: "Configurações", href: "/config", icon: Settings },
 	{ label: "Navegação", href: "/navegacao", icon: Navigation },
-	{ label: "Mídia", icon: ImageIcon },
+	{ label: "Mídia", href: "/midia", icon: ImageIcon },
 	{ label: "Leads", icon: Inbox },
 	{ label: "Participantes", href: "/participantes", icon: Ticket },
 ];

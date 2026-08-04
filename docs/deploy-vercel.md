@@ -94,6 +94,8 @@ Na Vercel: **Add New… → Project → importe o repositório**.
 | `NEXT_PUBLIC_SITE_URL` | `https://www.plastlima.com.br` | Canonical, OpenGraph, sitemap, robots, JSON-LD |
 | `CORS_ORIGIN` | `https://www.plastlima.com.br` | Origem permitida |
 | `REVALIDATE_SECRET` | _(o 2º segredo do passo 3)_ | Autentica o `POST /api/revalidate` vindo do painel |
+| `PREVIEW_SECRET` | _(o 3º segredo do passo 3)_ | Valida o token do preview (draft mode). O MESMO do painel |
+| `R2_PUBLIC_URL` | `https://cdn.plastlima.com.br` | Libera as imagens do R2 no `next/image` (`images.remotePatterns`) |
 
 > **Dica de resiliência:** acrescente `&serverSelectionTimeoutMS=5000` ao
 > `DATABASE_URL` do site. Se o Atlas ficar inacessível, o driver desiste rápido e
@@ -122,10 +124,17 @@ Na Vercel: **Add New… → Project → importe o MESMO repositório** de novo.
 | `BETTER_AUTH_SECRET` | _(o 1º segredo do passo 3)_ | Assinatura das sessões |
 | `BETTER_AUTH_URL` | `https://admin.plastlima.com.br` | URL base do painel para o Better Auth |
 | `REVALIDATE_SECRET` | _(o MESMO do site)_ | Autentica a chamada de revalidação ao site |
-| `PUBLIC_SITE_URL` | `https://www.plastlima.com.br` | Para onde o painel envia o `POST /api/revalidate` ao publicar |
+| `PUBLIC_SITE_URL` | `https://www.plastlima.com.br` | Para onde o painel envia o `POST /api/revalidate` e monta a URL de preview |
+| `PREVIEW_SECRET` | _(o MESMO do site)_ | Assina o token do botão "Visualizar" (draft mode) |
+| `R2_ACCOUNT_ID` | _(do painel Cloudflare R2)_ | Endpoint S3 do bucket |
+| `R2_ACCESS_KEY_ID` | _(token de API do R2)_ | Credencial de upload |
+| `R2_SECRET_ACCESS_KEY` | _(token de API do R2)_ | Credencial de upload (secreta) |
+| `R2_BUCKET` | `plastlima-midia` | Nome do bucket |
+| `R2_PUBLIC_URL` | `https://cdn.plastlima.com.br` | Domínio público do bucket (o MESMO do site) |
 
 > Sem `REVALIDATE_SECRET`/`PUBLIC_SITE_URL` no painel, publicar **funciona** (grava
 > a revisão), mas o site só reflete pelo ISR (renovação periódica), não na hora.
+> Sem as variáveis `R2_*`, a tela de **Mídia** mostra o upload como indisponível.
 
 ---
 
@@ -173,12 +182,14 @@ Há também `pnpm run seed:admin:prod`, que lê de um arquivo `.env.atlas` — v
   declara `binaryTargets = ["native", "rhel-openssl-3.0.x"]` — não mexa nisso, ou
   o build passa e o deploy quebra na primeira query. O `vercel-build` roda
   `prisma generate` antes do `next build`.
-- **Imagens remotas (Fase 5):** quando a biblioteca de mídia no Cloudflare R2
-  entrar, será preciso um bloco `images.remotePatterns` no `apps/web/next.config.ts`
-  apontando para o domínio público do R2, e as variáveis `R2_ACCOUNT_ID`,
-  `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` no
-  projeto `admin`. Hoje as imagens são servidas de `apps/web/public`.
-- **Preview / draft mode (Fase 5):** exigirá `PREVIEW_SECRET` (site + painel).
+- **Biblioteca de mídia (Cloudflare R2):** crie um bucket R2 com **acesso público**
+  (domínio `r2.dev` ou um domínio próprio), gere um token de API S3 e preencha
+  `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`,
+  `R2_PUBLIC_URL` no painel. O `R2_PUBLIC_URL` também vai no site — o
+  `apps/web/next.config.ts` já lê essa variável para o `images.remotePatterns`.
+  Sem as variáveis, o site segue servindo as imagens de `apps/web/public`.
+- **Preview / draft mode:** já ativo — exige `PREVIEW_SECRET` igual nos dois
+  projetos.
 - **`SKIP_ENV_VALIDATION`:** só é usado no CI. Em produção, deixe as variáveis
   definidas de verdade.
 

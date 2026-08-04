@@ -15,8 +15,10 @@
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.1103.0",
 		"@plastlima-app/core": "workspace:*",
-		"@prisma/client": "catalog:"
+		"@prisma/client": "catalog:",
+		"image-size": "^2.0.2"
 	},
 	"devDependencies": {
 		"@plastlima-app/config": "workspace:*",
