@@ -57,6 +57,57 @@ model Participant {
 }
 
 // ---------------------------------------------------------------------------
+// CMS — conteúdo editável do site (spec docs/spec-dashboard-cms.md §4).
+// Um documento por área do site; o formato de cada `key` é definido por um
+// schema Zod em packages/core, não pelo banco.
+// ---------------------------------------------------------------------------
+
+/// Um documento de conteúdo editável: rascunho (`draft`) e publicado
+/// (`published`) guardados como JSON, validados na fronteira pelo schema Zod da
+/// respectiva `key`.
+///
+/// `currentVersion` é denormalizado (o maior número de revisão já criado): evita
+/// um `count` a cada leitura e é gravado na mesma transação da revisão, mantendo
+/// a sequência consistente. `updatedAt` é controlado pelo domínio (relógio
+/// injetado), não por `@updatedAt` — a fonte de tempo é uma só.
+model ContentDocument {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  key           String    @unique // "home" | "about" | "locations" | ...
+  schemaVersion Int       @default(1)
+  draft         Json
+  published     Json?
+  currentVersion Int      @default(0)
+  publishedAt   DateTime?
+  publishedBy   String?
+  updatedAt     DateTime
+  updatedBy     String
+
+  revisions ContentRevision[]
+}
+
+/// Snapshot imutável do conteúdo no momento de uma publicação — histórico e
+/// rollback. Nunca é editado depois de criado.
+///
+/// O índice único `(documentId, version)` garante a sequência estrita de versões
+/// no nível do banco: mesmo sob duas publicações simultâneas, só uma grava cada
+/// número. `schemaVersion` registra o formato em que a revisão foi criada, para
+/// a migração de shape na restauração (spec §5.2).
+model ContentRevision {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  documentId    String          @db.ObjectId
+  document      ContentDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  version       Int
+  data          Json
+  schemaVersion Int
+  note          String?
+  createdBy     String
+  createdAt     DateTime        @default(now())
+
+  @@unique([documentId, version])
+  @@index([documentId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
 // Better Auth — acesso ao painel administrativo.
 // Não há cadastro público: os usuários são criados pelo seed (`db:seed-admin`).
 // ---------------------------------------------------------------------------
