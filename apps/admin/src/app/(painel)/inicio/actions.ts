@@ -3,10 +3,17 @@
 import {
 	InvalidContentError,
 	NoChangesToPublishError,
+	RevisionNotFoundError,
 } from "@plastlima-app/core";
 import type { HomeContent } from "@plastlima-app/core/schemas";
+import { createPreviewToken } from "@plastlima-app/infra";
 import { requireActor } from "@/lib/auth-actor";
-import { createPublishDocument, createSaveDraft } from "@/lib/content";
+import {
+	createListRevisions,
+	createPublishDocument,
+	createRollbackToRevision,
+	createSaveDraft,
+} from "@/lib/content";
 
 const HOME_KEY = "home";
 
@@ -74,4 +81,99 @@ export async function publishHomeAction(): Promise<PublishResult> {
 		ok: false,
 		message: "Não foi possível publicar agora. Tente novamente em instantes.",
 	};
+}
+
+/** Uma revisão no histórico, já serializada para a interface. */
+export type RevisionSummary = {
+	version: number;
+	createdBy: string;
+	createdAt: string;
+	note: string | null;
+};
+
+/**
+ * Lista as revisões da home, da mais recente para a mais antiga — alimenta o
+ * drawer de histórico (spec §6.5). Devolve só o que a UI mostra, não o JSON
+ * inteiro de cada revisão.
+ */
+export async function listHomeRevisionsAction(): Promise<RevisionSummary[]> {
+	await requireActor();
+
+	const result = await createListRevisions().execute(HOME_KEY);
+
+	if (!result.ok) {
+		return [];
+	}
+
+	return result.value.map((revision) => {
+		const snapshot = revision.toSnapshot();
+		return {
+			version: snapshot.version,
+			createdBy: snapshot.createdBy,
+			createdAt: snapshot.createdAt.toISOString(),
+			note: snapshot.note,
+		};
+	});
+}
+
+export type RollbackResult =
+	| { ok: true; version: number; restoredFrom: number }
+	| { ok: false; message: string };
+
+/**
+ * Restaura a home para o conteúdo de uma revisão anterior. Cria uma revisão
+ * nova (o histórico nunca encolhe — invariante 3) e revalida o site.
+ */
+export async function rollbackHomeAction(
+	version: number,
+): Promise<RollbackResult> {
+	const actor = await requireActor();
+
+	const result = await createRollbackToRevision().execute({
+		key: HOME_KEY,
+		version,
+		actor,
+	});
+
+	if (result.ok) {
+		return {
+			ok: true,
+			version: result.value.version,
+			restoredFrom: result.value.restoredFrom,
+		};
+	}
+
+	if (result.error instanceof RevisionNotFoundError) {
+		return { ok: false, message: "Essa revisão não existe mais." };
+	}
+
+	return {
+		ok: false,
+		message: "Não foi possível restaurar agora. Tente novamente em instantes.",
+	};
+}
+
+/**
+ * Monta a URL de pré-visualização do site em modo rascunho (spec §7.4).
+ *
+ * Devolve `null` quando o preview não está configurado (`PREVIEW_SECRET` ou
+ * `PUBLIC_SITE_URL` ausentes) — a interface trata isso como indisponível em vez
+ * de gerar um link quebrado. O token é assinado no servidor; o segredo nunca vai
+ * para o cliente nem para a URL.
+ */
+export async function createHomePreviewUrlAction(): Promise<string | null> {
+	await requireActor();
+
+	const secret = process.env.PREVIEW_SECRET;
+	const baseUrl = process.env.PUBLIC_SITE_URL;
+
+	if (!secret || !baseUrl) {
+		return null;
+	}
+
+	const url = new URL("/api/preview", baseUrl);
+	url.searchParams.set("token", createPreviewToken(secret, Date.now()));
+	url.searchParams.set("path", "/");
+
+	return url.toString();
 }

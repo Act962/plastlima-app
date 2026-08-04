@@ -6,14 +6,17 @@ import type {
 } from "@plastlima-app/core/schemas";
 import { Button } from "@plastlima-app/ui/components/button";
 import { cn } from "@plastlima-app/ui/lib/utils";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, History, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
+	createHomePreviewUrlAction,
 	type PublishIssue,
 	publishHomeAction,
 	saveHomeDraftAction,
 } from "@/app/(painel)/inicio/actions";
+import { HistoryDrawer } from "./history-drawer";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
@@ -50,7 +53,9 @@ export function HomeEditor({
 	const [stateLabel, setStateLabel] = useState(initialStateLabel);
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [issues, setIssues] = useState<PublishIssue[]>([]);
+	const [historyOpen, setHistoryOpen] = useState(false);
 
+	const router = useRouter();
 	const isFirstRender = useRef(true);
 
 	// Autosave com debounce: nada disso afeta o site até publicar, então salvar é
@@ -163,15 +168,46 @@ export function HomeEditor({
 		}
 	}
 
+	async function handlePreview() {
+		// Salva o rascunho antes: o preview lê o rascunho do banco, então precisa
+		// refletir o que está na tela agora.
+		try {
+			await saveHomeDraftAction(home);
+			setSavedAt(new Date());
+			setStatus("saved");
+		} catch {
+			setStatus("error");
+		}
+
+		const url = await createHomePreviewUrlAction();
+
+		if (url === null) {
+			toast.error(
+				"Pré-visualização indisponível: configure PREVIEW_SECRET e PUBLIC_SITE_URL.",
+			);
+			return;
+		}
+
+		window.open(url, "_blank", "noopener,noreferrer");
+	}
+
 	return (
 		<div className="flex flex-col">
 			<StatusBar
 				dirty={dirty}
 				isPublishing={isPublishing}
+				onOpenHistory={() => setHistoryOpen(true)}
+				onPreview={handlePreview}
 				onPublish={handlePublish}
 				savedAt={savedAt}
 				stateLabel={stateLabel}
 				status={status}
+			/>
+
+			<HistoryDrawer
+				onClose={() => setHistoryOpen(false)}
+				onRestored={() => router.refresh()}
+				open={historyOpen}
 			/>
 
 			<div className="mx-auto w-full max-w-3xl px-6 py-8">
@@ -240,6 +276,8 @@ function StatusBar({
 	dirty,
 	isPublishing,
 	onPublish,
+	onOpenHistory,
+	onPreview,
 }: {
 	status: SaveStatus;
 	savedAt: Date | null;
@@ -247,6 +285,8 @@ function StatusBar({
 	dirty: boolean;
 	isPublishing: boolean;
 	onPublish: () => void;
+	onOpenHistory: () => void;
+	onPreview: () => void;
 }) {
 	return (
 		<div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-border border-b bg-card/80 px-6 py-3 backdrop-blur">
@@ -264,14 +304,29 @@ function StatusBar({
 				<SaveIndicator savedAt={savedAt} status={status} />
 			</div>
 
-			<Button
-				disabled={!dirty || isPublishing}
-				onClick={onPublish}
-				size="sm"
-				type="button"
-			>
-				{isPublishing ? "Publicando…" : "Publicar"}
-			</Button>
+			<div className="flex items-center gap-2">
+				<Button onClick={onPreview} size="sm" type="button" variant="outline">
+					<Eye className="size-4" />
+					Visualizar
+				</Button>
+				<Button
+					onClick={onOpenHistory}
+					size="sm"
+					type="button"
+					variant="outline"
+				>
+					<History className="size-4" />
+					Histórico
+				</Button>
+				<Button
+					disabled={!dirty || isPublishing}
+					onClick={onPublish}
+					size="sm"
+					type="button"
+				>
+					{isPublishing ? "Publicando…" : "Publicar"}
+				</Button>
+			</div>
 		</div>
 	);
 }

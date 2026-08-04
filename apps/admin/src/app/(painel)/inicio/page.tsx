@@ -50,10 +50,14 @@ export default async function InicioPage() {
 
 	return (
 		<HomeEditor
+			// Remonta o editor quando o conteúdo do servidor muda (ex.: após uma
+			// restauração via router.refresh()), reiniciando o estado local a partir
+			// do documento restaurado.
 			initialCanPublish={canPublish}
 			initialHome={draft}
 			initialStateLabel={stateLabel}
 			initialUpdatedAt={updatedAt}
+			key={updatedAt}
 		/>
 	);
 }

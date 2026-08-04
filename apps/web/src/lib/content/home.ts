@@ -1,10 +1,15 @@
-import { contentCacheTag, GetPublishedContent } from "@plastlima-app/core";
+import {
+	contentCacheTag,
+	GetDraft,
+	GetPublishedContent,
+} from "@plastlima-app/core";
 import {
 	type HomeContent,
 	homeContentSchema,
 } from "@plastlima-app/core/schemas";
 import { getPrisma, PrismaContentRepository } from "@plastlima-app/infra";
 import { unstable_cache } from "next/cache";
+import { draftMode } from "next/headers";
 import { HOME_FALLBACK } from "@/data/fallback/home";
 
 const HOME_TAG = contentCacheTag("home");
@@ -55,12 +60,38 @@ const readPublishedHome = unstable_cache(
 );
 
 /**
+ * Lê o rascunho da home, **sem cache**. Só roda em draft mode (preview), para o
+ * editor ver o que ainda não publicou. Fora do preview isto nunca é chamado.
+ */
+async function readDraftHome(): Promise<HomeContent> {
+	const repository = new PrismaContentRepository(getPrisma());
+	const result = await new GetDraft(repository).execute("home");
+
+	if (!result.ok) {
+		return HOME_FALLBACK;
+	}
+
+	const parsed = homeContentSchema.safeParse(result.value.draft);
+	return parsed.success ? parsed.data : HOME_FALLBACK;
+}
+
+/**
  * Conteúdo da home para a página renderizar. Nunca lança: banco fora, documento
  * inexistente ou JSON inválido caem no conteúdo de fallback, com o erro no log
  * (spec §7.1).
+ *
+ * Em draft mode (preview, spec §7.4) lê o rascunho sem cache; caso contrário, o
+ * publicado cacheado. Consultar o `draftMode()` torna a home dinâmica, mas a
+ * leitura do publicado continua cacheada — o banco não é tocado a cada request.
  */
 export async function getHomeContent(): Promise<HomeContent> {
 	try {
+		const { isEnabled: isDraft } = await draftMode();
+
+		if (isDraft) {
+			return await withTimeout(readDraftHome(), READ_TIMEOUT_MS);
+		}
+
 		const published = await withTimeout(readPublishedHome(), READ_TIMEOUT_MS);
 
 		if (published === null) {
