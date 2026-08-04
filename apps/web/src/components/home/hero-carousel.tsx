@@ -1,12 +1,12 @@
 "use client";
 
+import type { HeroBannerContent } from "@plastlima-app/core/schemas";
 import { cn } from "@plastlima-app/ui/lib/utils";
+import type { Route } from "next";
 import { getImageProps } from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { HERO_BANNERS } from "@/data/home";
 import { useCarousel } from "@/hooks/use-carousel";
-import type { HeroBanner } from "@/types/content";
 import { CarouselArrow } from "./carousel-arrow";
 import { CarouselDots } from "./carousel-dots";
 
@@ -17,19 +17,19 @@ const FALLBACK_ASPECT = 1.92;
 const MOBILE_MEDIA = "(max-width: 39.999rem)";
 
 /**
- * No celular todos os slides dividem a mesma altura, senão a página pularia a
- * cada troca. A referência é a arte de celular mais alta declarada; banner sem
- * arte própria aparece inteiro dentro dessa caixa, com o fundo borrado
- * preenchendo a sobra. Sem nenhuma arte de celular, cada banner usa a
- * proporção dele mesmo.
+ * A altura compartilhada dos slides no celular: a proporção da arte de celular
+ * mais alta declarada. Sem nenhuma arte de celular, devolve `undefined` e cada
+ * banner usa a proporção dele mesmo.
  */
-const MOBILE_ASPECT = HERO_BANNERS.reduce<number | undefined>(
-	(tallest, banner) =>
-		banner.mobile === undefined
-			? tallest
-			: Math.min(tallest ?? banner.mobile.aspect, banner.mobile.aspect),
-	undefined,
-);
+function mobileAspectOf(banners: HeroBannerContent[]): number | undefined {
+	return banners.reduce<number | undefined>(
+		(tallest, banner) =>
+			banner.mobile === undefined
+				? tallest
+				: Math.min(tallest ?? banner.mobile.aspect, banner.mobile.aspect),
+		undefined,
+	);
+}
 
 /**
  * `<picture>` em vez de `<Image>` porque só ele troca de arquivo por media
@@ -40,7 +40,7 @@ function BannerArt({
 	banner,
 	priority,
 }: {
-	banner: HeroBanner;
+	banner: HeroBannerContent;
 	priority: boolean;
 }) {
 	const shared = { alt: banner.alt, fill: true, priority, sizes: "100vw" };
@@ -77,19 +77,19 @@ function BannerArt({
 	);
 }
 
-export function HeroCarousel() {
+export function HeroCarousel({ banners }: { banners: HeroBannerContent[] }) {
 	const { activeIndex, goTo, goToPrevious, goToNext } = useCarousel(
-		HERO_BANNERS.length,
+		banners.length,
 	);
 
 	// Com um único banner não há o que navegar: some com setas e indicadores.
-	const hasMultiple = HERO_BANNERS.length > 1;
+	const hasMultiple = banners.length > 1;
 
 	// No desktop a faixa assume a proporção do banner visível, então a arte
 	// preenche a área inteira sem sobra; banners de proporções diferentes fazem
 	// a altura animar junto com o crossfade.
-	const aspect = HERO_BANNERS[activeIndex]?.aspect ?? FALLBACK_ASPECT;
-	const mobileAspect = MOBILE_ASPECT ?? aspect;
+	const aspect = banners[activeIndex]?.aspect ?? FALLBACK_ASPECT;
+	const mobileAspect = mobileAspectOf(banners) ?? aspect;
 
 	return (
 		<section
@@ -107,7 +107,7 @@ export function HeroCarousel() {
 					} as CSSProperties
 				}
 			>
-				{HERO_BANNERS.map((banner, index) => (
+				{banners.map((banner, index) => (
 					<div
 						aria-hidden={index !== activeIndex}
 						className={cn(
@@ -125,7 +125,9 @@ export function HeroCarousel() {
 							// passaria por links escondidos atrás dos outros.
 							<Link
 								className="block size-full focus-visible:outline-2 focus-visible:outline-yellow focus-visible:-outline-offset-4"
-								href={banner.href}
+								// O href vem do conteúdo (string); a tipagem `Route` do
+								// typedRoutes é resolvida aqui, na fronteira (spec §2.5).
+								href={banner.href as Route}
 								tabIndex={index === activeIndex ? undefined : -1}
 							>
 								<BannerArt banner={banner} priority={index === 0} />
@@ -150,7 +152,7 @@ export function HeroCarousel() {
 					<CarouselDots
 						activeIndex={activeIndex}
 						onSelect={goTo}
-						slideKeys={HERO_BANNERS.map((banner) => banner.src)}
+						slideKeys={banners.map((banner) => banner.src)}
 					/>
 				</>
 			) : null}

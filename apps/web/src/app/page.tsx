@@ -6,6 +6,7 @@ import { HeroCarousel } from "@/components/home/hero-carousel";
 import { OffersSection } from "@/components/home/offers-section";
 import { StatsBand } from "@/components/home/stats-band";
 import { DistributionCenterSection } from "@/components/sections/distribution-center-section";
+import { getHomeContent } from "@/lib/content/home";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -16,7 +17,9 @@ export const metadata: Metadata = buildPageMetadata({
 	path: "/",
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+	const home = await getHomeContent();
+
 	return (
 		<>
 			{/* Único h1 da home: invisível, dá à página raiz um cabeçalho para busca e leitores de tela. */}
@@ -24,13 +27,13 @@ export default function HomePage() {
 				Plastlima — distribuidora de descartáveis, embalagens e utilidades no
 				Piauí, Maranhão e Pernambuco
 			</h1>
-			<HeroCarousel />
-			<StatsBand />
+			<HeroCarousel banners={home.banners} />
+			<StatsBand stats={home.stats} />
 			<AboutPreviewSection />
 			<DistributionCenterSection eyebrow="02 — Logística" />
 			<CatalogCtaSection />
 			<FranchisePreviewSection />
-			<OffersSection />
+			<OffersSection offers={home.offers} />
 		</>
 	);
 }

@@ -1,11 +1,11 @@
+import type { StatContent } from "@plastlima-app/core/schemas";
 import { Section } from "@/components/ui/section";
-import { COMPANY_STATS } from "@/data/home";
 
-export function StatsBand() {
+export function StatsBand({ stats }: { stats: StatContent[] }) {
 	return (
 		<Section tone="yellow">
 			<dl className="mx-auto grid w-full max-w-site grid-cols-1 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4">
-				{COMPANY_STATS.map((stat) => (
+				{stats.map((stat) => (
 					<div
 						/* Divisor só entre colunas: com 2 colunas quem divide são os ímpares;
 						   com 4, entram também os pares que não fecham a linha. Sem coluna

@@ -11,6 +11,7 @@ import {
 import { ZodContentValidator } from "@plastlima-app/core/schemas";
 import {
 	getPrisma,
+	HttpRevalidationClient,
 	PrismaContentRepository,
 	SystemClock,
 } from "@plastlima-app/infra";
@@ -19,11 +20,11 @@ const validator = new ZodContentValidator();
 const clock = new SystemClock();
 
 /**
- * Invalidação de cache temporária: só registra a intenção.
+ * Invalidação de cache local: só registra a intenção.
  *
- * O adaptador real (`HttpRevalidationClient`, um `POST` para a rota de
- * revalidação do `apps/web`) chega na Fase 4, quando o site passa a ler do
- * banco. Até lá, publicar já grava a revisão — que é o que a Fase 3 valida.
+ * Usada quando `REVALIDATE_SECRET` não está configurado — desenvolvimento sem o
+ * site rodando. Publicar já grava a revisão de qualquer forma; a invalidação é
+ * o que faz o site refletir na hora, e sem ela o ISR do site renova sozinho.
  */
 class LoggingCacheInvalidator implements CacheInvalidator {
 	async invalidate(tags: string[]): Promise<void> {
@@ -45,7 +46,22 @@ class ConsoleAuditLogger implements AuditLogger {
 	}
 }
 
-const cache = new LoggingCacheInvalidator();
+/**
+ * Fala com o site real se houver segredo; senão, só loga. O site em
+ * desenvolvimento é `http://localhost:3001` (porta do `dev:web`).
+ */
+function buildCacheInvalidator(): CacheInvalidator {
+	const secret = process.env.REVALIDATE_SECRET;
+
+	if (!secret) {
+		return new LoggingCacheInvalidator();
+	}
+
+	const baseUrl = process.env.PUBLIC_SITE_URL ?? "http://localhost:3001";
+	return new HttpRevalidationClient(baseUrl, secret);
+}
+
+const cache = buildCacheInvalidator();
 const audit = new ConsoleAuditLogger();
 
 /** Novo repositório por chamada; o `getPrisma()` por baixo é cacheado. */
