@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 import type { ContentKeyValue } from "../../domain/content/value-objects/content-key";
 import { aboutContentSchema } from "./about";
 import { homeContentSchema } from "./home";
+import { locationsContentSchema } from "./locations";
 import { siteContentSchema } from "./site";
 
 /** Um schema de documento e a versão de formato que ele representa. */
@@ -21,6 +22,7 @@ export const CONTENT_SCHEMAS: Partial<
 	home: { schema: homeContentSchema, version: 1 },
 	site: { schema: siteContentSchema, version: 1 },
 	about: { schema: aboutContentSchema, version: 1 },
+	locations: { schema: locationsContentSchema, version: 1 },
 };
 
 export function getContentSchema(
@@ -46,6 +48,17 @@ export {
 	type StatContent,
 	statSchema,
 } from "./home";
+export {
+	LOCATION_STATES,
+	type LocationStateValue,
+	type LocationsContent,
+	locationStateSchema,
+	locationsContentSchema,
+	type OpeningHoursContent,
+	openingHoursSchema,
+	type StoreLocationContent,
+	storeLocationSchema,
+} from "./locations";
 export { markdownToSegments, segmentsToMarkdown } from "./rich-text";
 export {
 	type SiteContent,

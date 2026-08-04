@@ -1,6 +1,5 @@
-import { STORE_LOCATIONS } from "@/data/locations";
 import { CONTACT, SITE, SOCIAL_LINKS } from "@/data/site";
-import type { LocationState } from "@/types/location";
+import type { LocationState, StoreLocation } from "@/types/location";
 
 const ORGANIZATION_ID = `${SITE.url}/#organization`;
 const WEBSITE_ID = `${SITE.url}/#website`;
@@ -64,12 +63,12 @@ export function websiteSchema() {
 }
 
 /** Lista de lojas físicas — usado na página de unidades. */
-export function storeListSchema() {
+export function storeListSchema(stores: StoreLocation[]) {
 	return {
 		"@context": "https://schema.org",
 		"@type": "ItemList",
 		name: "Unidades Plastlima",
-		itemListElement: STORE_LOCATIONS.map((location, index) => ({
+		itemListElement: stores.map((location, index) => ({
 			"@type": "ListItem",
 			position: index + 1,
 			item: {

@@ -22,9 +22,9 @@ import { usePathname } from "next/navigation";
  * usa o painel pensa "quero mudar o banner da home", não "update no documento
  * key=home".
  *
- * Só *Início* está funcional nesta fase; os demais documentos entram na Fase 5.
- * Itens prontos são links (`href` tipado como `Route`, validado pelo
- * `typedRoutes`); os pendentes são rótulos "em breve", sem rota.
+ * Os documentos vão sendo ligados um a um na Fase 5. Itens prontos são links
+ * (`href` tipado como `Route`, validado pelo `typedRoutes`); os pendentes são
+ * rótulos "em breve", sem rota.
  */
 type ReadyItem = { label: string; href: Route; icon: LucideIcon };
 type SoonItem = { label: string; icon: LucideIcon };
@@ -38,7 +38,7 @@ const CONTENT_ITEMS: NavItem[] = [
 	{ label: "Início", href: "/inicio", icon: Home },
 	{ label: "Sobre", href: "/sobre", icon: Info },
 	{ label: "Franquias", icon: Store },
-	{ label: "Unidades", icon: MapPin },
+	{ label: "Unidades", href: "/unidades", icon: MapPin },
 	{ label: "Política de Privacidade", icon: FileText },
 ];
 

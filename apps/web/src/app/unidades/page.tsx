@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { PageHero } from "@/components/ui/page-hero";
 import { Section } from "@/components/ui/section";
-import { STORE_LOCATIONS } from "@/data/locations";
+import { getLocationsContent } from "@/lib/content/locations";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, storeListSchema } from "@/lib/seo/schema";
 
@@ -15,7 +15,9 @@ export const metadata: Metadata = buildPageMetadata({
 	path: "/unidades",
 });
 
-export default function LocationsPage() {
+export default async function LocationsPage() {
+	const { stores } = await getLocationsContent();
+
 	return (
 		<>
 			<JsonLd
@@ -24,7 +26,7 @@ export default function LocationsPage() {
 						{ name: "Início", path: "/" },
 						{ name: "Unidades", path: "/unidades" },
 					]),
-					storeListSchema(),
+					storeListSchema(stores),
 				]}
 			/>
 			<PageHero
@@ -33,7 +35,7 @@ export default function LocationsPage() {
 			/>
 			<Section>
 				<Container className="pt-10 pb-[clamp(64px,9vw,112px)]">
-					<LocationsExplorer locations={STORE_LOCATIONS} />
+					<LocationsExplorer locations={stores} />
 				</Container>
 			</Section>
 		</>
