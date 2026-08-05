@@ -31,6 +31,7 @@ import {
 	saveAboutDraftAction,
 } from "@/app/(painel)/sobre/actions";
 import { HistoryDrawer } from "@/components/inicio/history-drawer";
+import { MediaField } from "@/components/midia/media-field";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
@@ -423,15 +424,13 @@ function BlockCard({
 							value={block.alt}
 						/>
 					</Field>
-					<Field error={issueFor("src")} label="Imagem (caminho)">
-						<input
-							className={fieldClassName}
-							onChange={(event) =>
-								onChange({ ...block, src: event.target.value })
-							}
-							value={block.src}
-						/>
-					</Field>
+					<MediaField
+						alt={block.alt}
+						error={issueFor("src")}
+						label="Imagem"
+						onChange={(src) => onChange({ ...block, src })}
+						value={block.src}
+					/>
 				</div>
 			) : (
 				<div className="flex flex-col gap-3">

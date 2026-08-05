@@ -28,6 +28,7 @@ import {
 } from "@/app/(painel)/franquias/actions";
 import type { PublishIssue } from "@/app/(painel)/inicio/actions";
 import { HistoryDrawer } from "@/components/inicio/history-drawer";
+import { MediaField } from "@/components/midia/media-field";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
@@ -531,18 +532,13 @@ function MarketImagesSection({
 								value={image.alt}
 							/>
 						</Field>
-						<Field
+						<MediaField
+							alt={image.alt}
 							error={issueFor(`marketImages.${index}.src`)}
-							label="Imagem (caminho)"
-						>
-							<input
-								className={fieldClassName}
-								onChange={(event) =>
-									updateImage(index, { ...image, src: event.target.value })
-								}
-								value={image.src}
-							/>
-						</Field>
+							label="Imagem"
+							onChange={(src) => updateImage(index, { ...image, src })}
+							value={image.src}
+						/>
 					</div>
 				</article>
 			))}
