@@ -18,6 +18,7 @@ import {
 	rollbackHomeAction,
 	saveHomeDraftAction,
 } from "@/app/(painel)/inicio/actions";
+import { MediaField } from "@/components/midia/media-field";
 import { HistoryDrawer } from "./history-drawer";
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -442,15 +443,13 @@ function BannerCard({
 					/>
 				</Field>
 
-				<Field error={srcIssue?.message} label="Imagem (caminho)">
-					<input
-						className={fieldClassName}
-						onChange={(event) => onChange({ src: event.target.value })}
-						placeholder="/banners/exemplo.jpeg"
-						type="text"
-						value={banner.src}
-					/>
-				</Field>
+				<MediaField
+					alt={banner.alt}
+					error={srcIssue?.message}
+					label="Imagem"
+					onChange={(src) => onChange({ src })}
+					value={banner.src}
+				/>
 
 				<div className="grid grid-cols-2 gap-3">
 					<Field label="Proporção (largura ÷ altura)">
