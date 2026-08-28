@@ -17,6 +17,7 @@
 			"!**/.zed",
 			"!**/.vscode",
 			"!**/routeTree.gen.ts",
+			"!**/next-env.d.ts",
 			"!**/src-tauri",
 			"!**/.nuxt",
 			"!bts.jsonc",
