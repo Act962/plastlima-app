@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Marketing website for **Plastlima**, a Brazilian distributor of disposables and packaging. Single Next.js app (`apps/web`) in a pnpm + Turborepo monorepo. All user-facing content is in **Portuguese (pt-BR)**; code identifiers, filenames, and comments are English (some inline comments are Portuguese — match the surrounding file).
+Website and admin panel for **Plastlima**, a Brazilian distributor of disposables and packaging. pnpm + Turborepo monorepo with two Next.js apps:
+
+- `apps/web` — public marketing site plus the raffle ("sorteio") signup, on **:3001**
+- `apps/admin` — CMS and raffle panel for the client's team, on **:3002**
+
+They share `packages/core` (domain + use cases, no I/O), `packages/infra` (Prisma/MongoDB, R2, HTTP adapters), `packages/ui` (shadcn primitives), plus `packages/config` (tsconfig/vitest bases) and `packages/env`.
+
+All user-facing content is in **Portuguese (pt-BR)**. Code identifiers and filenames are English; comments are mostly Portuguese (all of `core`/`infra` and the newer app code) — match the surrounding file.
 
 ## Commands
 
@@ -12,47 +19,104 @@ Run from the repo root:
 
 ```bash
 pnpm install            # install (pnpm 10, uses catalog: version pinning)
-pnpm run dev            # all apps (web on :3001)
+pnpm run dev            # both apps
 pnpm run dev:web        # web only, http://localhost:3001
+pnpm run dev:admin      # admin only, http://localhost:3002
 pnpm run build          # turbo build
 pnpm run check-types    # tsc --noEmit across the workspace
 pnpm run check          # biome check --write . (format + lint + organize imports)
+pnpm run test           # vitest in core + infra (infra needs the Mongo container up)
+
+pnpm run db:up          # MongoDB replica set via docker-compose, waits for healthy
+pnpm run db:down        # stop (data stays in the volume)
+pnpm run db:reset       # stop and wipe the volume
+pnpm run db:push        # prisma db push (schema lives in packages/infra/prisma)
+
+pnpm run seed:admin -- --email=… --senha=… [--nome=…] [--papel=owner|editor]
+pnpm run seed:participants -- --quantidade=50   # fake raffle entries, dev only
 ```
 
-There is **no test suite** and no separate lint script — `pnpm run check` (Biome) is the lint/format gate, `check-types` is the type gate. When previewing the dev server, use the launch config named `web` (`.claude/launch.json`), never a raw Bash `next dev`.
+The gates are **`pnpm run check` (Biome — lint/format), `pnpm run check-types`, and `pnpm run test`**; there is no separate lint script. When previewing a dev server, use the launch configs named `web` and `admin` (`.claude/launch.json`), never a raw Bash `next dev`.
+
+## Local setup
+
+1. `cp` each `.env.example` to `.env`: `apps/web`, `apps/admin`, `packages/infra`. Three values must be **identical across web and admin** or the features silently degrade: `REVALIDATE_SECRET` (publish → site cache invalidation), `PREVIEW_SECRET` (draft-mode preview), `R2_PUBLIC_URL` (so `next/image` accepts panel-uploaded images). Without R2 credentials the Media screen reports upload as unavailable; everything else works.
+2. `pnpm run db:up && pnpm run db:push`
+3. `pnpm run seed:admin -- …` — there is no public signup (`disableSignUp`), so the seed is the only way to create a panel login.
+
+**On Windows, in a fresh clone:** Git for Windows ships `core.autocrlf=true` in the *system* config and this repo has no `.gitattributes`, so the worktree comes out CRLF while the index is LF, and Biome then fails on ~200 files. With a clean tree: `git config --local core.autocrlf false; git rm --cached -r -q .; git reset --hard HEAD`. Verify with `git ls-files --eol package.json` (expect `i/lf w/lf`).
 
 ## Architecture
 
-**Data-driven content, thin presentation.** The core pattern across the whole app: content lives in plain TypeScript constants, typed by a matching `types/` file, and small presentation components just map over that data. To change copy, offers, banners, locations, timeline, or the privacy policy, edit the `data/` file — not JSX.
+**Layered, dependency-inverted.** `packages/core` holds the domain (entities, value objects, errors) and use cases that depend only on **ports** (`ContentRepository`, `ParticipantRepository`, `StorageProvider`, `CacheInvalidator`, `Clock`, `AuditLogger`, `ContentValidator`). `packages/infra` implements those ports with Prisma, R2 and HTTP. The apps are the **composition roots** — the only places that wire a use case to a concrete adapter:
+
+- `apps/admin/src/lib/content.ts` (`createSaveDraft`, `createPublishDocument`, `createRollbackToRevision`, …)
+- `apps/admin/src/lib/participants.ts`, `apps/admin/src/lib/media.ts`, `apps/admin/src/lib/auth.ts`
+- `apps/web/src/lib/raffle/registration.ts`, `apps/web/src/lib/content/*.ts`
+
+Keep the direction: nothing in `core` imports Prisma, Next or Zod schemas from the apps; nothing in a React component imports Prisma directly. Domain failures are **values, not exceptions** — use cases return `Result` (`ok`/`fail`) and the app maps the error to a message.
+
+**Content: CMS documents with a code fallback.** `CONTENT_KEYS` (`home`, `about`, `franchise`, `locations`, `privacy-policy`, `site`, `navigation`) is a closed list — the panel edits content inside those slots, it never creates new ones. Each key is one `ContentDocument` with a `draft` and a `published` JSON, plus immutable `ContentRevision` snapshots for history/rollback. The **shape of each key is a Zod schema in `@plastlima-app/core/schemas`**, validated at the boundary.
+
+The site reads through `apps/web/src/lib/content/<key>.ts`, and that file is the pattern to copy for a new key:
+
+- `unstable_cache` tagged `content:<key>` with `revalidate: 300` (ISR as a safety net)
+- a 3s read timeout — with Mongo down the driver would otherwise hang ~30s
+- schema validation **outside** the cache, so an invalid published JSON never poisons it
+- any failure falls back to `apps/web/src/data/fallback/<key>.ts`, which is assembled from the plain constants in `apps/web/src/data/*.ts`
+
+So: **to change what the live site shows, edit in the panel; `data/*.ts` is the deploy-time default and the last line of defense.** The database being down must never take the site down.
+
+Publishing calls `PublishDocument` → `HttpRevalidationClient` → `POST /api/revalidate` on the site (shared `REVALIDATE_SECRET`), which invalidates the cache tag. Preview uses a signed token (`packages/infra/src/preview/preview-token.ts`) against `/api/preview`, which turns on Next draft mode; in draft mode the content readers serve the `draft` instead of the `published` — except `site` and `navigation`, which are read from the layout and deliberately skip `draftMode()`, since calling it there would opt every page out of static rendering.
+
+**Raffle.** `Participant` + the `PhoneNumber` value object; `(campaignId, phone)` is a unique index and *the* dedup rule — a repeat signup increments `participationCount` instead of creating a row. The store is stored as a **snapshot** (`storeId`/`storeName`/`city`/`state`), so renaming a store later cannot rewrite where someone actually bought. The campaign id is deliberately duplicated in `apps/web/src/data/raffle.ts` and `apps/admin/src/lib/participants.ts` — the panel does not depend on the public app.
+
+**Media.** `MediaAsset` in Cloudflare R2. `storageKey` derives from the SHA-256 `checksum`, which is unique in the database, so re-uploading the same file returns the existing record; `alt` is required. Uploads go through a Server Action, which is why `apps/admin/next.config.ts` raises `serverActions.bodySizeLimit` to 6mb.
+
+**Data-driven presentation (web).** Content lives in plain TypeScript constants typed by a matching `types/` file, and small components map over that data. `data/site.ts` holds `SITE`, `CONTACT`, `EXTERNAL_LINKS`, `SOCIAL_LINKS`; `data/navigation.ts` holds `NAV_ITEMS` and `LEGAL_ITEMS`. They feed the header, footer, `sitemap.ts` and JSON-LD — extend `LEGAL_ITEMS` and a legal page flows to both automatically. Never hardcode a phone number, email or nav link in a component.
 
 ```
 apps/web/src/
-  app/          # App Router routes (page.tsx per route) + sitemap.ts, robots
-  data/         # content constants: site.ts, home.ts, navigation.ts, locations.ts,
-                #   franchise.ts, about.ts, privacy-policy.ts, images.ts
-  types/        # shapes for the data files: content, navigation, location, legal
-  components/   # feature-grouped: home/ franchise/ locations/ about/ contact/
-                #   forms/ legal/ layout/ seo/ sections/ ui/
-  lib/          # seo/ (metadata, schema), services/, schemas/ (zod), whatsapp.ts
-  hooks/        # use-carousel, use-form-submission, use-location-filters
-  index.css     # brand theme (imported by app/layout.tsx)
+  app/          # routes + sitemap.ts, robots, api/revalidate, api/preview
+  data/         # content constants; data/fallback/ = CMS-shaped defaults built from them
+  types/        # shapes for the data files
+  components/   # home/ franchise/ locations/ about/ contact/ raffle/ forms/ legal/ layout/ seo/ ui/
+  lib/          # content/ (CMS readers), raffle/, seo/, services/, schemas/, image/, whatsapp.ts
+  index.css     # brand theme
+
+apps/admin/src/
+  app/(painel)/ # one route per content key + midia/, config/
+  app/participantes/  # raffle entries: search, pagination, CSV export
+  lib/          # composition roots, auth, csv
 ```
 
-**Single source of truth for site-wide facts.** `data/site.ts` holds `SITE` (name, url, address, emails, copyright), `CONTACT` (WhatsApp phone numbers), `EXTERNAL_LINKS`, and `SOCIAL_LINKS`. `data/navigation.ts` holds `NAV_ITEMS` and `LEGAL_ITEMS`. These feed the header, footer, sitemap, and JSON-LD — add a legal page by extending `LEGAL_ITEMS` and it flows to both the footer and `sitemap.ts` automatically. Never hardcode a phone number, email, or nav link in a component.
+**SEO is centralized, not per-page ad hoc.** Every route's `metadata` comes from `buildPageMetadata({ title, description, path })` (`lib/seo/metadata.ts`), which handles canonical/OpenGraph/Twitter consistently. `metadataBase` is set once in `app/layout.tsx`, so image and canonical paths stay relative. Structured data comes from `lib/seo/schema.ts` rendered via `<JsonLd>`. `DEFAULT_OG_IMAGE` points at `/og-image.jpg` (1200×630).
 
-**SEO is centralized, not per-page ad hoc.** Every route's `metadata` is built with `buildPageMetadata({ title, description, path })` from `lib/seo/metadata.ts` (handles canonical, OpenGraph, Twitter consistently). `metadataBase` is set once in `app/layout.tsx`, so all image/canonical paths are relative. Structured data comes from `lib/seo/schema.ts` (`organizationSchema`, `websiteSchema`, `breadcrumbSchema`) rendered via the `<JsonLd>` / `JsonLd` component. `DEFAULT_OG_IMAGE` points at `/og-image.jpg` (1200×630).
-
-**Shared UI package.** `@plastlima-app/ui` (`packages/ui`) holds shadcn/ui primitives and the base `globals.css`. Import primitives as `@plastlima-app/ui/components/button` and the class merger as `import { cn } from "@plastlima-app/ui/lib/utils"`. App-local presentational wrappers live in `apps/web/src/components/ui/` (e.g. `Container`, `Section`, `Eyebrow`, `ContentImage`) — prefer these over raw markup for layout consistency.
+**Shared UI package.** `@plastlima-app/ui` holds shadcn primitives and the base `globals.css`. Import as `@plastlima-app/ui/components/button` and `import { cn } from "@plastlima-app/ui/lib/utils"`. App-local presentational wrappers live in `apps/web/src/components/ui/` (`Container`, `Section`, `Eyebrow`, `ContentImage`) — prefer them over raw markup.
 
 ## Conventions that will trip you up
 
-- **Path aliases:** `@/*` → `apps/web/src/*`; `@plastlima-app/ui/*` → the shared package. Both are configured in `tsconfig.json`.
-- **Typed routes are on** (`typedRoutes: true` in `next.config.ts`). Every `href` is checked against real routes at build time — a typo'd path is a type error, and nav data is typed as `Route`.
-- **React Compiler is on** (`reactCompiler: true`) — do not hand-add `useMemo`/`useCallback` for micro-optimization; the compiler handles memoization.
-- **Custom `type-*` typography utilities** (`type-display`, `type-heading`, `type-heading-sm`, `type-body-lg`, `type-lead`, `type-eyebrow`) live in `index.css`, deliberately **outside** the `text-*` namespace so `cn()`/tailwind-merge doesn't confuse a font-size with a text color. Use these for headings/body scale, not raw `text-[..]`.
-- **Brand color tokens** are custom Tailwind v4 `@theme` variables (`ink`, `brand`, `yellow`, `canvas`, `surface`, `line`, …) named away from shadcn tokens on purpose. Use `text-ink`, `bg-brand`, etc. — not shadcn's `foreground`/`muted`.
-- **Biome, not Prettier/ESLint:** tab indentation, class sorting enabled for `clsx`/`cva`/`cn` (keep class strings sorted or let `pnpm run check` fix them).
-- **Images:** local assets in `apps/web/public/`; always `next/image`. For fluid editorial images use the `ContentImage` wrapper (width/height are only aspect hints, `h-auto` preserves real proportions). Hero carousel banner sizing/cropping rules are documented in `docs/banner-spec.md`.
+- **Path aliases:** `@/*` resolves per app (`apps/web/src/*` *or* `apps/admin/src/*`); `@plastlima-app/ui/*` → the shared package. Cross-app imports do not exist — share through `packages/`.
+- **Typed routes are on** in both apps. Every `href` is checked against real routes at build time, and nav data is typed as `Route`.
+- **React Compiler is on in `apps/web` only** — do not hand-add `useMemo`/`useCallback` there for micro-optimization.
+- **Two palettes on purpose.** The site uses custom Tailwind v4 `@theme` brand tokens (`ink`, `brand`, `yellow`, `canvas`, `surface`, `line`, …) — `text-ink`, `bg-brand`. The panel uses the **neutral shadcn tokens** (`bg-background`, `text-muted-foreground`), with brand red only as an accent, so an editor never mistakes the editing screen for a preview of the site.
+- **Custom `type-*` typography utilities** (`type-display`, `type-heading`, `type-heading-sm`, `type-body-lg`, `type-lead`, `type-eyebrow`) live in `apps/web/src/index.css`, deliberately **outside** the `text-*` namespace so `cn()`/tailwind-merge doesn't confuse a font size with a text color. Site only.
+- **Biome, not Prettier/ESLint:** tab indentation, class sorting for `clsx`/`cva`/`cn`.
+- **Prisma + MongoDB:** the schema lives in `packages/infra/prisma/schema.prisma`; a **replica set is required** (both Atlas and the docker-compose single node qualify). Both apps list `@prisma/client` and `@plastlima-app/infra` in `serverExternalPackages` — importing infra from a client component breaks the build.
+- **Images:** local assets in `apps/web/public/`, always `next/image`; panel-uploaded images come from the R2 domain, allowed via `images.remotePatterns` built from `R2_PUBLIC_URL`. For fluid editorial images use `ContentImage` (width/height are aspect hints, `h-auto` keeps real proportions). Hero banner sizing rules: `docs/banner-spec.md`.
+
+## Tests
+
+Vitest, in two flavors:
+
+- `packages/core` — pure unit tests, fast, parallel, no setup. This is where coverage is expected to be high.
+- `packages/infra` — integration tests against the **real MongoDB** from docker-compose. `src/testing/global-setup.ts` runs `prisma db push` against `plastlima_test` (override with `TEST_DATABASE_URL`) because the unique index is what the duplicate test actually exercises; `fileParallelism` is off since all files share one database. Run `pnpm run db:up` first or they fail with instructions.
+
+The apps have no tests — behavior worth testing belongs in `core`.
+
+## Specs
+
+`docs/` carries the written specs, and they are the source of truth for decisions and open questions: `spec-sorteio.md` (raffle), `spec-dashboard-cms.md` (panel/CMS, sections are referenced from code comments as "spec §N"), `deploy-vercel.md`, `banner-spec.md`, `offers-aspect-ratio.md`.
 
 ## Git
 
