@@ -13,6 +13,12 @@ export {
 	DeleteAsset,
 	type DeleteAssetInput,
 } from "./application/use-cases/delete-asset";
+export {
+	type DrawMode,
+	DrawWinner,
+	type DrawWinnerInput,
+	type DrawWinnerOutput,
+} from "./application/use-cases/draw-winner";
 export { GetDraft } from "./application/use-cases/get-draft";
 export { GetPublishedContent } from "./application/use-cases/get-published-content";
 export { ListAssets } from "./application/use-cases/list-assets";
@@ -87,15 +93,32 @@ export {
 	type RaffleCampaign,
 } from "./domain/raffle/campaign";
 export {
+	buildDrawRecord,
+	type DrawCandidate,
+	type DrawCriterion,
+	type DrawnCandidate,
+	type DrawRecord,
+	drawOrder,
+	type EligibilitySplit,
+	nationalDigits,
+	parsePhoneList,
+	splitByEligibility,
+	ticketFor,
+	universeHash,
+} from "./domain/raffle/draw";
+export {
 	Participant,
 	type ParticipantSnapshot,
 } from "./domain/raffle/entities/participant";
 export {
 	CampaignClosedError,
 	DomainError,
+	type DrawError,
 	DuplicateParticipantError,
+	EmptyDrawError,
 	InvalidParticipantError,
 	InvalidPhoneError,
+	MissingSeedError,
 	type RegistrationError,
 	UnknownStoreError,
 } from "./domain/raffle/errors";

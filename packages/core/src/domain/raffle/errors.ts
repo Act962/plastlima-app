@@ -68,3 +68,23 @@ export type RegistrationError =
 	| InvalidParticipantError
 	| UnknownStoreError
 	| CampaignClosedError;
+
+/** A semente do sorteio não foi informada. */
+export class MissingSeedError extends DomainError {
+	readonly code = "MISSING_SEED";
+
+	constructor() {
+		super("Semente do sorteio não informada");
+	}
+}
+
+/** Não há ninguém elegível para sortear. */
+export class EmptyDrawError extends DomainError {
+	readonly code = "EMPTY_DRAW";
+
+	constructor() {
+		super("Nenhum participante elegível");
+	}
+}
+
+export type DrawError = MissingSeedError | EmptyDrawError;

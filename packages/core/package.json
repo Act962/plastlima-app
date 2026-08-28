@@ -6,6 +6,7 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./schemas": "./src/schemas/index.ts",
+		"./raffle-draw": "./src/domain/raffle/draw.ts",
 		"./testing": "./src/testing/index.ts"
 	},
 	"scripts": {

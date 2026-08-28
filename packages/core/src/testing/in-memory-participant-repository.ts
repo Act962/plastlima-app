@@ -1,3 +1,4 @@
+import type { DrawCandidate } from "../domain/raffle/draw";
 import { Participant } from "../domain/raffle/entities/participant";
 import { DuplicateParticipantError } from "../domain/raffle/errors";
 import type {
@@ -100,6 +101,25 @@ export class InMemoryParticipantRepository implements ParticipantRepository {
 			page,
 			pageSize,
 		};
+	}
+
+	async listForDraw(campaignId: string): Promise<DrawCandidate[]> {
+		return [...this.items.values()]
+			.filter((participant) => participant.campaignId === campaignId)
+			.map((participant) => {
+				const snapshot = participant.toSnapshot();
+
+				return {
+					name: snapshot.name,
+					phone: snapshot.phone,
+					phoneDisplay: snapshot.phoneDisplay,
+					storeName: snapshot.storeName,
+					city: snapshot.city,
+					state: snapshot.state,
+					participationCount: snapshot.participationCount,
+					createdAt: snapshot.createdAt,
+				};
+			});
 	}
 
 	/** Quantidade total de registros — atalho de asserção para os testes. */

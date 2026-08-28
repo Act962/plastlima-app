@@ -1,3 +1,4 @@
+import type { DrawCandidate } from "../draw";
 import type { Participant } from "../entities/participant";
 
 export type ParticipantListQuery = {
@@ -31,4 +32,14 @@ export interface ParticipantRepository {
 	update(participant: Participant): Promise<Participant>;
 
 	list(query: ParticipantListQuery): Promise<ParticipantListResult>;
+
+	/**
+	 * Todos os participantes da campanha, na forma mínima que a apuração precisa.
+	 *
+	 * Existe separado de `list` porque o sorteio percorre a campanha inteira e
+	 * não pode arrastar o `receiptImage` junto: são data URLs de até 800 mil
+	 * caracteres, e uma base de alguns milhares viraria centenas de MB para
+	 * responder uma pergunta que só depende do telefone.
+	 */
+	listForDraw(campaignId: string): Promise<DrawCandidate[]>;
 }

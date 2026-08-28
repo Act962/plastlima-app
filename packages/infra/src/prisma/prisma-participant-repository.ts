@@ -1,4 +1,5 @@
 import {
+	type DrawCandidate,
 	DuplicateParticipantError,
 	type Participant,
 	type ParticipantListQuery,
@@ -58,6 +59,29 @@ export class PrismaParticipantRepository implements ParticipantRepository {
 		});
 
 		return toDomain(record);
+	}
+
+	/**
+	 * O `select` é o ponto do método: sem ele, o Prisma traz o `receiptImage` de
+	 * cada participante — data URLs de até 800 mil caracteres — só para a
+	 * apuração descartar. Numa campanha de alguns milhares, é a diferença entre
+	 * uma consulta e centenas de MB de tráfego.
+	 */
+	async listForDraw(campaignId: string): Promise<DrawCandidate[]> {
+		return this.prisma.participant.findMany({
+			where: { campaignId },
+			orderBy: { createdAt: "asc" },
+			select: {
+				name: true,
+				phone: true,
+				phoneDisplay: true,
+				storeName: true,
+				city: true,
+				state: true,
+				participationCount: true,
+				createdAt: true,
+			},
+		});
 	}
 
 	async list(query: ParticipantListQuery): Promise<ParticipantListResult> {
