@@ -18,6 +18,9 @@
 		"dev:admin": "turbo run dev -F admin",
 		"seed:admin": "pnpm --filter admin seed:admin",
 		"seed:admin:prod": "pnpm --filter admin seed:admin:prod",
+		"seed:participants": "pnpm --filter admin seed:participants",
+		"draw:winner": "pnpm --filter admin draw:winner",
+		"draw:winner:prod": "pnpm --filter admin draw:winner:prod",
 		"test": "turbo run test",
 		"check": "biome check --write ."
 	},

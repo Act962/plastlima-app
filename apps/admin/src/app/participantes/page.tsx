@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+import type { LucideIcon } from "lucide-react";
+import { LayoutDashboard, Trophy } from "lucide-react";
+import type { Metadata, Route } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -44,6 +46,22 @@ export default async function ParticipantsPage({ searchParams }: PageProps) {
 
 	return (
 		<main className="mx-auto w-full max-w-6xl px-5 py-10">
+			{/*
+			 * Esta rota fica fora do grupo `(painel)`, então não herda a barra
+			 * lateral: sem estes atalhos, sair daqui só recarregando a URL na mão.
+			 */}
+			<nav
+				aria-label="Atalhos do painel"
+				className="mb-5 flex flex-wrap items-center gap-2"
+			>
+				<ShortcutLink href="/inicio" icon={LayoutDashboard}>
+					Painel
+				</ShortcutLink>
+				<ShortcutLink href="/sorteio" icon={Trophy}>
+					Sorteio
+				</ShortcutLink>
+			</nav>
+
 			<header className="mb-8 flex flex-wrap items-start justify-between gap-4">
 				<div>
 					<h1 className="font-bold text-2xl tracking-tight">Participantes</h1>
@@ -182,5 +200,25 @@ export default async function ParticipantsPage({ searchParams }: PageProps) {
 				</nav>
 			) : null}
 		</main>
+	);
+}
+
+function ShortcutLink({
+	href,
+	icon: Icon,
+	children,
+}: {
+	href: Route;
+	icon: LucideIcon;
+	children: React.ReactNode;
+}) {
+	return (
+		<Link
+			className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 font-medium text-sm transition-colors hover:bg-muted"
+			href={href}
+		>
+			<Icon aria-hidden className="size-4" />
+			{children}
+		</Link>
 	);
 }

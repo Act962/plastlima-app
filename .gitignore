@@ -54,3 +54,6 @@ coverage
 .cache
 tmp
 temp
+
+# Atas de apuração do sorteio (dado pessoal do ganhador)
+atas/

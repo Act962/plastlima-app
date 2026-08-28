@@ -8,6 +8,9 @@
 		"check-types": "tsc --noEmit",
 		"seed:admin": "node --env-file-if-exists=.env scripts/seed-admin.mjs",
 		"seed:admin:prod": "node --env-file=.env.atlas scripts/seed-admin.mjs",
+		"seed:participants": "node --env-file-if-exists=.env scripts/seed-participants.mjs",
+		"draw:winner": "node --env-file-if-exists=.env scripts/draw-winner.mjs",
+		"draw:winner:prod": "node --env-file=.env.atlas scripts/draw-winner.mjs",
 		"start": "next start",
 		"vercel-build": "pnpm --filter @plastlima-app/infra db:generate && next build"
 	},

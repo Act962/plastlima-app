@@ -1,5 +1,13 @@
-import { ListParticipants, type RaffleCampaign } from "@plastlima-app/core";
-import { getPrisma, PrismaParticipantRepository } from "@plastlima-app/infra";
+import {
+	DrawWinner,
+	ListParticipants,
+	type RaffleCampaign,
+} from "@plastlima-app/core";
+import {
+	getPrisma,
+	PrismaParticipantRepository,
+	SystemClock,
+} from "@plastlima-app/infra";
 
 /**
  * Campanha exibida no painel.
@@ -17,5 +25,17 @@ export function createListParticipants(): ListParticipants {
 	return new ListParticipants(
 		new PrismaParticipantRepository(getPrisma()),
 		ADMIN_CAMPAIGN,
+	);
+}
+
+export function createParticipantRepository(): PrismaParticipantRepository {
+	return new PrismaParticipantRepository(getPrisma());
+}
+
+export function createDrawWinner(): DrawWinner {
+	return new DrawWinner(
+		createParticipantRepository(),
+		ADMIN_CAMPAIGN,
+		new SystemClock(),
 	);
 }

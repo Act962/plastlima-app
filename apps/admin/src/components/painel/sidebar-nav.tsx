@@ -13,6 +13,7 @@ import {
 	Settings,
 	Store,
 	Ticket,
+	Trophy,
 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -53,6 +54,7 @@ const SYSTEM_ITEMS: NavItem[] = [
 	{ label: "Mídia", href: "/midia", icon: ImageIcon },
 	{ label: "Leads", icon: Inbox },
 	{ label: "Participantes", href: "/participantes", icon: Ticket },
+	{ label: "Sorteio", href: "/sorteio", icon: Trophy },
 ];
 
 export function SidebarNav() {
