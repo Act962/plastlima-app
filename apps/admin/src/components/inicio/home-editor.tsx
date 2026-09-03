@@ -12,7 +12,6 @@ import {
 	ArrowUp,
 	Eye,
 	History,
-	ImageOff,
 	Pencil,
 	Plus,
 	Trash2,
@@ -28,6 +27,7 @@ import {
 	rollbackHomeAction,
 	saveHomeDraftAction,
 } from "@/app/(painel)/inicio/actions";
+import { ImageThumb } from "@/components/image-thumb";
 import { BannerDialog } from "./banner-dialog";
 import { HistoryDrawer } from "./history-drawer";
 
@@ -422,17 +422,12 @@ function BannerRow({
 			)}
 		>
 			<button
-				className="flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40"
+				className="h-14 w-24 shrink-0 overflow-hidden rounded-lg border border-border"
 				onClick={onEdit}
 				title="Editar banner"
 				type="button"
 			>
-				{banner.src ? (
-					// biome-ignore lint/performance/noImgElement: preview do painel a partir de URL/caminho arbitrário.
-					<img alt="" className="h-full w-full object-cover" src={banner.src} />
-				) : (
-					<ImageOff className="size-5 text-muted-foreground" />
-				)}
+				<ImageThumb className="h-full w-full" src={banner.src} />
 			</button>
 
 			<div className="min-w-0 flex-1">

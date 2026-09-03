@@ -10,6 +10,7 @@ import {
 	type AssetSummary,
 	listAssetsAction,
 } from "@/app/(painel)/midia/actions";
+import { ImageThumb } from "@/components/image-thumb";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -156,10 +157,9 @@ export function MediaField({
 
 			{value ? (
 				<div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-2">
-					{/* biome-ignore lint/performance/noImgElement: preview do painel a partir de URL/caminho arbitrário. */}
-					<img
-						alt=""
-						className="h-12 w-20 shrink-0 rounded object-cover"
+					<ImageThumb
+						className="h-12 w-20 shrink-0 rounded"
+						iconClassName="size-4"
 						src={value}
 					/>
 					<div className="ml-auto flex items-center gap-2">

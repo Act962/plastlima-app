@@ -13,7 +13,7 @@ export function PanelTopbar() {
 	return (
 		<header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
 			<SidebarTrigger className="-ml-1.5" />
-			<Separator className="!h-4 mr-1" orientation="vertical" />
+			<Separator className="!h-4 !self-center mr-1" orientation="vertical" />
 			<nav aria-label="Trilha" className="flex items-center gap-2 text-sm">
 				<span className="text-muted-foreground">Painel</span>
 				{current ? (
