@@ -198,7 +198,7 @@ export function LocationsEditor({
 
 	return (
 		<div className="flex flex-col">
-			<div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-border border-b bg-card/80 px-6 py-3 backdrop-blur">
+			<div className="sticky top-12 z-10 flex flex-wrap items-center justify-between gap-3 border-border border-b bg-card/80 px-6 py-3 backdrop-blur">
 				<div className="flex items-center gap-3">
 					<span
 						className={cn(

@@ -88,21 +88,21 @@ apps/web/src/
 
 apps/admin/src/
   app/(painel)/ # one route per content key + midia/, config/
-  app/participantes/  # raffle entries: search, pagination, CSV export
+                # (painel)/participantes/ = raffle entries: search, pagination, CSV
                 # (painel)/leads/ = form submissions: filters, CSV, mark as handled
   lib/          # composition roots, auth, csv
 ```
 
 **SEO is centralized, not per-page ad hoc.** Every route's `metadata` comes from `buildPageMetadata({ title, description, path })` (`lib/seo/metadata.ts`), which handles canonical/OpenGraph/Twitter consistently. `metadataBase` is set once in `app/layout.tsx`, so image and canonical paths stay relative. Structured data comes from `lib/seo/schema.ts` rendered via `<JsonLd>`. `DEFAULT_OG_IMAGE` points at `/og-image.jpg` (1200×630).
 
-**Shared UI package.** `@plastlima-app/ui` holds shadcn primitives and the base `globals.css`. Import as `@plastlima-app/ui/components/button` and `import { cn } from "@plastlima-app/ui/lib/utils"`. App-local presentational wrappers live in `apps/web/src/components/ui/` (`Container`, `Section`, `Eyebrow`, `ContentImage`) — prefer them over raw markup.
+**Shared UI package.** `@plastlima-app/ui` holds shadcn primitives (**base-maia** style, `@base-ui/react` — not radix) and the base `globals.css`. The admin's chrome is composed from these: `Sidebar` (+ `SidebarProvider`/`SidebarInset`/rail), `Table`, `Select`, `Badge`, `Button`, `Input`, `Dialog`, `Sheet`, `Tooltip`, `Breadcrumb`. To wrap a Next `<Link>` in a base-ui `Button`/`SidebarMenuButton`, pass `render={<Link … />}` (not `asChild`); for a link styled as a button prefer `<a className={buttonVariants(…)}>` — base-ui `Button` warns when it renders a non-`<button>`. Biome ignores `packages/ui`, so components stay as shadcn ships them. New shared components must be generated from the **main checkout** (`shadcn add -c packages/ui`), never a worktree — the CLI misresolves the workspace alias inside a worktree and writes to the repo root. Import as `@plastlima-app/ui/components/button` and `import { cn } from "@plastlima-app/ui/lib/utils"`. App-local presentational wrappers live in `apps/web/src/components/ui/` (`Container`, `Section`, `Eyebrow`, `ContentImage`) — prefer them over raw markup.
 
 ## Conventions that will trip you up
 
 - **Path aliases:** `@/*` resolves per app (`apps/web/src/*` *or* `apps/admin/src/*`); `@plastlima-app/ui/*` → the shared package. Cross-app imports do not exist — share through `packages/`.
 - **Typed routes are on** in both apps. Every `href` is checked against real routes at build time, and nav data is typed as `Route`.
 - **React Compiler is on in `apps/web` only** — do not hand-add `useMemo`/`useCallback` there for micro-optimization.
-- **Two palettes on purpose.** The site uses custom Tailwind v4 `@theme` brand tokens (`ink`, `brand`, `yellow`, `canvas`, `surface`, `line`, …) — `text-ink`, `bg-brand`. The panel uses the **neutral shadcn tokens** (`bg-background`, `text-muted-foreground`), with brand red only as an accent, so an editor never mistakes the editing screen for a preview of the site.
+- **Two palettes on purpose.** The site uses custom Tailwind v4 `@theme` brand tokens (`ink`, `brand`, `yellow`, `canvas`, `surface`, `line`, …) — `text-ink`, `bg-brand`. The panel uses the **shadcn tokens** in `packages/ui/src/styles/globals.css` (an **amber/gold** `--primary` from the applied preset; `bg-background`, `text-muted-foreground`), with brand red kept only for the logo mark, so an editor never mistakes the editing screen for a preview of the site. The site is unaffected by this theme because it renders its own brand tokens and only borrows the shared `Toaster`. The panel shell lives in `apps/admin/src/components/painel/` (`app-sidebar`, `panel-topbar`, `page-shell`, `nav-items`); every panel route is under the `(painel)` group so it inherits the sidebar + top bar. Content editors keep their own sticky toolbar (offset `top-12` to clear the top bar).
 - **Custom `type-*` typography utilities** (`type-display`, `type-heading`, `type-heading-sm`, `type-body-lg`, `type-lead`, `type-eyebrow`) live in `apps/web/src/index.css`, deliberately **outside** the `text-*` namespace so `cn()`/tailwind-merge doesn't confuse a font size with a text color. Site only.
 - **Biome, not Prettier/ESLint:** tab indentation, class sorting for `clsx`/`cva`/`cn`.
 - **Prisma + MongoDB:** the schema lives in `packages/infra/prisma/schema.prisma`; a **replica set is required** (both Atlas and the docker-compose single node qualify). Both apps list `@prisma/client` and `@plastlima-app/infra` in `serverExternalPackages` — importing infra from a client component breaks the build.

@@ -4,9 +4,21 @@ import {
 	type LeadStatus,
 	PhoneNumber,
 } from "@plastlima-app/core";
-import { Check, Download, RotateCcw } from "lucide-react";
-import type { Metadata } from "next";
+import { Badge } from "@plastlima-app/ui/components/badge";
+import { Button, buttonVariants } from "@plastlima-app/ui/components/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@plastlima-app/ui/components/table";
+import { Check, RotateCcw } from "lucide-react";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
+import { LeadsFilters } from "@/components/painel/leads-filters";
+import { PageHeader, PageShell } from "@/components/painel/page-shell";
 import { requireActor } from "@/lib/auth-actor";
 import { createListLeads } from "@/lib/leads";
 import { setLeadStatusAction } from "./actions";
@@ -26,7 +38,6 @@ const KIND_LABELS: Record<LeadKind, string> = {
 	franchise: "Franquia",
 };
 
-/** Quanto da mensagem cabe na linha antes de virar um "ver mais". */
 const MESSAGE_PREVIEW_LENGTH = 90;
 
 type PageProps = {
@@ -55,102 +66,68 @@ export default async function LeadsPage({ searchParams }: PageProps) {
 	]);
 
 	const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
-	const filters = { busca: search, origem: kind, situacao: status };
+	const pageHref = (target: number): Route => {
+		const query = new URLSearchParams();
+		if (search) query.set("busca", search);
+		if (kind) query.set("origem", kind);
+		if (status) query.set("situacao", status);
+		query.set("pagina", String(target));
+		return `/leads?${query.toString()}` as Route;
+	};
 
 	return (
-		<div className="mx-auto w-full max-w-6xl px-6 py-8">
-			<header className="mb-6">
-				<h1 className="font-bold text-2xl tracking-tight">Leads</h1>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Mensagens do formulário de contato e interessados em franquia.{" "}
-					{newCount === 0
-						? "Nenhum aguardando atendimento."
-						: `${newCount} ${newCount === 1 ? "aguarda" : "aguardam"} atendimento.`}
-				</p>
-			</header>
+		<PageShell>
+			<PageHeader
+				description={
+					<>
+						Mensagens do formulário de contato e interessados em franquia.{" "}
+						{newCount === 0 ? (
+							"Nenhum aguardando atendimento."
+						) : (
+							<span className="font-medium text-primary">
+								{newCount} {newCount === 1 ? "aguarda" : "aguardam"}{" "}
+								atendimento.
+							</span>
+						)}
+					</>
+				}
+				title="Leads"
+			/>
 
-			<search className="mb-5 block">
-				<form className="flex flex-wrap items-center gap-2" method="get">
-					<input
-						aria-label="Buscar por nome, e-mail ou telefone"
-						className="w-full max-w-xs rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring"
-						defaultValue={search ?? ""}
-						name="busca"
-						placeholder="Buscar por nome, e-mail ou telefone"
-						type="search"
-					/>
-
-					<select
-						aria-label="Origem"
-						className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring"
-						defaultValue={kind ?? ""}
-						name="origem"
-					>
-						<option value="">Todas as origens</option>
-						<option value="contact">Contato</option>
-						<option value="franchise">Franquia</option>
-					</select>
-
-					<select
-						aria-label="Situação"
-						className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring"
-						defaultValue={status ?? ""}
-						name="situacao"
-					>
-						<option value="">Todas as situações</option>
-						<option value="new">Novos</option>
-						<option value="handled">Atendidos</option>
-					</select>
-
-					<button
-						className="cursor-pointer rounded-lg border border-border px-3 py-2 font-medium text-sm transition-colors hover:bg-muted"
-						type="submit"
-					>
-						Filtrar
-					</button>
-
-					<a
-						className="ml-auto flex cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 py-2 font-semibold text-sm text-white transition-colors hover:bg-brand-dark"
-						href={`/leads/exportar${queryString(filters)}`}
-					>
-						<Download aria-hidden className="size-4" />
-						Exportar CSV
-					</a>
-				</form>
-			</search>
+			<LeadsFilters kind={kind} search={search} status={status} />
 
 			{result.items.length === 0 ? (
-				<p className="rounded-xl border border-border border-dashed px-6 py-16 text-center text-muted-foreground text-sm">
+				<p className="rounded-xl border border-dashed px-6 py-16 text-center text-muted-foreground text-sm">
 					{search || kind || status
 						? "Nenhum lead encontrado com esses filtros."
 						: "Nenhum lead recebido ainda."}
 				</p>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-border">
-					<table className="w-full min-w-[900px] border-collapse text-sm">
-						<thead className="bg-muted/50 text-left">
-							<tr>
-								<th className="px-4 py-3 font-semibold">Origem</th>
-								<th className="px-4 py-3 font-semibold">Contato</th>
-								<th className="px-4 py-3 font-semibold">Local</th>
-								<th className="px-4 py-3 font-semibold">Mensagem</th>
-								<th className="px-4 py-3 font-semibold">Recebido</th>
-								<th className="px-4 py-3 text-right font-semibold">Situação</th>
-							</tr>
-						</thead>
-						<tbody>
+				<div className="overflow-hidden rounded-xl border bg-card">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Origem</TableHead>
+								<TableHead>Contato</TableHead>
+								<TableHead>Local</TableHead>
+								<TableHead>Mensagem</TableHead>
+								<TableHead>Recebido</TableHead>
+								<TableHead className="text-right">Situação</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{result.items.map((lead) => (
 								<LeadRow key={lead.toSnapshot().id} lead={lead.toSnapshot()} />
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 
 			{lastPage > 1 ? (
 				<nav
 					aria-label="Paginação"
-					className="mt-5 flex items-center justify-between text-sm"
+					className="flex items-center justify-between text-sm"
 				>
 					<span className="text-muted-foreground">
 						Página {page} de {lastPage}
@@ -158,16 +135,16 @@ export default async function LeadsPage({ searchParams }: PageProps) {
 					<div className="flex gap-2">
 						{page > 1 ? (
 							<Link
-								className="rounded-lg border border-border px-3 py-1.5 transition-colors hover:bg-muted"
-								href={`/leads${queryString({ ...filters, pagina: String(page - 1) })}`}
+								className={buttonVariants({ size: "sm", variant: "outline" })}
+								href={pageHref(page - 1)}
 							>
 								Anterior
 							</Link>
 						) : null}
 						{page < lastPage ? (
 							<Link
-								className="rounded-lg border border-border px-3 py-1.5 transition-colors hover:bg-muted"
-								href={`/leads${queryString({ ...filters, pagina: String(page + 1) })}`}
+								className={buttonVariants({ size: "sm", variant: "outline" })}
+								href={pageHref(page + 1)}
 							>
 								Próxima
 							</Link>
@@ -175,7 +152,7 @@ export default async function LeadsPage({ searchParams }: PageProps) {
 					</div>
 				</nav>
 			) : null}
-		</div>
+		</PageShell>
 	);
 }
 
@@ -183,23 +160,17 @@ function LeadRow({ lead }: { lead: LeadSnapshot }) {
 	const isHandled = lead.status === "handled";
 
 	return (
-		<tr className="border-border border-t align-top">
-			<td className="px-4 py-3">
-				<span
-					className={
-						lead.kind === "franchise"
-							? "rounded-full bg-brand/10 px-2 py-0.5 font-medium text-brand text-xs"
-							: "rounded-full bg-muted px-2 py-0.5 font-medium text-muted-foreground text-xs"
-					}
-				>
+		<TableRow className="align-top">
+			<TableCell>
+				<Badge variant={lead.kind === "franchise" ? "default" : "secondary"}>
 					{KIND_LABELS[lead.kind]}
-				</span>
-			</td>
+				</Badge>
+			</TableCell>
 
-			<td className="px-4 py-3">
+			<TableCell>
 				<p className="font-medium">{lead.name}</p>
 				<a
-					className="text-muted-foreground text-xs hover:text-brand hover:underline"
+					className="text-muted-foreground text-xs hover:text-primary hover:underline"
 					href={`mailto:${lead.email}`}
 				>
 					{lead.email}
@@ -209,24 +180,24 @@ function LeadRow({ lead }: { lead: LeadSnapshot }) {
 						<PhoneLink display={lead.phone} />
 					</p>
 				)}
-			</td>
+			</TableCell>
 
-			<td className="px-4 py-3 text-muted-foreground">
+			<TableCell className="text-muted-foreground">
 				{formatPlace(lead.city, lead.state)}
-			</td>
+			</TableCell>
 
-			<td className="max-w-[320px] px-4 py-3">
+			<TableCell className="max-w-[320px]">
 				<Message text={lead.message} />
-			</td>
+			</TableCell>
 
-			<td className="px-4 py-3 text-muted-foreground tabular-nums">
+			<TableCell className="text-muted-foreground tabular-nums">
 				{dateFormatter.format(lead.createdAt)}
 				{isHandled && lead.handledBy !== null ? (
 					<p className="mt-1 text-xs">Atendido por {lead.handledBy}</p>
 				) : null}
-			</td>
+			</TableCell>
 
-			<td className="px-4 py-3 text-right">
+			<TableCell className="text-right">
 				<form action={setLeadStatusAction}>
 					<input name="id" type="hidden" value={lead.id ?? ""} />
 					<input
@@ -234,29 +205,26 @@ function LeadRow({ lead }: { lead: LeadSnapshot }) {
 						type="hidden"
 						value={isHandled ? "false" : "true"}
 					/>
-					<button
-						className={
-							isHandled
-								? "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-muted"
-								: "inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-brand/30 bg-brand/10 px-2.5 py-1.5 font-medium text-brand text-xs transition-colors hover:bg-brand/20"
-						}
+					<Button
+						size="sm"
 						type="submit"
+						variant={isHandled ? "ghost" : "default"}
 					>
 						{isHandled ? (
 							<>
-								<RotateCcw aria-hidden className="size-3.5" />
+								<RotateCcw />
 								Reabrir
 							</>
 						) : (
 							<>
-								<Check aria-hidden className="size-3.5" />
+								<Check />
 								Marcar atendido
 							</>
 						)}
-					</button>
+					</Button>
 				</form>
-			</td>
-		</tr>
+			</TableCell>
+		</TableRow>
 	);
 }
 
@@ -276,7 +244,7 @@ function PhoneLink({ display }: { display: string }) {
 
 	return (
 		<a
-			className="hover:text-brand hover:underline"
+			className="hover:text-primary hover:underline"
 			href={`https://wa.me/${phone.value.value}`}
 			rel="noreferrer"
 			target="_blank"
@@ -286,7 +254,7 @@ function PhoneLink({ display }: { display: string }) {
 	);
 }
 
-/** Mensagem curta inteira; longa, atrás de um "ver mensagem" que não estica a linha. */
+/** Mensagem curta inteira; longa, atrás de um "ver mais" que não estica a linha. */
 function Message({ text }: { text: string | null }) {
 	if (text === null) {
 		return <span className="text-muted-foreground">—</span>;
@@ -298,7 +266,7 @@ function Message({ text }: { text: string | null }) {
 
 	return (
 		<details>
-			<summary className="cursor-pointer text-muted-foreground marker:text-brand">
+			<summary className="cursor-pointer text-muted-foreground marker:text-primary">
 				{`${text.slice(0, MESSAGE_PREVIEW_LENGTH)}…`}
 			</summary>
 			<p className="mt-2 whitespace-pre-line">{text}</p>
@@ -316,19 +284,4 @@ function toKind(value: string | undefined): LeadKind | undefined {
 
 function toStatus(value: string | undefined): LeadStatus | undefined {
 	return value === "new" || value === "handled" ? value : undefined;
-}
-
-/** Monta a query preservando os filtros ativos e omitindo os vazios. */
-function queryString(params: Record<string, string | undefined>): string {
-	const search = new URLSearchParams();
-
-	for (const [key, value] of Object.entries(params)) {
-		if (value !== undefined && value.length > 0) {
-			search.set(key, value);
-		}
-	}
-
-	const query = search.toString();
-
-	return query.length === 0 ? "" : `?${query}`;
 }

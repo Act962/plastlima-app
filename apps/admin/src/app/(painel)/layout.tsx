@@ -1,8 +1,13 @@
-import { headers } from "next/headers";
+import {
+	SidebarInset,
+	SidebarProvider,
+} from "@plastlima-app/ui/components/sidebar";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { SidebarNav } from "@/components/painel/sidebar-nav";
-import { SignOutButton } from "@/components/sign-out-button";
+import { AppSidebar } from "@/components/painel/app-sidebar";
+import { PanelTopbar } from "@/components/painel/panel-topbar";
 import { auth } from "@/lib/auth";
+import { createListLeads } from "@/lib/leads";
 
 export default async function PainelLayout({
 	children,
@@ -13,30 +18,27 @@ export default async function PainelLayout({
 		redirect("/login");
 	}
 
+	// Contador de leads novos no menu. Envolto em try/catch porque um banco fora
+	// do ar não pode derrubar todo o painel — o resto das telas trata a própria
+	// falha, e aqui a ausência do número é só um menu sem o selo.
+	const newLeads = await createListLeads()
+		.countNew()
+		.catch(() => 0);
+
+	// A sidebar lembra se estava recolhida entre visitas (cookie que ela mesma
+	// grava); lê-lo aqui evita o "pisca" de abrir aberta e fechar no cliente.
+	const cookieStore = await cookies();
+	const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
+	const role = (session.user as { role?: string }).role ?? "editor";
+
 	return (
-		<div className="flex min-h-dvh">
-			<aside className="sticky top-0 flex h-dvh w-64 shrink-0 flex-col gap-6 border-border border-r bg-card px-3 py-5">
-				<div className="px-3">
-					<p className="font-bold text-lg tracking-tight">Plastlima</p>
-					<p className="text-muted-foreground text-xs">Painel de conteúdo</p>
-				</div>
-
-				<div className="flex-1 overflow-y-auto">
-					<SidebarNav />
-				</div>
-
-				<div className="flex items-center justify-between gap-2 border-border border-t px-3 pt-4">
-					<span
-						className="min-w-0 truncate text-muted-foreground text-sm"
-						title={session.user.email}
-					>
-						{session.user.email}
-					</span>
-					<SignOutButton />
-				</div>
-			</aside>
-
-			<main className="min-w-0 flex-1">{children}</main>
-		</div>
+		<SidebarProvider defaultOpen={defaultOpen}>
+			<AppSidebar email={session.user.email} newLeads={newLeads} role={role} />
+			<SidebarInset>
+				<PanelTopbar />
+				{children}
+			</SidebarInset>
+		</SidebarProvider>
 	);
 }
