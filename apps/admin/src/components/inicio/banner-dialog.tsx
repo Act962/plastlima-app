@@ -89,7 +89,7 @@ export function BannerDialog({ open, onOpenChange, initial, onSubmit }: Props) {
 
 	return (
 		<Dialog onOpenChange={onOpenChange} open={open}>
-			<DialogContent className="max-h-[calc(100dvh-4rem)] max-w-lg overflow-y-auto">
+			<DialogContent className="max-h-[calc(100dvh-4rem)] w-[70vw] max-w-6xl overflow-y-auto sm:max-w-6xl">
 				<DialogHeader>
 					<DialogTitle>{isEdit ? "Editar banner" : "Novo banner"}</DialogTitle>
 					<DialogDescription>
