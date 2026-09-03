@@ -31,15 +31,27 @@ export function AppSidebar({ email, role, newLeads }: Props) {
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
-				<div className="flex items-center gap-2.5 px-1.5 py-1.5">
-					<div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand font-bold text-sm text-white">
-						P
-					</div>
-					<div className="grid leading-tight group-data-[collapsible=icon]:hidden">
-						<span className="font-semibold tracking-tight">Plastlima</span>
-						<span className="text-muted-foreground text-xs">Painel</span>
-					</div>
-				</div>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							render={<Link href="/inicio" />}
+							size="lg"
+							tooltip="Plastlima"
+						>
+							<div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-brand font-bold text-sm text-white">
+								P
+							</div>
+							<div className="grid flex-1 text-left leading-tight">
+								<span className="truncate font-semibold tracking-tight">
+									Plastlima
+								</span>
+								<span className="truncate text-muted-foreground text-xs">
+									Painel
+								</span>
+							</div>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+				</SidebarMenu>
 			</SidebarHeader>
 
 			<SidebarContent>
