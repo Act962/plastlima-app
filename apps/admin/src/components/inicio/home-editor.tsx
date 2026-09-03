@@ -4,9 +4,19 @@ import type {
 	HeroBannerContent,
 	HomeContent,
 } from "@plastlima-app/core/schemas";
+import { Badge } from "@plastlima-app/ui/components/badge";
 import { Button } from "@plastlima-app/ui/components/button";
 import { cn } from "@plastlima-app/ui/lib/utils";
-import { ArrowDown, ArrowUp, Eye, History, Plus, Trash2 } from "lucide-react";
+import {
+	ArrowDown,
+	ArrowUp,
+	Eye,
+	History,
+	ImageOff,
+	Pencil,
+	Plus,
+	Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +28,7 @@ import {
 	rollbackHomeAction,
 	saveHomeDraftAction,
 } from "@/app/(painel)/inicio/actions";
-import { MediaField } from "@/components/midia/media-field";
+import { BannerDialog } from "./banner-dialog";
 import { HistoryDrawer } from "./history-drawer";
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -28,9 +38,6 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
 	minute: "2-digit",
 	timeZone: "America/Fortaleza",
 });
-
-const fieldClassName =
-	"w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-ring";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -57,6 +64,9 @@ export function HomeEditor({
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [issues, setIssues] = useState<PublishIssue[]>([]);
 	const [historyOpen, setHistoryOpen] = useState(false);
+
+	// `null` = diálogo fechado; `"new"` = criando; número = editando aquele índice.
+	const [editing, setEditing] = useState<"new" | number | null>(null);
 
 	const router = useRouter();
 	const isFirstRender = useRef(true);
@@ -89,20 +99,20 @@ export function HomeEditor({
 		setDirty(true);
 	}
 
-	function updateBanner(index: number, patch: Partial<HeroBannerContent>) {
-		updateHome({
-			...home,
-			banners: home.banners.map((banner, i) =>
-				i === index ? { ...banner, ...patch } : banner,
-			),
-		});
-	}
+	function submitBanner(banner: HeroBannerContent) {
+		if (editing === "new") {
+			updateHome({ ...home, banners: [...home.banners, banner] });
+			return;
+		}
 
-	function addBanner() {
-		updateHome({
-			...home,
-			banners: [...home.banners, { src: "", alt: "", aspect: 3 }],
-		});
+		if (typeof editing === "number") {
+			updateHome({
+				...home,
+				banners: home.banners.map((current, i) =>
+					i === editing ? banner : current,
+				),
+			});
+		}
 	}
 
 	function removeBanner(index: number) {
@@ -120,7 +130,7 @@ export function HomeEditor({
 						...current,
 						banners: [
 							...current.banners.slice(0, index),
-							removed,
+							removed as HeroBannerContent,
 							...current.banners.slice(index),
 						],
 					}));
@@ -243,7 +253,7 @@ export function HomeEditor({
 					<div className="flex items-center justify-between">
 						<h2 className="font-semibold text-lg">Banners do carrossel</h2>
 						<Button
-							onClick={addBanner}
+							onClick={() => setEditing("new")}
 							size="sm"
 							type="button"
 							variant="outline"
@@ -253,22 +263,44 @@ export function HomeEditor({
 						</Button>
 					</div>
 
-					{home.banners.map((banner, index) => (
-						<BannerCard
-							banner={banner}
-							canMoveDown={index < home.banners.length - 1}
-							canMoveUp={index > 0}
-							issues={issues}
-							key={index}
-							onChange={(patch) => updateBanner(index, patch)}
-							onMoveDown={() => moveBanner(index, 1)}
-							onMoveUp={() => moveBanner(index, -1)}
-							onRemove={() => removeBanner(index)}
-							position={index}
-						/>
-					))}
+					{home.banners.length === 0 ? (
+						<p className="rounded-xl border border-dashed px-6 py-12 text-center text-muted-foreground text-sm">
+							Nenhum banner ainda. Use “Novo banner” para adicionar o primeiro.
+						</p>
+					) : (
+						<ul className="flex flex-col gap-2.5">
+							{home.banners.map((banner, index) => (
+								<BannerRow
+									banner={banner}
+									canMoveDown={index < home.banners.length - 1}
+									canMoveUp={index > 0}
+									hasIssue={issues.some((issue) =>
+										issue.path.startsWith(`banners.${index}.`),
+									)}
+									key={index}
+									onEdit={() => setEditing(index)}
+									onMoveDown={() => moveBanner(index, 1)}
+									onMoveUp={() => moveBanner(index, -1)}
+									onRemove={() => removeBanner(index)}
+								/>
+							))}
+						</ul>
+					)}
 				</section>
 			</div>
+
+			<BannerDialog
+				initial={
+					typeof editing === "number" ? (home.banners[editing] ?? null) : null
+				}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditing(null);
+					}
+				}}
+				onSubmit={submitBanner}
+				open={editing !== null}
+			/>
 		</div>
 	);
 }
@@ -363,139 +395,108 @@ function SaveIndicator({
 	);
 }
 
-function BannerCard({
+function BannerRow({
 	banner,
-	position,
-	issues,
+	hasIssue,
 	canMoveUp,
 	canMoveDown,
-	onChange,
+	onEdit,
 	onMoveUp,
 	onMoveDown,
 	onRemove,
 }: {
 	banner: HeroBannerContent;
-	position: number;
-	issues: PublishIssue[];
+	hasIssue: boolean;
 	canMoveUp: boolean;
 	canMoveDown: boolean;
-	onChange: (patch: Partial<HeroBannerContent>) => void;
+	onEdit: () => void;
 	onMoveUp: () => void;
 	onMoveDown: () => void;
 	onRemove: () => void;
 }) {
-	const altIssue = issues.find(
-		(issue) => issue.path === `banners.${position}.alt`,
-	);
-	const srcIssue = issues.find(
-		(issue) => issue.path === `banners.${position}.src`,
-	);
-
 	return (
-		<article className="rounded-xl border border-border bg-card p-4">
-			<div className="mb-3 flex items-center justify-between">
-				<span className="font-medium text-muted-foreground text-sm">
-					Banner {position + 1}
-				</span>
-				<div className="flex items-center gap-1">
-					<Button
-						aria-label="Mover para cima"
-						disabled={!canMoveUp}
-						onClick={onMoveUp}
-						size="icon"
-						type="button"
-						variant="ghost"
-					>
-						<ArrowUp className="size-4" />
-					</Button>
-					<Button
-						aria-label="Mover para baixo"
-						disabled={!canMoveDown}
-						onClick={onMoveDown}
-						size="icon"
-						type="button"
-						variant="ghost"
-					>
-						<ArrowDown className="size-4" />
-					</Button>
-					<Button
-						aria-label="Remover banner"
-						onClick={onRemove}
-						size="icon"
-						type="button"
-						variant="ghost"
-					>
-						<Trash2 className="size-4 text-destructive" />
-					</Button>
-				</div>
-			</div>
+		<li
+			className={cn(
+				"flex items-center gap-3 rounded-xl border bg-card p-2.5",
+				hasIssue ? "border-destructive/50" : "border-border",
+			)}
+		>
+			<button
+				className="flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted/40"
+				onClick={onEdit}
+				title="Editar banner"
+				type="button"
+			>
+				{banner.src ? (
+					// biome-ignore lint/performance/noImgElement: preview do painel a partir de URL/caminho arbitrário.
+					<img alt="" className="h-full w-full object-cover" src={banner.src} />
+				) : (
+					<ImageOff className="size-5 text-muted-foreground" />
+				)}
+			</button>
 
-			<div className="flex flex-col gap-3">
-				<Field
-					error={altIssue?.message}
-					label="Texto alternativo (obrigatório)"
+			<div className="min-w-0 flex-1">
+				<p
+					className={cn(
+						"truncate font-medium text-sm",
+						banner.alt ? "" : "text-muted-foreground italic",
+					)}
 				>
-					<textarea
-						className={cn(fieldClassName, "min-h-16 resize-y")}
-						onChange={(event) => onChange({ alt: event.target.value })}
-						placeholder="Descreva a imagem para leitores de tela e SEO"
-						value={banner.alt}
-					/>
-				</Field>
-
-				<MediaField
-					alt={banner.alt}
-					error={srcIssue?.message}
-					label="Imagem"
-					onChange={(src) => onChange({ src })}
-					value={banner.src}
-				/>
-
-				<div className="grid grid-cols-2 gap-3">
-					<Field label="Proporção (largura ÷ altura)">
-						<input
-							className={fieldClassName}
-							onChange={(event) =>
-								onChange({ aspect: Number(event.target.value) || undefined })
-							}
-							step="0.01"
-							type="number"
-							value={banner.aspect ?? ""}
-						/>
-					</Field>
-
-					<Field label="Link ao clicar (opcional)">
-						<input
-							className={fieldClassName}
-							onChange={(event) =>
-								onChange({ href: event.target.value || undefined })
-							}
-							placeholder="/sorteio"
-							type="text"
-							value={banner.href ?? ""}
-						/>
-					</Field>
+					{banner.alt || "(sem texto alternativo)"}
+				</p>
+				<div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+					{banner.mobile ? (
+						<Badge variant="default">Mobile ✓</Badge>
+					) : (
+						<Badge variant="secondary">Sem mobile</Badge>
+					)}
+					{banner.aspect ? (
+						<Badge variant="outline">Proporção {banner.aspect}</Badge>
+					) : null}
+					{banner.href ? <Badge variant="outline">Link</Badge> : null}
+					{hasIssue ? (
+						<span className="text-destructive text-xs">
+							Faltam campos obrigatórios
+						</span>
+					) : null}
 				</div>
 			</div>
-		</article>
-	);
-}
 
-function Field({
-	label,
-	error,
-	children,
-}: {
-	label: string;
-	error?: string;
-	children: React.ReactNode;
-}) {
-	return (
-		// biome-ignore lint/a11y/noLabelWithoutControl: o control (input/textarea) é passado via children, fora do que o Biome enxerga estaticamente.
-		<label className="flex flex-col gap-1.5">
-			<span className="font-medium text-sm">{label}</span>
-			{children}
-			{error ? <span className="text-destructive text-xs">{error}</span> : null}
-		</label>
+			<div className="flex items-center gap-1">
+				<Button onClick={onEdit} size="sm" type="button" variant="outline">
+					<Pencil className="size-3.5" />
+					Editar
+				</Button>
+				<Button
+					aria-label="Mover para cima"
+					disabled={!canMoveUp}
+					onClick={onMoveUp}
+					size="icon-sm"
+					type="button"
+					variant="ghost"
+				>
+					<ArrowUp className="size-4" />
+				</Button>
+				<Button
+					aria-label="Mover para baixo"
+					disabled={!canMoveDown}
+					onClick={onMoveDown}
+					size="icon-sm"
+					type="button"
+					variant="ghost"
+				>
+					<ArrowDown className="size-4" />
+				</Button>
+				<Button
+					aria-label="Remover banner"
+					onClick={onRemove}
+					size="icon-sm"
+					type="button"
+					variant="ghost"
+				>
+					<Trash2 className="size-4 text-destructive" />
+				</Button>
+			</div>
+		</li>
 	);
 }

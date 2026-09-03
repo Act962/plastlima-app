@@ -2,7 +2,7 @@
 
 import { Button } from "@plastlima-app/ui/components/button";
 import { cn } from "@plastlima-app/ui/lib/utils";
-import { ImageIcon, Library, UploadCloud, X } from "lucide-react";
+import { Eye, ImageIcon, Library, UploadCloud, X } from "lucide-react";
 import { useState } from "react";
 import { type FileRejection, useDropzone } from "react-dropzone";
 import { toast } from "sonner";
@@ -12,9 +12,6 @@ import {
 } from "@/app/(painel)/midia/actions";
 
 const MAX_BYTES = 5 * 1024 * 1024;
-
-const fieldClassName =
-	"w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:border-ring";
 
 const ACCEPT = {
 	"image/png": [".png"],
@@ -77,14 +74,24 @@ type Props = {
 	value: string;
 	/** Texto alternativo do contexto — vira o alt do arquivo enviado. */
 	alt?: string;
+	/** Linha de apoio sob o rótulo, ex.: "Arte larga, exibida em telas grandes." */
+	hint?: string;
 	error?: string;
 	onChange: (url: string) => void;
 };
 
-export function MediaField({ label, value, alt, error, onChange }: Props) {
+export function MediaField({
+	label,
+	value,
+	alt,
+	hint,
+	error,
+	onChange,
+}: Props) {
 	const [progress, setProgress] = useState<number | null>(null);
 	const [uploadError, setUploadError] = useState<string | null>(null);
 	const [libraryOpen, setLibraryOpen] = useState(false);
+	const [previewOpen, setPreviewOpen] = useState(false);
 	const [assets, setAssets] = useState<AssetSummary[] | null>(null);
 	const [loadingLibrary, setLoadingLibrary] = useState(false);
 
@@ -140,28 +147,41 @@ export function MediaField({ label, value, alt, error, onChange }: Props) {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<span className="font-medium text-sm">{label}</span>
+			<div className="flex flex-col gap-0.5">
+				<span className="font-medium text-sm">{label}</span>
+				{hint ? (
+					<span className="text-muted-foreground text-xs">{hint}</span>
+				) : null}
+			</div>
 
 			{value ? (
 				<div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-2">
 					{/* biome-ignore lint/performance/noImgElement: preview do painel a partir de URL/caminho arbitrário. */}
 					<img
 						alt=""
-						className="size-16 shrink-0 rounded object-contain"
+						className="h-12 w-20 shrink-0 rounded object-cover"
 						src={value}
 					/>
-					<span className="min-w-0 flex-1 truncate text-muted-foreground text-xs">
-						{value}
-					</span>
-					<Button
-						aria-label="Remover imagem"
-						onClick={() => onChange("")}
-						size="icon"
-						type="button"
-						variant="ghost"
-					>
-						<X className="size-4" />
-					</Button>
+					<div className="ml-auto flex items-center gap-2">
+						<Button
+							onClick={() => setPreviewOpen(true)}
+							size="sm"
+							type="button"
+							variant="outline"
+						>
+							<Eye className="size-4" />
+							Visualizar
+						</Button>
+						<Button
+							aria-label="Remover imagem"
+							onClick={() => onChange("")}
+							size="icon"
+							type="button"
+							variant="ghost"
+						>
+							<X className="size-4" />
+						</Button>
+					</div>
 				</div>
 			) : null}
 
@@ -207,14 +227,6 @@ export function MediaField({ label, value, alt, error, onChange }: Props) {
 				</Button>
 			</div>
 
-			<input
-				className={fieldClassName}
-				onChange={(event) => onChange(event.target.value)}
-				placeholder="/banners/exemplo.jpeg ou https://…"
-				type="text"
-				value={value}
-			/>
-
 			{uploadError ? (
 				<span className="text-destructive text-xs">{uploadError}</span>
 			) : null}
@@ -231,7 +243,35 @@ export function MediaField({ label, value, alt, error, onChange }: Props) {
 					}}
 				/>
 			) : null}
+
+			{previewOpen && value ? (
+				<ImagePreview onClose={() => setPreviewOpen(false)} src={value} />
+			) : null}
 		</div>
+	);
+}
+
+/** Sobreposição que mostra a imagem em tamanho grande. Clique ou Esc fecha. */
+function ImagePreview({ src, onClose }: { src: string; onClose: () => void }) {
+	return (
+		<button
+			aria-label="Fechar visualização"
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6"
+			onClick={onClose}
+			onKeyDown={(event) => {
+				if (event.key === "Escape") {
+					onClose();
+				}
+			}}
+			type="button"
+		>
+			{/* biome-ignore lint/performance/noImgElement: preview do painel a partir de URL/caminho arbitrário. */}
+			<img
+				alt=""
+				className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+				src={src}
+			/>
+		</button>
 	);
 }
 
