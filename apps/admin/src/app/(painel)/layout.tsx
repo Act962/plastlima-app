@@ -35,7 +35,10 @@ export default async function PainelLayout({
 	return (
 		<SidebarProvider defaultOpen={defaultOpen}>
 			<AppSidebar email={session.user.email} newLeads={newLeads} role={role} />
-			<SidebarInset>
+			{/* `min-w-0`: o inset é um flex item, e sem isso o mínimo automático dele
+			é a largura do conteúdo — uma tabela larga empurraria a página inteira
+			para os lados em vez de rolar dentro do próprio contêiner. */}
+			<SidebarInset className="min-w-0">
 				<PanelTopbar />
 				{children}
 			</SidebarInset>
