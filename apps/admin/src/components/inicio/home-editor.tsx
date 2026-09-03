@@ -1,5 +1,26 @@
 "use client";
 
+import {
+	closestCenter,
+	DndContext,
+	type DragEndEvent,
+	KeyboardSensor,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import {
+	restrictToParentElement,
+	restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
+import {
+	arrayMove,
+	SortableContext,
+	sortableKeyboardCoordinates,
+	useSortable,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type {
 	HeroBannerContent,
 	HomeContent,
@@ -7,15 +28,7 @@ import type {
 import { Badge } from "@plastlima-app/ui/components/badge";
 import { Button } from "@plastlima-app/ui/components/button";
 import { cn } from "@plastlima-app/ui/lib/utils";
-import {
-	ArrowDown,
-	ArrowUp,
-	Eye,
-	History,
-	Pencil,
-	Plus,
-	Trash2,
-} from "lucide-react";
+import { Eye, GripVertical, History, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -70,6 +83,21 @@ export function HomeEditor({
 
 	const router = useRouter();
 	const isFirstRender = useRef(true);
+
+	// Ids estáveis por identidade do objeto: reordenar preserva a referência de
+	// cada banner (o `arrayMove` só embaralha), então o id acompanha o item; ao
+	// editar, o objeto é trocado e ganha um id novo — sem efeito na ordenação.
+	const bannerIds = useRef(new WeakMap<HeroBannerContent, string>());
+	const bannerIdSeq = useRef(0);
+
+	const sensors = useSensors(
+		// Exige mover 6px antes de arrastar, senão um clique em "Editar" viraria
+		// um arrasto.
+		useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates,
+		}),
+	);
 
 	// Autosave com debounce: nada disso afeta o site até publicar, então salvar é
 	// barato e evita a falha nº 1 de painel caseiro — perder trabalho por
@@ -140,16 +168,30 @@ export function HomeEditor({
 		});
 	}
 
-	function moveBanner(index: number, direction: -1 | 1) {
-		const target = index + direction;
-		if (target < 0 || target >= home.banners.length) {
+	function bannerId(banner: HeroBannerContent): string {
+		let id = bannerIds.current.get(banner);
+		if (id === undefined) {
+			bannerIdSeq.current += 1;
+			id = `banner-${bannerIdSeq.current}`;
+			bannerIds.current.set(banner, id);
+		}
+		return id;
+	}
+
+	function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+		if (over === null || active.id === over.id) {
 			return;
 		}
 
-		const banners = [...home.banners];
-		const [moved] = banners.splice(index, 1);
-		banners.splice(target, 0, moved as HeroBannerContent);
-		updateHome({ ...home, banners });
+		const ids = home.banners.map(bannerId);
+		const from = ids.indexOf(String(active.id));
+		const to = ids.indexOf(String(over.id));
+		if (from === -1 || to === -1) {
+			return;
+		}
+
+		updateHome({ ...home, banners: arrayMove(home.banners, from, to) });
 	}
 
 	async function handlePublish() {
@@ -268,23 +310,32 @@ export function HomeEditor({
 							Nenhum banner ainda. Use “Novo banner” para adicionar o primeiro.
 						</p>
 					) : (
-						<ul className="flex flex-col gap-2.5">
-							{home.banners.map((banner, index) => (
-								<BannerRow
-									banner={banner}
-									canMoveDown={index < home.banners.length - 1}
-									canMoveUp={index > 0}
-									hasIssue={issues.some((issue) =>
-										issue.path.startsWith(`banners.${index}.`),
-									)}
-									key={index}
-									onEdit={() => setEditing(index)}
-									onMoveDown={() => moveBanner(index, 1)}
-									onMoveUp={() => moveBanner(index, -1)}
-									onRemove={() => removeBanner(index)}
-								/>
-							))}
-						</ul>
+						<DndContext
+							collisionDetection={closestCenter}
+							modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+							onDragEnd={handleDragEnd}
+							sensors={sensors}
+						>
+							<SortableContext
+								items={home.banners.map(bannerId)}
+								strategy={verticalListSortingStrategy}
+							>
+								<ul className="flex flex-col gap-2.5">
+									{home.banners.map((banner, index) => (
+										<BannerRow
+											banner={banner}
+											hasIssue={issues.some((issue) =>
+												issue.path.startsWith(`banners.${index}.`),
+											)}
+											id={bannerId(banner)}
+											key={bannerId(banner)}
+											onEdit={() => setEditing(index)}
+											onRemove={() => removeBanner(index)}
+										/>
+									))}
+								</ul>
+							</SortableContext>
+						</DndContext>
 					)}
 				</section>
 			</div>
@@ -396,31 +447,47 @@ function SaveIndicator({
 }
 
 function BannerRow({
+	id,
 	banner,
 	hasIssue,
-	canMoveUp,
-	canMoveDown,
 	onEdit,
-	onMoveUp,
-	onMoveDown,
 	onRemove,
 }: {
+	id: string;
 	banner: HeroBannerContent;
 	hasIssue: boolean;
-	canMoveUp: boolean;
-	canMoveDown: boolean;
 	onEdit: () => void;
-	onMoveUp: () => void;
-	onMoveDown: () => void;
 	onRemove: () => void;
 }) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id });
+
 	return (
 		<li
 			className={cn(
-				"flex items-center gap-3 rounded-xl border bg-card p-2.5",
+				"flex items-center gap-2 rounded-xl border bg-card p-2.5",
 				hasIssue ? "border-destructive/50" : "border-border",
+				isDragging && "z-10 shadow-lg",
 			)}
+			ref={setNodeRef}
+			style={{ transform: CSS.Transform.toString(transform), transition }}
 		>
+			<button
+				aria-label="Arrastar para reordenar"
+				className="flex h-8 w-6 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground hover:text-foreground active:cursor-grabbing"
+				type="button"
+				{...attributes}
+				{...listeners}
+			>
+				<GripVertical className="size-4" />
+			</button>
+
 			<button
 				className="h-14 w-24 shrink-0 overflow-hidden rounded-lg border border-border"
 				onClick={onEdit}
@@ -461,26 +528,6 @@ function BannerRow({
 				<Button onClick={onEdit} size="sm" type="button" variant="outline">
 					<Pencil className="size-3.5" />
 					Editar
-				</Button>
-				<Button
-					aria-label="Mover para cima"
-					disabled={!canMoveUp}
-					onClick={onMoveUp}
-					size="icon-sm"
-					type="button"
-					variant="ghost"
-				>
-					<ArrowUp className="size-4" />
-				</Button>
-				<Button
-					aria-label="Mover para baixo"
-					disabled={!canMoveDown}
-					onClick={onMoveDown}
-					size="icon-sm"
-					type="button"
-					variant="ghost"
-				>
-					<ArrowDown className="size-4" />
 				</Button>
 				<Button
 					aria-label="Remover banner"
