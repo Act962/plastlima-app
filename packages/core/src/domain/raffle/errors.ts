@@ -23,6 +23,15 @@ export class InvalidPhoneError extends DomainError {
 	}
 }
 
+/** O CPF/CNPJ informado não passa na checagem dos dígitos verificadores. */
+export class InvalidDocumentError extends DomainError {
+	readonly code = "INVALID_DOCUMENT";
+
+	constructor(readonly reason: string) {
+		super(`Documento inválido: ${reason}`);
+	}
+}
+
 /** Os dados do participante não satisfazem as invariantes da entidade. */
 export class InvalidParticipantError extends DomainError {
 	readonly code = "INVALID_PARTICIPANT";
@@ -65,6 +74,7 @@ export class DuplicateParticipantError extends DomainError {
 
 export type RegistrationError =
 	| InvalidPhoneError
+	| InvalidDocumentError
 	| InvalidParticipantError
 	| UnknownStoreError
 	| CampaignClosedError;

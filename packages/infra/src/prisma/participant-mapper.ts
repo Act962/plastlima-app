@@ -1,4 +1,4 @@
-import { Participant } from "@plastlima-app/core";
+import { isRafflePool, Participant } from "@plastlima-app/core";
 import type { Participant as ParticipantRecord } from "@prisma/client";
 
 /** Registro do banco → entidade de domínio. */
@@ -13,6 +13,14 @@ export function toDomain(record: ParticipantRecord): Participant {
 		storeName: record.storeName,
 		city: record.city,
 		state: record.state,
+		// Cadastro da campanha anterior não tem grupo: todos eram de loja, porque
+		// o Centro de Distribuição nem era opção então.
+		pool:
+			record.pool !== null && isRafflePool(record.pool)
+				? record.pool
+				: "unidades",
+		document: record.document,
+		documentDisplay: record.documentDisplay,
 		receiptImage: record.receiptImage,
 		participationCount: record.participationCount,
 		acceptedTermsAt: record.acceptedTermsAt,
@@ -34,6 +42,9 @@ export function toCreateData(participant: Participant) {
 		storeName: snapshot.storeName,
 		city: snapshot.city,
 		state: snapshot.state,
+		pool: snapshot.pool,
+		document: snapshot.document,
+		documentDisplay: snapshot.documentDisplay,
 		receiptImage: snapshot.receiptImage,
 		participationCount: snapshot.participationCount,
 		acceptedTermsAt: snapshot.acceptedTermsAt,

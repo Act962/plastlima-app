@@ -1,9 +1,20 @@
+import type { RafflePool } from "./pool";
+
 /** Loja elegível para a campanha, na forma mínima que o domínio precisa. */
 export type RaffleStore = {
 	id: string;
 	name: string;
 	city: string;
 	state: string;
+	/**
+	 * Grupo em que quem comprou aqui concorre.
+	 *
+	 * Vive na loja, e não num campo separado do formulário, porque assim o grupo
+	 * é **derivado** de onde a pessoa comprou em vez de declarado à parte. Não há
+	 * como o cliente mandar uma loja e um grupo que se contradizem: existe uma
+	 * fonte de verdade só.
+	 */
+	pool: RafflePool;
 };
 
 /**

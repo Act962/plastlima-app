@@ -1,11 +1,18 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import type { DrawCriterion, DrawMode, DrawRecord } from "@plastlima-app/core";
+import type {
+	DrawCriterion,
+	DrawMode,
+	DrawRecord,
+	RafflePool,
+} from "@plastlima-app/core";
 import { requireActor } from "@/lib/auth-actor";
 import { createDrawWinner } from "@/lib/participants";
 
 export type DrawInput = {
+	/** Grupo apurado. Cada um tem seu próprio prêmio e seu próprio ganhador. */
+	pool: RafflePool;
 	/** Vazio quando quem apura não informou semente pública: o servidor gera uma. */
 	seed: string;
 	criterion: DrawCriterion;

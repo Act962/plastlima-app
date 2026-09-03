@@ -11,6 +11,7 @@ const CENTRO: RaffleStore = {
 	name: "Loja Centro",
 	city: "Teresina",
 	state: "Piauí",
+	pool: "unidades",
 };
 
 const CAMPAIGN: RaffleCampaign = {
@@ -68,7 +69,10 @@ describe("DrawWinner", () => {
 		clock.travelTo(DURING_CAMPAIGN);
 		await addParticipant("86988970955");
 
-		const result = await useCase.execute({ seed: "loteria-5987" });
+		const result = await useCase.execute({
+			pool: "unidades",
+			seed: "loteria-5987",
+		});
 
 		expect(result.ok).toBe(true);
 	});
@@ -78,6 +82,7 @@ describe("DrawWinner", () => {
 		await addParticipant("86988970955");
 
 		const result = await useCase.execute({
+			pool: "unidades",
 			seed: "ensaio",
 			mode: "simulation",
 		});
@@ -88,7 +93,7 @@ describe("DrawWinner", () => {
 	it("recusa apurar sem semente", async () => {
 		await addParticipant("86988970955");
 
-		const result = await useCase.execute({ seed: "   " });
+		const result = await useCase.execute({ pool: "unidades", seed: "   " });
 
 		expect(result.ok).toBe(false);
 
@@ -98,7 +103,10 @@ describe("DrawWinner", () => {
 	});
 
 	it("recusa apurar sem ninguém elegível", async () => {
-		const result = await useCase.execute({ seed: "loteria-5987" });
+		const result = await useCase.execute({
+			pool: "unidades",
+			seed: "loteria-5987",
+		});
 
 		expect(result.ok).toBe(false);
 
@@ -113,6 +121,7 @@ describe("DrawWinner", () => {
 		await addParticipant("86988970957");
 
 		const result = await useCase.execute({
+			pool: "unidades",
 			seed: "loteria-5987",
 			substitutes: 2,
 		});
@@ -134,8 +143,14 @@ describe("DrawWinner", () => {
 		await addParticipant("86988970956");
 		await addParticipant("86988970957");
 
-		const first = await useCase.execute({ seed: "loteria-5987" });
-		const second = await useCase.execute({ seed: "loteria-5987" });
+		const first = await useCase.execute({
+			pool: "unidades",
+			seed: "loteria-5987",
+		});
+		const second = await useCase.execute({
+			pool: "unidades",
+			seed: "loteria-5987",
+		});
 
 		expect(first.ok && second.ok).toBe(true);
 
@@ -149,6 +164,7 @@ describe("DrawWinner", () => {
 		await addParticipant("86988970956");
 
 		const result = await useCase.execute({
+			pool: "unidades",
 			seed: "loteria-5987",
 			excludedPhones: "(86) 98897-0955",
 		});
@@ -170,7 +186,10 @@ describe("DrawWinner", () => {
 			at: new Date("2026-08-31T10:00:00-03:00"),
 		});
 
-		const result = await useCase.execute({ seed: "loteria-5987" });
+		const result = await useCase.execute({
+			pool: "unidades",
+			seed: "loteria-5987",
+		});
 
 		expect(result.ok).toBe(true);
 
@@ -184,8 +203,13 @@ describe("DrawWinner", () => {
 		await addParticipant("86988970955", { times: 4 });
 		await addParticipant("86988970956");
 
-		const simple = await useCase.execute({ seed: "x", criterion: "simples" });
+		const simple = await useCase.execute({
+			pool: "unidades",
+			seed: "x",
+			criterion: "simples",
+		});
 		const weighted = await useCase.execute({
+			pool: "unidades",
 			seed: "x",
 			criterion: "ponderado",
 		});

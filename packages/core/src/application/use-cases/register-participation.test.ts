@@ -18,6 +18,7 @@ const CENTRO: RaffleStore = {
 	name: "Loja Centro",
 	city: "Teresina",
 	state: "Piauí",
+	pool: "unidades",
 };
 
 const TIMON: RaffleStore = {
@@ -25,6 +26,15 @@ const TIMON: RaffleStore = {
 	name: "Loja Ceasa",
 	city: "Timon",
 	state: "Maranhão",
+	pool: "unidades",
+};
+
+const DISTRIBUICAO: RaffleStore = {
+	id: "centro-distribuicao",
+	name: "Centro de Distribuição",
+	city: "Teresina",
+	state: "Piauí",
+	pool: "cd",
 };
 
 const CAMPAIGN: RaffleCampaign = {
@@ -49,7 +59,7 @@ beforeEach(() => {
 	clock = new FixedClock(DURING_CAMPAIGN);
 	useCase = new RegisterParticipation(
 		participants,
-		new InMemoryStoreDirectory([CENTRO, TIMON]),
+		new InMemoryStoreDirectory([CENTRO, TIMON, DISTRIBUICAO]),
 		clock,
 		CAMPAIGN,
 	);
@@ -219,5 +229,113 @@ describe("recusas", () => {
 		if (!result.ok) {
 			expect(result.error.code).toBe("INVALID_PARTICIPANT");
 		}
+	});
+});
+
+describe("grupo sorteado", () => {
+	it("deduz o grupo da loja escolhida, sem o cliente informá-lo", async () => {
+		await useCase.execute(VALID_INPUT);
+		await useCase.execute({
+			...VALID_INPUT,
+			phone: "(86) 99999-8888",
+			storeId: DISTRIBUICAO.id,
+		});
+
+		const { items } = await participants.list({
+			campaignId: CAMPAIGN.id,
+		});
+
+		const byStore = new Map(
+			items.map((participant) => [participant.store.id, participant.pool]),
+		);
+
+		expect(byStore.get(CENTRO.id)).toBe("unidades");
+		expect(byStore.get(DISTRIBUICAO.id)).toBe("cd");
+	});
+
+	it("filtra a apuração por grupo", async () => {
+		await useCase.execute(VALID_INPUT);
+		await useCase.execute({
+			...VALID_INPUT,
+			phone: "(86) 99999-8888",
+			storeId: DISTRIBUICAO.id,
+		});
+
+		const cd = await participants.listForDraw(CAMPAIGN.id, "cd");
+		const lojas = await participants.listForDraw(CAMPAIGN.id, "unidades");
+
+		expect(cd).toHaveLength(1);
+		expect(lojas).toHaveLength(1);
+		expect(cd[0]?.storeName).toBe("Centro de Distribuição");
+	});
+
+	/**
+	 * A regra "uma pessoa concorre em um grupo apenas". Quem já se cadastrou não
+	 * migra de grupo tentando de novo por outra loja: soma participação e mantém
+	 * o grupo original, que é o registro histórico.
+	 */
+	it("não deixa a mesma pessoa trocar de grupo em um novo cadastro", async () => {
+		await useCase.execute({ ...VALID_INPUT, storeId: CENTRO.id });
+
+		const again = await useCase.execute({
+			...VALID_INPUT,
+			storeId: DISTRIBUICAO.id,
+		});
+
+		expect(again.ok).toBe(true);
+
+		if (again.ok) {
+			expect(again.value.isNewParticipant).toBe(false);
+			expect(again.value.participationCount).toBe(2);
+		}
+
+		expect(participants.size).toBe(1);
+		expect(await participants.listForDraw(CAMPAIGN.id, "cd")).toHaveLength(0);
+		expect(
+			await participants.listForDraw(CAMPAIGN.id, "unidades"),
+		).toHaveLength(1);
+	});
+});
+
+describe("documento", () => {
+	it("guarda o CPF normalizado e a forma legível", async () => {
+		await useCase.execute({ ...VALID_INPUT, document: "529.982.247-25" });
+
+		const { items } = await participants.list({ campaignId: CAMPAIGN.id });
+		const snapshot = items[0]?.toSnapshot();
+
+		expect(snapshot?.document).toBe("52998224725");
+		expect(snapshot?.documentDisplay).toBe("529.982.247-25");
+	});
+
+	it("aceita cadastro sem documento — o campo é opcional", async () => {
+		const semNada = await useCase.execute(VALID_INPUT);
+		const vazio = await useCase.execute({
+			...VALID_INPUT,
+			phone: "(86) 99999-8888",
+			document: "   ",
+		});
+
+		expect(semNada.ok).toBe(true);
+		expect(vazio.ok).toBe(true);
+
+		const { items } = await participants.list({ campaignId: CAMPAIGN.id });
+
+		expect(items.every((item) => item.document === null)).toBe(true);
+	});
+
+	it("recusa documento inválido em vez de gravar lixo", async () => {
+		const result = await useCase.execute({
+			...VALID_INPUT,
+			document: "529.982.247-26",
+		});
+
+		expect(result.ok).toBe(false);
+
+		if (!result.ok) {
+			expect(result.error.code).toBe("INVALID_DOCUMENT");
+		}
+
+		expect(participants.size).toBe(0);
 	});
 });

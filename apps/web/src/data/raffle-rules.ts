@@ -3,24 +3,27 @@ import { RAFFLE_CAMPAIGN } from "./raffle";
 import { SITE } from "./site";
 
 /**
- * Regulamento da campanha, transcrito do documento oficial enviado pelo
- * cliente ("REGULAMENTO DA CAMPANHA: GANHE UM KIT CHURRASCO PLASTLIMA").
+ * Regulamento da campanha das duas TVs.
  *
- * As seções seguem a ordem do documento oficial. Duas seções vêm do rascunho
- * anterior e não têm equivalente no documento do cliente: "Tratamento de dados
- * pessoais" (detalha os direitos do titular exigidos pela LGPD) e a redação de
- * "Quem pode participar" em forma de lista.
+ * ⚠️ PENDENTES a confirmar com o cliente antes de publicar:
+ * 1. A **data de início** da campanha (§2) — só o encerramento está definido.
+ * 2. O modelo/especificação exata das TVs (§6).
+ * 3. Se haverá Certificado de Autorização: sorteio condicionado a compra é
+ *    "distribuição gratuita de prêmios a título de propaganda" (Lei 5.768/71 e
+ *    Decreto 70.951/72) e depende de autorização prévia da Secretaria de
+ *    Prêmios e Apostas do Ministério da Fazenda.
  *
- * ⚠️ O documento oficial não menciona Certificado de Autorização. Sorteio
- * condicionado a compra é "distribuição gratuita de prêmios a título de
- * propaganda" (Lei 5.768/71 e Decreto 70.951/72) e depende de autorização
- * prévia da Secretaria de Prêmios e Apostas do Ministério da Fazenda.
+ * A cláusula de comprovação em §8 não é decorativa: o grupo do participante é
+ * autodeclarado no cadastro e o grupo do Centro de Distribuição tende a ser bem
+ * menor, o que dá vantagem a quem mentir. Exigir a nota fiscal no resgate é o
+ * que torna a declaração falsa inútil.
  */
 export const RAFFLE_RULES: LegalDocument = {
-	updatedAt: "31 de julho de 2026",
+	updatedAt: "3 de setembro de 2026",
 
 	intro: [
-		`Este regulamento estabelece as condições de participação na campanha "Ganhe um ${RAFFLE_CAMPAIGN.prize} Plastlima", realizada pela ${SITE.name}.`,
+		`Este regulamento estabelece as condições de participação na campanha "Ganhe uma ${RAFFLE_CAMPAIGN.prize} Plastlima", realizada pela ${SITE.name}.`,
+		`Serão sorteadas ${RAFFLE_CAMPAIGN.prizeCount} (duas) TVs, em dois sorteios independentes: uma entre os clientes do Centro de Distribuição e outra entre os clientes das lojas.`,
 		"Ao se cadastrar, o participante declara ter lido e aceito integralmente as regras descritas abaixo.",
 	],
 
@@ -31,7 +34,7 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: `A campanha "Ganhe um ${RAFFLE_CAMPAIGN.prize} Plastlima" é uma ação promocional realizada pela ${SITE.name} com o objetivo de presentear seus clientes durante a Semana dos Pais.`,
+					text: `A campanha "Ganhe uma ${RAFFLE_CAMPAIGN.prize} Plastlima" é uma ação promocional realizada pela ${SITE.name} com o objetivo de presentear seus clientes.`,
 				},
 			],
 		},
@@ -41,7 +44,7 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: "A campanha é válida de 1º de agosto de 2026 até 30 de agosto de 2026, conforme divulgado nos materiais oficiais.",
+					text: "A campanha é válida até 15 de outubro de 2026, conforme divulgado nos materiais oficiais. Cadastros enviados após essa data não concorrem.",
 				},
 				{
 					type: "paragraph",
@@ -59,7 +62,7 @@ export const RAFFLE_RULES: LegalDocument = {
 					items: [
 						"tenham 18 anos completos ou mais;",
 						"sejam residentes no Brasil;",
-						"tenham realizado compra em qualquer unidade Plastlima durante o período da campanha;",
+						"tenham realizado compra no Centro de Distribuição ou em qualquer loja Plastlima durante o período da campanha;",
 						"tenham concluído o cadastro na página oficial da campanha.",
 						"ESTÁ VEDADA A PARTICIPAÇÃO DE COLABORADORES DO GRUPO PLASTLIMA.",
 					],
@@ -74,14 +77,14 @@ export const RAFFLE_RULES: LegalDocument = {
 					type: "list",
 					lead: "Para participar é necessário:",
 					items: [
-						"realizar uma compra em qualquer uma das franquias Plastlima durante o período da campanha;",
+						"realizar uma compra no Centro de Distribuição ou em qualquer loja Plastlima durante o período da campanha;",
 						`acessar o site oficial da campanha — ${new URL(SITE.url).host};`,
-						"preencher corretamente o formulário com nome completo, WhatsApp e a loja onde realizou a compra.",
+						"preencher corretamente o formulário com nome completo, WhatsApp e onde realizou a compra — no Centro de Distribuição ou em uma das lojas.",
 					],
 				},
 				{
 					type: "paragraph",
-					text: "O participante pode também anexar a foto do cupom de compra. Após o envio do formulário, a participação está automaticamente registrada.",
+					text: "O participante pode também informar seu CPF ou CNPJ, o que facilita a conferência dos dados na entrega do prêmio. Após o envio do formulário, a participação está automaticamente registrada.",
 				},
 			],
 		},
@@ -97,6 +100,10 @@ export const RAFFLE_RULES: LegalDocument = {
 					type: "paragraph",
 					text: "O cadastro deve ser realizado dentro do período de vigência da promoção. Cadastros incompletos ou com informações incorretas podem ser desclassificados.",
 				},
+				{
+					type: "paragraph",
+					text: "Cada participante concorre em um único grupo, definido pelo local de compra informado no primeiro cadastro. Novos cadastros com o mesmo WhatsApp somam participações no mesmo grupo e não transferem o participante para o outro sorteio.",
+				},
 			],
 		},
 		{
@@ -105,11 +112,19 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: `Será sorteado 01 (um) ${RAFFLE_CAMPAIGN.prize} Plastlima, composto pelos itens divulgados na campanha.`,
+					text: `Serão sorteadas ${RAFFLE_CAMPAIGN.prizeCount} (duas) TVs de 42 polegadas, uma para cada grupo de participantes.`,
+				},
+				{
+					type: "list",
+					lead: "Os grupos são:",
+					items: [
+						"Centro de Distribuição — clientes que realizaram a compra diretamente no Centro de Distribuição;",
+						"Lojas — clientes que realizaram a compra em qualquer uma das lojas Plastlima.",
+					],
 				},
 				{
 					type: "paragraph",
-					text: `A ${SITE.name} pode substituir algum item do kit por outro de igual ou superior valor, caso haja indisponibilidade.`,
+					text: `Cada grupo tem seu próprio sorteio e seu próprio ganhador. A ${SITE.name} pode substituir o aparelho por outro de igual ou superior valor, caso haja indisponibilidade.`,
 				},
 			],
 		},
@@ -119,7 +134,7 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: `O sorteio ocorrerá em ${RAFFLE_CAMPAIGN.drawDateLabel}, em horário e formato definidos pela ${SITE.name}.`,
+					text: `Os dois sorteios ocorrerão em ${RAFFLE_CAMPAIGN.drawDateLabel}, em horário e formato definidos pela ${SITE.name}, apurados separadamente — um por grupo.`,
 				},
 				{
 					type: "list",
@@ -141,6 +156,10 @@ export const RAFFLE_RULES: LegalDocument = {
 				},
 				{
 					type: "paragraph",
+					text: "A participação é provisória até a conferência da compra. Para receber o prêmio, o ganhador deve apresentar comprovante de compra (cupom fiscal ou nota fiscal) do período da campanha, emitido pelo grupo em que concorreu. Não havendo comprovação, o participante é desclassificado e novo sorteio é realizado naquele grupo.",
+				},
+				{
+					type: "paragraph",
 					text: `Caso não seja localizado em até 7 (sete) dias corridos, a ${SITE.name} pode realizar novo sorteio, conforme critérios estabelecidos pela organização da campanha.`,
 				},
 				{
@@ -157,7 +176,8 @@ export const RAFFLE_RULES: LegalDocument = {
 					type: "list",
 					lead: "São desclassificados os participantes que:",
 					items: [
-						"preencherem informações falsas;",
+						"preencherem informações falsas, inclusive quanto ao local da compra;",
+						"não comprovarem a compra no grupo em que concorreram;",
 						"realizarem cadastros duplicados utilizando dados de terceiros;",
 						"não atenderem aos critérios deste regulamento.",
 					],

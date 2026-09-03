@@ -13,7 +13,8 @@ export type RegistrationResult = {
 /** Cada erro de domínio vira uma frase que faz sentido para quem está no site. */
 const ERROR_MESSAGES: Record<string, string> = {
 	INVALID_PHONE: "Informe um WhatsApp válido com DDD.",
-	UNKNOWN_STORE: "Selecione uma das lojas da lista.",
+	INVALID_DOCUMENT: "Confira o CPF ou CNPJ informado.",
+	UNKNOWN_STORE: "Selecione onde você comprou.",
 	CAMPAIGN_CLOSED: "As inscrições para este sorteio já encerraram.",
 	INVALID_PARTICIPANT: "Confira os dados informados e tente de novo.",
 };
@@ -49,7 +50,7 @@ export async function registerParticipationAction(
 			name: parsed.data.name,
 			phone: parsed.data.phone,
 			storeId: parsed.data.storeId,
-			receiptImage: parsed.data.receiptImage ?? null,
+			document: parsed.data.document ?? null,
 		});
 	} catch (error) {
 		console.error("[sorteio] falha ao registrar participação", error);

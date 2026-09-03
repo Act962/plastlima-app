@@ -13,6 +13,7 @@ import {
 	EmptyDrawError,
 	MissingSeedError,
 } from "../../domain/raffle/errors";
+import type { RafflePool } from "../../domain/raffle/pool";
 import type { ParticipantRepository } from "../../domain/raffle/repositories/participant-repository";
 import { fail, ok, type Result } from "../../domain/shared/result";
 import type { Clock } from "../ports/clock";
@@ -24,6 +25,11 @@ const DEFAULT_SUBSTITUTES = 3;
 const MAX_SUBSTITUTES = 10;
 
 export type DrawWinnerInput = {
+	/**
+	 * Grupo a apurar. Obrigatório porque a campanha entrega um prêmio por grupo:
+	 * apurar "a campanha inteira" misturaria dois sorteios diferentes.
+	 */
+	pool: RafflePool;
 	/** Valor público que origina o sorteio (ex.: Loteria Federal do dia). */
 	seed: string;
 	criterion?: DrawCriterion;
@@ -40,7 +46,7 @@ export type DrawWinnerOutput = {
 };
 
 /**
- * Apura o ganhador da campanha.
+ * Apura o ganhador de um grupo da campanha.
  *
  * Apurar não depende de as inscrições terem encerrado — é decisão de quem
  * conduz, e a tela avisa quando o prazo ainda está correndo. O que o caso de uso
@@ -71,7 +77,10 @@ export class DrawWinner {
 		}
 
 		const now = this.clock.now();
-		const candidates = await this.participants.listForDraw(this.campaign.id);
+		const candidates = await this.participants.listForDraw(
+			this.campaign.id,
+			input.pool,
+		);
 
 		const split = splitByEligibility(candidates, {
 			cutoff: this.campaign.entriesCloseAt,
@@ -91,6 +100,7 @@ export class DrawWinner {
 
 		const record = buildDrawRecord({
 			campaignId: this.campaign.id,
+			pool: input.pool,
 			seed,
 			criterion,
 			cutoff: this.campaign.entriesCloseAt,

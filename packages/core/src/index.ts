@@ -132,6 +132,7 @@ export {
 	drawOrder,
 	type EligibilitySplit,
 	nationalDigits,
+	POOL_LABELS,
 	parsePhoneList,
 	splitByEligibility,
 	ticketFor,
@@ -147,12 +148,18 @@ export {
 	type DrawError,
 	DuplicateParticipantError,
 	EmptyDrawError,
+	InvalidDocumentError,
 	InvalidParticipantError,
 	InvalidPhoneError,
 	MissingSeedError,
 	type RegistrationError,
 	UnknownStoreError,
 } from "./domain/raffle/errors";
+export {
+	isRafflePool,
+	RAFFLE_POOLS,
+	type RafflePool,
+} from "./domain/raffle/pool";
 export type {
 	ParticipantListQuery,
 	ParticipantListResult,
@@ -163,6 +170,10 @@ export type {
 	StoreDirectory,
 } from "./domain/raffle/store-directory";
 export { PhoneNumber } from "./domain/raffle/value-objects/phone-number";
+export {
+	TaxDocument,
+	type TaxDocumentKind,
+} from "./domain/raffle/value-objects/tax-document";
 export type { Actor } from "./domain/shared/actor";
 export { deepEqual } from "./domain/shared/deep-equal";
 export type { JsonValue } from "./domain/shared/json";

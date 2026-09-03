@@ -26,7 +26,9 @@
  *   --criterio=simples    1 pessoa = 1 chance (padrão, decisão do cliente)
  *   --criterio=ponderado  bilhetes = participationCount (regulamento §5)
  *   --suplentes=<n>       quantos suplentes sortear (padrão 3)
- *   --campanha=<id>       campanha alvo (padrão kit-churrasco-2026)
+ *   --grupo=cd            apura só os clientes do Centro de Distribuição
+ *   --grupo=unidades      apura só os clientes das lojas
+ *   --campanha=<id>       campanha alvo (padrão tv-42-2026)
  *   --ate=<ISO>           só cadastros até esta data (padrão: fim das inscrições)
  *   --excluir=<telefones> lista separada por vírgula, desclassificados
  *   --saida=<arquivo>     caminho da ata (padrão atas/ata-<campanha>.json; o
@@ -43,7 +45,7 @@ import {
 } from "@plastlima-app/core/raffle-draw";
 import { PrismaClient } from "@prisma/client";
 
-const DEFAULT_CAMPAIGN_ID = "kit-churrasco-2026";
+const DEFAULT_CAMPAIGN_ID = "tv-42-2026";
 const DEFAULT_SUBSTITUTES = 3;
 
 /**
@@ -93,6 +95,17 @@ if (substituteCount < 0) {
 }
 
 const campaignId = readArg("campanha") ?? DEFAULT_CAMPAIGN_ID;
+
+// A campanha entrega uma TV por grupo: apurar sem escolher misturaria as duas
+// bases num sorteio só, o que daria o ganhador errado nos dois prêmios.
+const pool = readArg("grupo");
+
+if (pool !== "cd" && pool !== "unidades") {
+	abort(
+		"Informe o grupo a apurar: --grupo=cd ou --grupo=unidades.\n" +
+			"  Cada grupo tem seu próprio prêmio e sua própria apuração.",
+	);
+}
 const cutoff = new Date(readArg("ate") ?? DEFAULT_ENTRIES_CLOSE_AT);
 
 if (Number.isNaN(cutoff.getTime())) {
@@ -133,7 +146,9 @@ const outputPath =
 		scriptDir,
 		"..",
 		"atas",
-		isRehearsal ? `ata-${campaignId}-ensaio.json` : `ata-${campaignId}.json`,
+		isRehearsal
+			? `ata-${campaignId}-${pool}-ensaio.json`
+			: `ata-${campaignId}-${pool}.json`,
 	);
 
 if (existsSync(outputPath)) {
@@ -147,12 +162,19 @@ if (existsSync(outputPath)) {
 const prisma = new PrismaClient();
 
 try {
-	console.info(`Lendo ${host} (campanha ${campaignId})`);
+	console.info(`Lendo ${host} (campanha ${campaignId}, grupo ${pool})`);
 
 	// Mesma projeção do `listForDraw` do repositório: sem `receiptImage`, que são
 	// data URLs de até 800 mil caracteres e não interessam à apuração.
 	const candidates = await prisma.participant.findMany({
-		where: { campaignId },
+		// "unidades" precisa aceitar `pool: null`: os cadastros da campanha
+		// anterior são anteriores ao campo, e todos eram de loja.
+		where: {
+			campaignId,
+			...(pool === "unidades"
+				? { OR: [{ pool: "unidades" }, { pool: null }] }
+				: { pool }),
+		},
 		orderBy: { createdAt: "asc" },
 		select: {
 			name: true,
@@ -179,6 +201,7 @@ try {
 
 	const record = buildDrawRecord({
 		campaignId,
+		pool,
 		seed,
 		criterion,
 		cutoff,
@@ -192,6 +215,7 @@ try {
 	writeFileSync(outputPath, `${JSON.stringify(record, null, "\t")}\n`, "utf8");
 
 	console.info("");
+	console.info(`Grupo:         ${record.grupo}`);
 	console.info(`Critério:      ${record.criterio}`);
 	console.info(`Semente:       ${seed}`);
 	console.info(

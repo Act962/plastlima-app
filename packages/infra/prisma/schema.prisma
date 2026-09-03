@@ -40,6 +40,19 @@ model Participant {
   city      String
   state     String
 
+  /// Grupo sorteado ("cd" ou "unidades"), derivado da loja no cadastro.
+  ///
+  /// Opcional no banco só por compatibilidade: os participantes da campanha
+  /// anterior foram gravados antes de o campo existir. O mapper trata ausência
+  /// como "unidades", que é o que eles de fato eram — o Centro de Distribuição
+  /// nem era opção na época.
+  pool String?
+
+  /// CPF/CNPJ, quando informado. `document` só com dígitos (é o que a busca do
+  /// painel usa); `documentDisplay` guarda a forma legível.
+  document        String?
+  documentDisplay String?
+
   /// Data URL da imagem do cupom, comprimida pelo navegador antes do envio.
   receiptImage String?
 
@@ -54,6 +67,7 @@ model Participant {
   @@unique([campaignId, phone])
   @@index([campaignId, createdAt])
   @@index([campaignId, name])
+  @@index([campaignId, pool, createdAt])
 }
 
 // ---------------------------------------------------------------------------

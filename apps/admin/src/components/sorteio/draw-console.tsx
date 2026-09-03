@@ -1,7 +1,13 @@
 "use client";
 
-import type { DrawCriterion, DrawMode, DrawRecord } from "@plastlima-app/core";
-import { Button } from "@plastlima-app/ui/components/button";
+import {
+	type DrawCriterion,
+	type DrawMode,
+	type DrawRecord,
+	POOL_LABELS,
+	type RafflePool,
+} from "@plastlima-app/core";
+import { Button, buttonVariants } from "@plastlima-app/ui/components/button";
 import { cn } from "@plastlima-app/ui/lib/utils";
 import {
 	Dices,
@@ -14,6 +20,8 @@ import {
 	Users,
 	X,
 } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { type DrawInput, drawAction } from "@/app/(painel)/sorteio/actions";
@@ -38,6 +46,9 @@ type Props = {
 	totalEligible: number;
 	lateCount: number;
 	names: string[];
+	/** Grupo em apuração — vai na ata e decide de qual base sai o ganhador. */
+	pool: RafflePool;
+	poolLabel: string;
 };
 
 type Result = { record: DrawRecord; mode: DrawMode };
@@ -78,6 +89,8 @@ export function DrawConsole({
 	totalEligible,
 	lateCount,
 	names,
+	pool,
+	poolLabel,
 }: Props) {
 	const [tab, setTab] = useState<DrawMode>(
 		entriesOpen ? "simulation" : "official",
@@ -175,6 +188,7 @@ export function DrawConsole({
 	async function runDraw(mode: DrawMode) {
 		// Semente em branco: quem gera é o servidor, e ela fica registrada na ata.
 		const input: DrawInput = {
+			pool,
 			seed: mode === "simulation" ? "" : seed,
 			criterion,
 			excludedPhones: mode === "simulation" ? "" : excludedPhones,
@@ -214,13 +228,30 @@ export function DrawConsole({
 					<div>
 						<h1 className="font-bold text-2xl tracking-tight">Sorteio</h1>
 						<p className="mt-1 text-muted-foreground text-sm">
-							Kit Churrasco — {totalEligible} concorrendo
+							{poolLabel} — {totalEligible} concorrendo
 						</p>
 					</div>
-					<Button onClick={openPresentation} variant="outline">
-						<Maximize2 aria-hidden className="size-4" />
-						Tela cheia
-					</Button>
+					<div className="flex flex-wrap items-center gap-2">
+						<nav aria-label="Grupo a apurar" className="flex gap-2">
+							{(["cd", "unidades"] as const).map((option) => (
+								<Link
+									aria-current={option === pool ? "page" : undefined}
+									className={buttonVariants({
+										size: "sm",
+										variant: option === pool ? "default" : "outline",
+									})}
+									href={`/sorteio?grupo=${option}` as Route}
+									key={option}
+								>
+									{POOL_LABELS[option]}
+								</Link>
+							))}
+						</nav>
+						<Button onClick={openPresentation} variant="outline">
+							<Maximize2 aria-hidden className="size-4" />
+							Tela cheia
+						</Button>
+					</div>
 				</header>
 
 				<section

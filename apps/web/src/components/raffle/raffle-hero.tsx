@@ -1,9 +1,9 @@
-import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { RAFFLE_CAMPAIGN } from "@/data/raffle";
 import { RAFFLE_FORM_ID } from "./constants";
+import { RaffleArt } from "./raffle-art";
 
 export function RaffleHero() {
 	const { hero, prize, drawDateLabel } = RAFFLE_CAMPAIGN;
@@ -48,14 +48,11 @@ export function RaffleHero() {
 				</div>
 
 				<div className="overflow-hidden rounded-[20px] border border-white/15">
-					<Image
-						alt={hero.image.alt}
-						className="h-auto w-full"
-						height={hero.image.height}
+					<RaffleArt
+						image={hero.image}
+						imageClassName="h-auto w-full"
 						priority
 						sizes="(max-width: 1024px) 100vw, 600px"
-						src={hero.image.src}
-						width={hero.image.width}
 					/>
 				</div>
 			</Container>

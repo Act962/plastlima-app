@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RaffleConfirmationPage() {
-	const { confirmation, prize, drawDateLabel } = RAFFLE_CAMPAIGN;
+	const { confirmation, drawDateLabel } = RAFFLE_CAMPAIGN;
 
 	// Quem já tinha cadastro não vira um segundo registro: o contador sobe. A
 	// tela precisa dizer isso, senão parece que o envio não valeu.
@@ -57,8 +57,8 @@ export default async function RaffleConfirmationPage() {
 					</p>
 				)}
 				<p className="mx-auto mb-10 max-w-[540px] text-[15.5px] text-body-muted">
-					O sorteio do {prize} acontece em {drawDateLabel}. Se você for o
-					ganhador, entramos em contato pelo WhatsApp cadastrado.
+					O sorteio acontece em {drawDateLabel}. Se você for o ganhador do seu
+					grupo, entramos em contato pelo WhatsApp cadastrado.
 				</p>
 
 				<div className="mx-auto max-w-[540px] rounded-[20px] border border-line bg-surface p-[clamp(24px,3vw,36px)]">
