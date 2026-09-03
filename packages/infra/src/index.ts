@@ -16,5 +16,6 @@ export {
 } from "./preview/preview-token";
 export { createPrismaClient, getPrisma, PrismaClient } from "./prisma/client";
 export { PrismaContentRepository } from "./prisma/prisma-content-repository";
+export { PrismaLeadRepository } from "./prisma/prisma-lead-repository";
 export { PrismaMediaRepository } from "./prisma/prisma-media-repository";
 export { PrismaParticipantRepository } from "./prisma/prisma-participant-repository";

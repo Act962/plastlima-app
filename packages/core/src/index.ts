@@ -23,6 +23,10 @@ export { GetDraft } from "./application/use-cases/get-draft";
 export { GetPublishedContent } from "./application/use-cases/get-published-content";
 export { ListAssets } from "./application/use-cases/list-assets";
 export {
+	ListLeads,
+	type ListLeadsInput,
+} from "./application/use-cases/list-leads";
+export {
 	ListParticipants,
 	type ListParticipantsInput,
 } from "./application/use-cases/list-participants";
@@ -46,6 +50,15 @@ export {
 	SaveDraft,
 	type SaveDraftInput,
 } from "./application/use-cases/save-draft";
+export {
+	SetLeadStatus,
+	type SetLeadStatusInput,
+} from "./application/use-cases/set-lead-status";
+export {
+	SubmitLead,
+	type SubmitLeadInput,
+	type SubmitLeadOutput,
+} from "./application/use-cases/submit-lead";
 export {
 	UploadAsset,
 	type UploadAssetInput,
@@ -78,6 +91,24 @@ export {
 	type PublishStateValue,
 } from "./domain/content/value-objects/publish-state";
 export { RevisionNumber } from "./domain/content/value-objects/revision-number";
+export {
+	LEAD_KINDS,
+	LEAD_STATUSES,
+	Lead,
+	type LeadKind,
+	type LeadSnapshot,
+	type LeadStatus,
+} from "./domain/lead/entities/lead";
+export {
+	InvalidLeadError,
+	type LeadError,
+	LeadNotFoundError,
+} from "./domain/lead/errors";
+export type {
+	LeadListQuery,
+	LeadListResult,
+	LeadRepository,
+} from "./domain/lead/repositories/lead-repository";
 export {
 	MediaAsset,
 	type MediaAssetSnapshot,

@@ -51,8 +51,8 @@ The gates are **`pnpm run check` (Biome — lint/format), `pnpm run check-types`
 **Layered, dependency-inverted.** `packages/core` holds the domain (entities, value objects, errors) and use cases that depend only on **ports** (`ContentRepository`, `ParticipantRepository`, `StorageProvider`, `CacheInvalidator`, `Clock`, `AuditLogger`, `ContentValidator`). `packages/infra` implements those ports with Prisma, R2 and HTTP. The apps are the **composition roots** — the only places that wire a use case to a concrete adapter:
 
 - `apps/admin/src/lib/content.ts` (`createSaveDraft`, `createPublishDocument`, `createRollbackToRevision`, …)
-- `apps/admin/src/lib/participants.ts`, `apps/admin/src/lib/media.ts`, `apps/admin/src/lib/auth.ts`
-- `apps/web/src/lib/raffle/registration.ts`, `apps/web/src/lib/content/*.ts`
+- `apps/admin/src/lib/participants.ts`, `apps/admin/src/lib/leads.ts`, `apps/admin/src/lib/media.ts`, `apps/admin/src/lib/auth.ts`
+- `apps/web/src/lib/raffle/registration.ts`, `apps/web/src/lib/leads/submission.ts`, `apps/web/src/lib/content/*.ts`
 
 Keep the direction: nothing in `core` imports Prisma, Next or Zod schemas from the apps; nothing in a React component imports Prisma directly. Domain failures are **values, not exceptions** — use cases return `Result` (`ok`/`fail`) and the app maps the error to a message.
 
@@ -71,6 +71,8 @@ Publishing calls `PublishDocument` → `HttpRevalidationClient` → `POST /api/r
 
 **Raffle.** `Participant` + the `PhoneNumber` value object; `(campaignId, phone)` is a unique index and *the* dedup rule — a repeat signup increments `participationCount` instead of creating a row. The store is stored as a **snapshot** (`storeId`/`storeName`/`city`/`state`), so renaming a store later cannot rewrite where someone actually bought. The campaign id is deliberately duplicated in `apps/web/src/data/raffle.ts` and `apps/admin/src/lib/participants.ts` — the panel does not depend on the public app.
 
+**Leads.** The public forms (`/contato`, `/franquias`) write a `Lead` through a Server Action colocated with each route, and the panel reads them at `/leads`. The opposite of the raffle on purpose: **no deduplication** — the same person may send two different messages, and merging them would lose the second. `phone` keeps what the person typed; `phoneDigits` is the derived field that makes the panel's search match an unformatted number. `handledBy` records who took the lead on the row itself, because the question the team asks is "who talked to this person?".
+
 **Media.** `MediaAsset` in Cloudflare R2. `storageKey` derives from the SHA-256 `checksum`, which is unique in the database, so re-uploading the same file returns the existing record; `alt` is required. Uploads go through a Server Action, which is why `apps/admin/next.config.ts` raises `serverActions.bodySizeLimit` to 6mb.
 
 **Data-driven presentation (web).** Content lives in plain TypeScript constants typed by a matching `types/` file, and small components map over that data. `data/site.ts` holds `SITE`, `CONTACT`, `EXTERNAL_LINKS`, `SOCIAL_LINKS`; `data/navigation.ts` holds `NAV_ITEMS` and `LEGAL_ITEMS`. They feed the header, footer, `sitemap.ts` and JSON-LD — extend `LEGAL_ITEMS` and a legal page flows to both automatically. Never hardcode a phone number, email or nav link in a component.
@@ -87,6 +89,7 @@ apps/web/src/
 apps/admin/src/
   app/(painel)/ # one route per content key + midia/, config/
   app/participantes/  # raffle entries: search, pagination, CSV export
+                # (painel)/leads/ = form submissions: filters, CSV, mark as handled
   lib/          # composition roots, auth, csv
 ```
 

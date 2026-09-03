@@ -46,9 +46,15 @@ export function useFormSubmission<Values>({
 			await onSubmit(parsed.data);
 			setStatus("success");
 			toast.success(successMessage);
-		} catch {
+		} catch (cause) {
 			setStatus("error");
-			setError("Não foi possível enviar agora. Tente novamente em instantes.");
+			// O transporte já traduz a falha do servidor numa frase para o usuário;
+			// o texto genérico só entra quando não veio mensagem nenhuma.
+			setError(
+				cause instanceof Error && cause.message.length > 0
+					? cause.message
+					: "Não foi possível enviar agora. Tente novamente em instantes.",
+			);
 		}
 	}
 

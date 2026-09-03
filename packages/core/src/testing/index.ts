@@ -5,6 +5,7 @@ import type {
 } from "../domain/raffle/store-directory";
 
 export { InMemoryContentRepository } from "./in-memory-content-repository";
+export { InMemoryLeadRepository } from "./in-memory-lead-repository";
 export { InMemoryParticipantRepository } from "./in-memory-participant-repository";
 export { RecordingAuditLogger } from "./recording-audit-logger";
 export { RecordingCacheInvalidator } from "./recording-cache-invalidator";
