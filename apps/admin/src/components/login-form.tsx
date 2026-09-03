@@ -1,11 +1,11 @@
 "use client";
 
+import { Button } from "@plastlima-app/ui/components/button";
+import { Input } from "@plastlima-app/ui/components/input";
+import { Label } from "@plastlima-app/ui/components/label";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-
-const fieldClassName =
-	"w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition-colors focus:border-ring";
 
 export function LoginForm() {
 	const router = useRouter();
@@ -48,27 +48,27 @@ export function LoginForm() {
 
 	return (
 		<form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-			<label className="flex flex-col gap-1.5">
-				<span className="font-medium text-sm">E-mail</span>
-				<input
+			<div className="flex flex-col gap-2">
+				<Label htmlFor="email">E-mail</Label>
+				<Input
 					autoComplete="email"
-					className={fieldClassName}
+					id="email"
 					name="email"
 					required
 					type="email"
 				/>
-			</label>
+			</div>
 
-			<label className="flex flex-col gap-1.5">
-				<span className="font-medium text-sm">Senha</span>
-				<input
+			<div className="flex flex-col gap-2">
+				<Label htmlFor="password">Senha</Label>
+				<Input
 					autoComplete="current-password"
-					className={fieldClassName}
+					id="password"
 					name="password"
 					required
 					type="password"
 				/>
-			</label>
+			</div>
 
 			{error === null ? null : (
 				<p className="font-medium text-destructive text-sm" role="alert">
@@ -76,13 +76,9 @@ export function LoginForm() {
 				</p>
 			)}
 
-			<button
-				className="mt-2 w-full cursor-pointer rounded-lg bg-brand px-4 py-2.5 font-semibold text-sm text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-				disabled={isSubmitting}
-				type="submit"
-			>
+			<Button className="mt-2 w-full" disabled={isSubmitting} type="submit">
 				{isSubmitting ? "Entrando…" : "Entrar"}
-			</button>
+			</Button>
 		</form>
 	);
 }

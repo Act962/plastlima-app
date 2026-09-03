@@ -52,7 +52,12 @@ export {
 	timelineEntrySchema,
 } from "./content";
 export {
-	MAX_RECEIPT_DATA_URL_LENGTH,
+	type ContactMessage,
+	contactMessageSchema,
+	type FranchiseLead,
+	franchiseLeadSchema,
+} from "./lead";
+export {
 	type RaffleRegistration,
 	raffleRegistrationSchema,
 } from "./raffle";

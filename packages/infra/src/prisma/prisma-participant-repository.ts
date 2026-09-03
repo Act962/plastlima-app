@@ -5,6 +5,7 @@ import {
 	type ParticipantListQuery,
 	type ParticipantListResult,
 	type ParticipantRepository,
+	type RafflePool,
 } from "@plastlima-app/core";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { toCreateData, toDomain } from "./participant-mapper";
@@ -67,9 +68,12 @@ export class PrismaParticipantRepository implements ParticipantRepository {
 	 * apuração descartar. Numa campanha de alguns milhares, é a diferença entre
 	 * uma consulta e centenas de MB de tráfego.
 	 */
-	async listForDraw(campaignId: string): Promise<DrawCandidate[]> {
+	async listForDraw(
+		campaignId: string,
+		pool?: RafflePool,
+	): Promise<DrawCandidate[]> {
 		return this.prisma.participant.findMany({
-			where: { campaignId },
+			where: { campaignId, ...poolFilter(pool) },
 			orderBy: { createdAt: "asc" },
 			select: {
 				name: true,
@@ -110,11 +114,31 @@ export class PrismaParticipantRepository implements ParticipantRepository {
 	}
 }
 
+/**
+ * Filtro do grupo sorteado.
+ *
+ * "unidades" precisa aceitar `null` porque os participantes da campanha anterior
+ * foram gravados antes de o campo existir — e todos eles eram de loja.
+ */
+function poolFilter(pool?: RafflePool): Prisma.ParticipantWhereInput {
+	if (pool === undefined) {
+		return {};
+	}
+
+	return pool === "unidades"
+		? { OR: [{ pool: "unidades" }, { pool: null }] }
+		: { pool };
+}
+
 function buildWhere(query: ParticipantListQuery): Prisma.ParticipantWhereInput {
 	const search = query.search?.trim();
+	const scope: Prisma.ParticipantWhereInput = {
+		campaignId: query.campaignId,
+		...poolFilter(query.pool),
+	};
 
 	if (search === undefined || search.length === 0) {
-		return { campaignId: query.campaignId };
+		return scope;
 	}
 
 	const digits = search.replace(/\D/g, "");
@@ -125,9 +149,12 @@ function buildWhere(query: ParticipantListQuery): Prisma.ParticipantWhereInput {
 
 	if (digits.length > 0) {
 		or.push({ phone: { contains: digits } });
+		or.push({ document: { contains: digits } });
 	}
 
-	return { campaignId: query.campaignId, OR: or };
+	// `AND` em vez de espalhar o `OR` no mesmo objeto: o filtro de grupo já usa
+	// um `OR` próprio, e os dois no mesmo nível se sobrescreveriam.
+	return { AND: [scope, { OR: or }] };
 }
 
 /**

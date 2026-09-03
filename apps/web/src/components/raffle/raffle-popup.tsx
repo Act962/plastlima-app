@@ -2,7 +2,6 @@
 
 import { areEntriesOpen } from "@plastlima-app/core";
 import * as Dialog from "@radix-ui/react-dialog";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +9,7 @@ import { LuX } from "react-icons/lu";
 import { actionClassName } from "@/components/ui/action-styles";
 import { RAFFLE_CAMPAIGN } from "@/data/raffle";
 import { RAFFLE_FORM_ID } from "./constants";
+import { RaffleArt } from "./raffle-art";
 
 const OPEN_DELAY_MS = 1200;
 
@@ -58,14 +58,13 @@ export function RafflePopup() {
 					disponível (`max-h`), sempre preservando a proporção real da arte — nunca
 					corta e nunca força rolagem. */}
 					<div className="flex shrink-0 justify-center overflow-hidden">
-						<Image
-							alt={popup.image.alt}
-							className="h-auto max-h-[42vh] w-auto max-w-full"
-							height={popup.image.height}
+						<RaffleArt
+							className="w-full bg-ink/10 text-ink/60"
+							image={popup.image}
+							imageClassName="h-auto max-h-[42vh] w-auto max-w-full"
+							placeholderAspect="4 / 5"
 							priority
 							sizes="380px"
-							src={popup.image.src}
-							width={popup.image.width}
 						/>
 					</div>
 

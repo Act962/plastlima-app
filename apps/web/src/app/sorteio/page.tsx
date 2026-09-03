@@ -13,12 +13,16 @@ export const metadata: Metadata = buildPageMetadata({
 	title: RAFFLE_CAMPAIGN.seo.title,
 	description: RAFFLE_CAMPAIGN.seo.description,
 	path: "/sorteio",
-	image: {
-		url: RAFFLE_CAMPAIGN.hero.image.src,
-		width: RAFFLE_CAMPAIGN.hero.image.width,
-		height: RAFFLE_CAMPAIGN.hero.image.height,
-		alt: RAFFLE_CAMPAIGN.hero.image.alt,
-	},
+	// Sem arte própria, o OG cai na imagem padrão do site.
+	image:
+		RAFFLE_CAMPAIGN.hero.image === undefined
+			? undefined
+			: {
+					url: RAFFLE_CAMPAIGN.hero.image.src,
+					width: RAFFLE_CAMPAIGN.hero.image.width,
+					height: RAFFLE_CAMPAIGN.hero.image.height,
+					alt: RAFFLE_CAMPAIGN.hero.image.alt,
+				},
 });
 
 /**

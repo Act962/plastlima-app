@@ -1,4 +1,9 @@
-import { areEntriesOpen, splitByEligibility } from "@plastlima-app/core";
+import {
+	areEntriesOpen,
+	POOL_LABELS,
+	type RafflePool,
+	splitByEligibility,
+} from "@plastlima-app/core";
 import type { Metadata } from "next";
 import { DrawConsole } from "@/components/sorteio/draw-console";
 import { requireActor } from "@/lib/auth-actor";
@@ -41,11 +46,26 @@ function firstName(name: string): string {
 	return name.trim().split(/\s+/)[0] ?? name;
 }
 
-export default async function SorteioPage() {
+type PageProps = {
+	searchParams: Promise<{ grupo?: string }>;
+};
+
+/**
+ * O grupo padrão é o Centro de Distribuição só por ser o menor: abrir a tela já
+ * apontada para o grupo grande convidaria a apurar o sorteio errado por engano.
+ */
+const DEFAULT_POOL: RafflePool = "cd";
+
+export default async function SorteioPage({ searchParams }: PageProps) {
 	await requireActor();
+
+	const { grupo } = await searchParams;
+	const pool: RafflePool =
+		grupo === "cd" || grupo === "unidades" ? grupo : DEFAULT_POOL;
 
 	const candidates = await createParticipantRepository().listForDraw(
 		ADMIN_CAMPAIGN.id,
+		pool,
 	);
 
 	const split = splitByEligibility(candidates, {
@@ -59,6 +79,8 @@ export default async function SorteioPage() {
 			entriesOpen={areEntriesOpen(ADMIN_CAMPAIGN, new Date())}
 			lateCount={split.afterCutoff.length}
 			names={shuffleSample(split.eligible.map((one) => one.name))}
+			pool={pool}
+			poolLabel={POOL_LABELS[pool]}
 			totalEligible={split.eligible.length}
 		/>
 	);

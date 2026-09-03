@@ -1,24 +1,40 @@
-import type { ContactMessage, FranchiseLead } from "@/lib/schemas/lead";
+import type {
+	ContactMessage,
+	FranchiseLead,
+} from "@plastlima-app/core/schemas";
+import { submitContactMessageAction } from "@/app/contato/actions";
+import { submitFranchiseLeadAction } from "@/app/franquias/actions";
+import type { LeadActionResult } from "@/lib/leads/action-result";
 
 /**
- * Boundary between the forms and whatever delivers the lead (CRM, e-mail, API route).
- * Forms depend on this contract only, so swapping the transport never touches the UI.
+ * Fronteira entre os formulários e o que entrega o lead.
+ *
+ * Os formulários dependem só deste contrato, então trocar o transporte — hoje
+ * Server Action + banco, amanhã também um e-mail ou um CRM — não toca a UI.
  */
 export type LeadService = {
 	submitFranchiseLead(lead: FranchiseLead): Promise<void>;
 	submitContactMessage(message: ContactMessage): Promise<void>;
 };
 
-/**
- * Placeholder transport — mirrors the behaviour of the design prototype.
- * Replace with a real implementation (e.g. a `POST /api/leads` route) when the
- * backend endpoint is available; no component needs to change.
- */
 export const leadService: LeadService = {
 	async submitFranchiseLead(lead) {
-		console.info("[lead] franchise", lead);
+		await deliver(submitFranchiseLeadAction(lead));
 	},
 	async submitContactMessage(message) {
-		console.info("[lead] contact", message);
+		await deliver(submitContactMessageAction(message));
 	},
 };
+
+/**
+ * Converte o resultado da action na convenção do `useFormSubmission`, que
+ * espera uma promessa rejeitada para exibir o erro. A mensagem vem de lá: o
+ * hook mostra o texto do `Error`, não um genérico.
+ */
+async function deliver(pending: Promise<LeadActionResult>): Promise<void> {
+	const result = await pending;
+
+	if (result.status === "error") {
+		throw new Error(result.message);
+	}
+}

@@ -1,7 +1,9 @@
 import { fail, ok, type Result } from "../../shared/result";
 import { InvalidParticipantError } from "../errors";
+import type { RafflePool } from "../pool";
 import type { RaffleStore } from "../store-directory";
 import { PhoneNumber } from "../value-objects/phone-number";
+import { TaxDocument } from "../value-objects/tax-document";
 
 const MIN_NAME_LENGTH = 3;
 
@@ -16,6 +18,11 @@ export type ParticipantSnapshot = {
 	storeName: string;
 	city: string;
 	state: string;
+	/** Grupo sorteado — derivado da loja no cadastro, nunca enviado pelo cliente. */
+	pool: RafflePool;
+	/** CPF/CNPJ só com dígitos, ou `null` quando não informado. */
+	document: string | null;
+	documentDisplay: string | null;
 	receiptImage: string | null;
 	participationCount: number;
 	acceptedTermsAt: Date;
@@ -28,6 +35,7 @@ type ParticipantProps = {
 	name: string;
 	phone: PhoneNumber;
 	store: RaffleStore;
+	document: TaxDocument | null;
 	receiptImage: string | null;
 	participationCount: number;
 	acceptedTermsAt: Date;
@@ -40,6 +48,7 @@ type CreateParticipantInput = {
 	name: string;
 	phone: PhoneNumber;
 	store: RaffleStore;
+	document?: TaxDocument | null;
 	receiptImage?: string | null;
 	now: Date;
 };
@@ -80,6 +89,7 @@ export class Participant {
 					name,
 					phone: input.phone,
 					store: input.store,
+					document: input.document ?? null,
 					receiptImage: input.receiptImage ?? null,
 					participationCount: 1,
 					acceptedTermsAt: input.now,
@@ -103,7 +113,12 @@ export class Participant {
 					name: snapshot.storeName,
 					city: snapshot.city,
 					state: snapshot.state,
+					pool: snapshot.pool,
 				},
+				document:
+					snapshot.document === null
+						? null
+						: TaxDocument.restore(snapshot.document),
 				receiptImage: snapshot.receiptImage,
 				participationCount: snapshot.participationCount,
 				acceptedTermsAt: snapshot.acceptedTermsAt,
@@ -142,6 +157,14 @@ export class Participant {
 		return this.props.store;
 	}
 
+	get pool(): RafflePool {
+		return this.props.store.pool;
+	}
+
+	get document(): TaxDocument | null {
+		return this.props.document;
+	}
+
 	get participationCount(): number {
 		return this.props.participationCount;
 	}
@@ -161,6 +184,9 @@ export class Participant {
 			storeName: this.props.store.name,
 			city: this.props.store.city,
 			state: this.props.store.state,
+			pool: this.props.store.pool,
+			document: this.props.document?.value ?? null,
+			documentDisplay: this.props.document?.display ?? null,
 			receiptImage: this.props.receiptImage,
 			participationCount: this.props.participationCount,
 			acceptedTermsAt: this.props.acceptedTermsAt,

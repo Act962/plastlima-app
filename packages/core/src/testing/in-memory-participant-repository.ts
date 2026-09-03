@@ -1,6 +1,7 @@
 import type { DrawCandidate } from "../domain/raffle/draw";
 import { Participant } from "../domain/raffle/entities/participant";
 import { DuplicateParticipantError } from "../domain/raffle/errors";
+import type { RafflePool } from "../domain/raffle/pool";
 import type {
 	ParticipantListQuery,
 	ParticipantListResult,
@@ -77,14 +78,22 @@ export class InMemoryParticipantRepository implements ParticipantRepository {
 
 		const matching = [...this.items.values()]
 			.filter((participant) => participant.campaignId === query.campaignId)
+			.filter(
+				(participant) =>
+					query.pool === undefined || participant.pool === query.pool,
+			)
 			.filter((participant) => {
 				if (search === undefined) {
 					return true;
 				}
 
+				const digits = search.replace(/\D/g, "");
+
 				return (
 					participant.name.toLowerCase().includes(search) ||
-					participant.phone.value.includes(search.replace(/\D/g, ""))
+					participant.phone.value.includes(digits) ||
+					(digits.length > 0 &&
+						(participant.document?.value.includes(digits) ?? false))
 				);
 			})
 			.sort(
@@ -103,9 +112,13 @@ export class InMemoryParticipantRepository implements ParticipantRepository {
 		};
 	}
 
-	async listForDraw(campaignId: string): Promise<DrawCandidate[]> {
+	async listForDraw(
+		campaignId: string,
+		pool?: RafflePool,
+	): Promise<DrawCandidate[]> {
 		return [...this.items.values()]
 			.filter((participant) => participant.campaignId === campaignId)
+			.filter((participant) => pool === undefined || participant.pool === pool)
 			.map((participant) => {
 				const snapshot = participant.toSnapshot();
 

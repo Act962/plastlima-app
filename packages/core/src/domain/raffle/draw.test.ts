@@ -242,6 +242,7 @@ describe("buildDrawRecord", () => {
 
 		return buildDrawRecord({
 			campaignId: "kit-churrasco-2026",
+			pool: "unidades",
 			seed: "loteria-5987",
 			criterion: "simples",
 			cutoff: CUTOFF,

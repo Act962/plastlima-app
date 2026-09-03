@@ -12,6 +12,7 @@ import {
 import type { ParticipantRepository } from "../../domain/raffle/repositories/participant-repository";
 import type { StoreDirectory } from "../../domain/raffle/store-directory";
 import { PhoneNumber } from "../../domain/raffle/value-objects/phone-number";
+import { TaxDocument } from "../../domain/raffle/value-objects/tax-document";
 import { fail, ok, type Result } from "../../domain/shared/result";
 import type { Clock } from "../ports/clock";
 
@@ -19,7 +20,13 @@ export type RegisterParticipationInput = {
 	name: string;
 	/** Telefone cru, exatamente como o usuário digitou. */
 	phone: string;
+	/**
+	 * Loja escolhida. Determina o grupo sorteado — inclusive o Centro de
+	 * Distribuição, que é uma entrada do diretório como qualquer outra.
+	 */
 	storeId: string;
+	/** CPF/CNPJ como digitado. Opcional; quando vier, precisa ser válido. */
+	document?: string | null;
 	/** Data URL da imagem do cupom, já comprimida pelo navegador. */
 	receiptImage?: string | null;
 };
@@ -66,6 +73,24 @@ export class RegisterParticipation {
 			return fail(new UnknownStoreError(input.storeId));
 		}
 
+		// O campo é opcional: só validamos quando a pessoa digitou alguma coisa.
+		const rawDocument = input.document?.trim() ?? "";
+		let document: TaxDocument | null = null;
+
+		if (rawDocument.length > 0) {
+			const documentResult = TaxDocument.create(rawDocument);
+
+			if (!documentResult.ok) {
+				return documentResult;
+			}
+
+			document = documentResult.value;
+		}
+
+		// Uma campanha só para os dois grupos: esta busca é o que garante "uma
+		// pessoa concorre em um grupo apenas". Quem já está cadastrado apenas
+		// soma participação — e mantém o grupo do primeiro cadastro, mesmo que
+		// agora escolha uma loja do outro grupo.
 		const existing = await this.participants.findByPhone(
 			this.campaign.id,
 			phone.value,
@@ -80,6 +105,7 @@ export class RegisterParticipation {
 			name: input.name,
 			phone,
 			store,
+			document,
 			receiptImage: input.receiptImage,
 			now,
 		});

@@ -40,6 +40,19 @@ model Participant {
   city      String
   state     String
 
+  /// Grupo sorteado ("cd" ou "unidades"), derivado da loja no cadastro.
+  ///
+  /// Opcional no banco só por compatibilidade: os participantes da campanha
+  /// anterior foram gravados antes de o campo existir. O mapper trata ausência
+  /// como "unidades", que é o que eles de fato eram — o Centro de Distribuição
+  /// nem era opção na época.
+  pool String?
+
+  /// CPF/CNPJ, quando informado. `document` só com dígitos (é o que a busca do
+  /// painel usa); `documentDisplay` guarda a forma legível.
+  document        String?
+  documentDisplay String?
+
   /// Data URL da imagem do cupom, comprimida pelo navegador antes do envio.
   receiptImage String?
 
@@ -54,6 +67,7 @@ model Participant {
   @@unique([campaignId, phone])
   @@index([campaignId, createdAt])
   @@index([campaignId, name])
+  @@index([campaignId, pool, createdAt])
 }
 
 // ---------------------------------------------------------------------------
@@ -198,4 +212,49 @@ model Verification {
   updatedAt DateTime @updatedAt
 
   @@index([identifier])
+}
+
+// ---------------------------------------------------------------------------
+// Leads — formulários públicos do site (contato e franquias).
+// ---------------------------------------------------------------------------
+
+/// Uma pessoa que preencheu um formulário do site.
+///
+/// Sem índice único: ao contrário do sorteio, não há deduplicação. A mesma
+/// pessoa pode mandar duas mensagens diferentes, e juntar as duas perderia a
+/// segunda — o custo de uma linha repetida é menor que o de um contato perdido.
+///
+/// `handledBy` guarda o e-mail de quem atendeu no próprio lead, e não só num log
+/// à parte: a pergunta que a equipe faz é "quem falou com essa pessoa?", olhando
+/// a linha da tabela.
+model Lead {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  /// "contact" | "franchise" — de qual formulário veio.
+  kind String
+
+  name  String
+  email String
+  /// Obrigatório em franquias, ausente no formulário de contato. Guardado como
+  /// a pessoa digitou.
+  phone String?
+  /// Só os dígitos de `phone`. Existe para a busca do painel casar com um número
+  /// digitado sem a formatação.
+  phoneDigits String?
+
+  state   String?
+  city    String?
+  message String?
+
+  /// "new" | "handled".
+  status    String    @default("new")
+  handledAt DateTime?
+  /// E-mail de quem marcou como atendido.
+  handledBy String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([kind, createdAt])
+  @@index([createdAt])
 }

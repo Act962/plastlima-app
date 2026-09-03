@@ -1,16 +1,21 @@
 "use client";
 
+import { Button } from "@plastlima-app/ui/components/button";
+import { cn } from "@plastlima-app/ui/lib/utils";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
-export function SignOutButton() {
+/** Botão de sair — ícone no rodapé da barra lateral. */
+export function SignOutButton({ className }: { className?: string }) {
 	const router = useRouter();
 	const [isPending, setIsPending] = useState(false);
 
 	return (
-		<button
-			className="cursor-pointer rounded-lg border border-border px-3 py-1.5 font-medium text-sm transition-colors hover:bg-muted disabled:opacity-60"
+		<Button
+			aria-label="Sair"
+			className={cn("text-muted-foreground", className)}
 			disabled={isPending}
 			onClick={async () => {
 				setIsPending(true);
@@ -18,9 +23,11 @@ export function SignOutButton() {
 				router.push("/login");
 				router.refresh();
 			}}
-			type="button"
+			size="icon-sm"
+			title="Sair"
+			variant="ghost"
 		>
-			{isPending ? "Saindo…" : "Sair"}
-		</button>
+			<LogOut />
+		</Button>
 	);
 }

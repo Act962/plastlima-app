@@ -1,9 +1,12 @@
 import type { DrawCandidate } from "../draw";
 import type { Participant } from "../entities/participant";
+import type { RafflePool } from "../pool";
 
 export type ParticipantListQuery = {
 	campaignId: string;
-	/** Busca por nome ou telefone. Ignorada quando vazia. */
+	/** Restringe a um grupo sorteado. Sem valor, traz os dois. */
+	pool?: RafflePool;
+	/** Busca por nome, telefone ou documento. Ignorada quando vazia. */
 	search?: string;
 	page?: number;
 	pageSize?: number;
@@ -34,12 +37,13 @@ export interface ParticipantRepository {
 	list(query: ParticipantListQuery): Promise<ParticipantListResult>;
 
 	/**
-	 * Todos os participantes da campanha, na forma mínima que a apuração precisa.
+	 * Os participantes da campanha (opcionalmente de um grupo só), na forma
+	 * mínima que a apuração precisa.
 	 *
 	 * Existe separado de `list` porque o sorteio percorre a campanha inteira e
 	 * não pode arrastar o `receiptImage` junto: são data URLs de até 800 mil
 	 * caracteres, e uma base de alguns milhares viraria centenas de MB para
 	 * responder uma pergunta que só depende do telefone.
 	 */
-	listForDraw(campaignId: string): Promise<DrawCandidate[]>;
+	listForDraw(campaignId: string, pool?: RafflePool): Promise<DrawCandidate[]>;
 }

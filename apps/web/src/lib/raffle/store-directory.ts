@@ -2,6 +2,24 @@ import type { RaffleStore, StoreDirectory } from "@plastlima-app/core";
 import { STORE_LOCATIONS } from "@/data/locations";
 
 /**
+ * Id do Centro de Distribuição.
+ *
+ * O CD não é uma das unidades de `/unidades` — é a operação de atacado, e por
+ * isso não entra em `STORE_LOCATIONS`. Aqui ele existe como uma "loja" do
+ * diretório da campanha só para que o grupo sorteado seja **derivado** de onde a
+ * pessoa comprou, em vez de ser um campo à parte que poderia contradizer a loja.
+ */
+export const DISTRIBUTION_CENTER_ID = "centro-distribuicao";
+
+const DISTRIBUTION_CENTER: RaffleStore = {
+	id: DISTRIBUTION_CENTER_ID,
+	name: "Centro de Distribuição",
+	city: "Teresina",
+	state: "Piauí",
+	pool: "cd",
+};
+
+/**
  * Lojas participantes, derivadas da lista de unidades do site.
  *
  * O rótulo inclui a cidade porque há nomes repetidos entre estados — existem
@@ -14,12 +32,16 @@ export const RAFFLE_STORE_OPTIONS = STORE_LOCATIONS.map((location) => ({
 	state: location.state,
 }));
 
-const STORES: RaffleStore[] = STORE_LOCATIONS.map((location) => ({
-	id: location.id,
-	name: location.name,
-	city: location.city,
-	state: location.state,
-}));
+const STORES: RaffleStore[] = [
+	...STORE_LOCATIONS.map((location) => ({
+		id: location.id,
+		name: location.name,
+		city: location.city,
+		state: location.state,
+		pool: "unidades" as const,
+	})),
+	DISTRIBUTION_CENTER,
+];
 
 /**
  * Implementação da porta do domínio.

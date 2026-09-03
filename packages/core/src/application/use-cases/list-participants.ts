@@ -1,10 +1,12 @@
 import type { RaffleCampaign } from "../../domain/raffle/campaign";
+import type { RafflePool } from "../../domain/raffle/pool";
 import type {
 	ParticipantListResult,
 	ParticipantRepository,
 } from "../../domain/raffle/repositories/participant-repository";
 
 export type ListParticipantsInput = {
+	pool?: RafflePool;
 	search?: string;
 	page?: number;
 	pageSize?: number;
@@ -33,6 +35,7 @@ export class ListParticipants {
 
 		return this.participants.list({
 			campaignId: this.campaign.id,
+			pool: input.pool,
 			search: input.search?.trim() || undefined,
 			page: Math.max(1, input.page ?? 1),
 			pageSize,

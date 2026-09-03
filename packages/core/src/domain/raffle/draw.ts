@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { RafflePool } from "./pool";
 
 /**
  * Núcleo da apuração do sorteio: determinístico, puro e verificável.
@@ -60,6 +61,8 @@ export type EligibilitySplit = {
 
 export type DrawRecord = {
 	campanha: string;
+	/** Grupo apurado. A campanha tem dois, e cada um rende um ganhador. */
+	grupo: string;
 	criterio: string;
 	semente: string;
 	apuradoEm: string;
@@ -88,6 +91,11 @@ type DrawnParticipantRecord = {
 	bilhetes: number;
 	bilhete: string;
 	cadastradoEm: string;
+};
+
+export const POOL_LABELS: Record<RafflePool, string> = {
+	cd: "Centro de Distribuição",
+	unidades: "Lojas",
 };
 
 const CRITERION_LABELS: Record<DrawCriterion, string> = {
@@ -255,6 +263,7 @@ function toRecord(candidate: DrawnCandidate): DrawnParticipantRecord {
  */
 export function buildDrawRecord(input: {
 	campaignId: string;
+	pool: RafflePool;
 	seed: string;
 	criterion: DrawCriterion;
 	cutoff: Date;
@@ -272,6 +281,7 @@ export function buildDrawRecord(input: {
 
 	return {
 		campanha: input.campaignId,
+		grupo: POOL_LABELS[input.pool],
 		criterio: CRITERION_LABELS[input.criterion],
 		semente: input.seed,
 		apuradoEm: input.now.toISOString(),

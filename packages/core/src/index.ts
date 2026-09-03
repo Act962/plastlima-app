@@ -23,6 +23,10 @@ export { GetDraft } from "./application/use-cases/get-draft";
 export { GetPublishedContent } from "./application/use-cases/get-published-content";
 export { ListAssets } from "./application/use-cases/list-assets";
 export {
+	ListLeads,
+	type ListLeadsInput,
+} from "./application/use-cases/list-leads";
+export {
 	ListParticipants,
 	type ListParticipantsInput,
 } from "./application/use-cases/list-participants";
@@ -46,6 +50,15 @@ export {
 	SaveDraft,
 	type SaveDraftInput,
 } from "./application/use-cases/save-draft";
+export {
+	SetLeadStatus,
+	type SetLeadStatusInput,
+} from "./application/use-cases/set-lead-status";
+export {
+	SubmitLead,
+	type SubmitLeadInput,
+	type SubmitLeadOutput,
+} from "./application/use-cases/submit-lead";
 export {
 	UploadAsset,
 	type UploadAssetInput,
@@ -79,6 +92,24 @@ export {
 } from "./domain/content/value-objects/publish-state";
 export { RevisionNumber } from "./domain/content/value-objects/revision-number";
 export {
+	LEAD_KINDS,
+	LEAD_STATUSES,
+	Lead,
+	type LeadKind,
+	type LeadSnapshot,
+	type LeadStatus,
+} from "./domain/lead/entities/lead";
+export {
+	InvalidLeadError,
+	type LeadError,
+	LeadNotFoundError,
+} from "./domain/lead/errors";
+export type {
+	LeadListQuery,
+	LeadListResult,
+	LeadRepository,
+} from "./domain/lead/repositories/lead-repository";
+export {
 	MediaAsset,
 	type MediaAssetSnapshot,
 } from "./domain/media/entities/media-asset";
@@ -101,6 +132,7 @@ export {
 	drawOrder,
 	type EligibilitySplit,
 	nationalDigits,
+	POOL_LABELS,
 	parsePhoneList,
 	splitByEligibility,
 	ticketFor,
@@ -116,12 +148,18 @@ export {
 	type DrawError,
 	DuplicateParticipantError,
 	EmptyDrawError,
+	InvalidDocumentError,
 	InvalidParticipantError,
 	InvalidPhoneError,
 	MissingSeedError,
 	type RegistrationError,
 	UnknownStoreError,
 } from "./domain/raffle/errors";
+export {
+	isRafflePool,
+	RAFFLE_POOLS,
+	type RafflePool,
+} from "./domain/raffle/pool";
 export type {
 	ParticipantListQuery,
 	ParticipantListResult,
@@ -132,6 +170,10 @@ export type {
 	StoreDirectory,
 } from "./domain/raffle/store-directory";
 export { PhoneNumber } from "./domain/raffle/value-objects/phone-number";
+export {
+	TaxDocument,
+	type TaxDocumentKind,
+} from "./domain/raffle/value-objects/tax-document";
 export type { Actor } from "./domain/shared/actor";
 export { deepEqual } from "./domain/shared/deep-equal";
 export type { JsonValue } from "./domain/shared/json";

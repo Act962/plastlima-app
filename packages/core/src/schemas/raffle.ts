@@ -1,18 +1,6 @@
 import { z } from "zod";
 import { PhoneNumber } from "../domain/raffle/value-objects/phone-number";
-
-/**
- * Teto do data URL do cupom.
- *
- * O navegador comprime para ~200KB antes de enviar (ver `compress-image.ts` no
- * app web), o que em base64 dá ~270 mil caracteres. O limite generoso aqui é a
- * rede de segurança do servidor contra quem burlar a compressão do cliente — o
- * body de uma Server Action tem 1MB.
- */
-export const MAX_RECEIPT_DATA_URL_LENGTH = 800_000;
-
-const RECEIPT_DATA_URL_PATTERN =
-	/^data:image\/(jpeg|png|webp);base64,[\w+/=]+$/;
+import { TaxDocument } from "../domain/raffle/value-objects/tax-document";
 
 /**
  * Contrato do formulário de participação.
@@ -34,12 +22,23 @@ export const raffleRegistrationSchema = z.object({
 		.min(1, "Informe seu WhatsApp.")
 		.refine(PhoneNumber.isValid, "Informe um WhatsApp válido com DDD."),
 
-	storeId: z.string().trim().min(1, "Selecione a loja onde você comprou."),
+	/**
+	 * Onde a pessoa comprou. O Centro de Distribuição é uma das opções, e é daqui
+	 * que o servidor deduz o grupo sorteado — o cliente nunca envia o grupo.
+	 */
+	storeId: z.string().trim().min(1, "Selecione onde você comprou."),
 
-	receiptImage: z
+	/**
+	 * CPF ou CNPJ. Opcional: string vazia passa, qualquer coisa preenchida
+	 * precisa fechar nos dígitos verificadores.
+	 */
+	document: z
 		.string()
-		.regex(RECEIPT_DATA_URL_PATTERN, "Envie uma imagem válida.")
-		.max(MAX_RECEIPT_DATA_URL_LENGTH, "A imagem do cupom é muito grande.")
+		.trim()
+		.refine(
+			(value) => value.length === 0 || TaxDocument.isValid(value),
+			"Informe um CPF ou CNPJ válido.",
+		)
 		.optional(),
 
 	acceptedTerms: z
