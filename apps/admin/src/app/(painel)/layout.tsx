@@ -4,10 +4,11 @@ import {
 } from "@plastlima-app/ui/components/sidebar";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/painel/app-sidebar";
+import { NewLeadsBadge } from "@/components/painel/new-leads-badge";
 import { PanelTopbar } from "@/components/painel/panel-topbar";
 import { auth } from "@/lib/auth";
-import { createListLeads } from "@/lib/leads";
 
 export default async function PainelLayout({
 	children,
@@ -18,13 +19,6 @@ export default async function PainelLayout({
 		redirect("/login");
 	}
 
-	// Contador de leads novos no menu. Envolto em try/catch porque um banco fora
-	// do ar não pode derrubar todo o painel — o resto das telas trata a própria
-	// falha, e aqui a ausência do número é só um menu sem o selo.
-	const newLeads = await createListLeads()
-		.countNew()
-		.catch(() => 0);
-
 	// A sidebar lembra se estava recolhida entre visitas (cookie que ela mesma
 	// grava); lê-lo aqui evita o "pisca" de abrir aberta e fechar no cliente.
 	const cookieStore = await cookies();
@@ -34,7 +28,18 @@ export default async function PainelLayout({
 
 	return (
 		<SidebarProvider defaultOpen={defaultOpen}>
-			<AppSidebar email={session.user.email} newLeads={newLeads} role={role} />
+			{/* O contador de leads entra como slot, atrás de Suspense: é a única
+			consulta ao banco que havia neste layout, e o layout está no caminho de
+			toda navegação — esperá-la aqui atrasava a troca de qualquer página. */}
+			<AppSidebar
+				email={session.user.email}
+				leadsBadge={
+					<Suspense fallback={null}>
+						<NewLeadsBadge />
+					</Suspense>
+				}
+				role={role}
+			/>
 			{/* `min-w-0`: o inset é um flex item, e sem isso o mínimo automático dele
 			é a largura do conteúdo — uma tabela larga empurraria a página inteira
 			para os lados em vez de rolar dentro do próprio contêiner. */}

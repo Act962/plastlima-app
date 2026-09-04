@@ -8,24 +8,28 @@ import {
 	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
-	SidebarMenuBadge,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarRail,
 } from "@plastlima-app/ui/components/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { SignOutButton } from "@/components/sign-out-button";
 import { NAV_GROUPS } from "./nav-items";
 
 type Props = {
 	email: string;
 	role: string;
-	/** Leads ainda não atendidos — vira o contador no item "Leads". */
-	newLeads: number;
+	/**
+	 * Selo de leads não atendidos, no item "Leads". Chega pronto do layout como
+	 * slot para que a consulta que o produz fique atrás de um `<Suspense>` e não
+	 * atrase a navegação.
+	 */
+	leadsBadge?: ReactNode;
 };
 
-export function AppSidebar({ email, role, newLeads }: Props) {
+export function AppSidebar({ email, role, leadsBadge }: Props) {
 	const pathname = usePathname();
 
 	return (
@@ -75,9 +79,7 @@ export function AppSidebar({ email, role, newLeads }: Props) {
 											<Icon />
 											<span>{item.label}</span>
 										</SidebarMenuButton>
-										{item.href === "/leads" && newLeads > 0 ? (
-											<SidebarMenuBadge>{newLeads}</SidebarMenuBadge>
-										) : null}
+										{item.href === "/leads" ? leadsBadge : null}
 									</SidebarMenuItem>
 								);
 							})}

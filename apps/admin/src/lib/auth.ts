@@ -18,6 +18,21 @@ export const auth = betterAuth({
 	session: {
 		expiresIn: 60 * 60 * 24 * 7,
 		updateAge: 60 * 60 * 24,
+		/**
+		 * A sessão vai assinada num cookie curto, então validar não custa uma ida
+		 * ao banco. Importa porque *toda* página e action do painel chama
+		 * `getSession` — no serverless da Vercel, com o Mongo no Atlas, era uma
+		 * viagem de rede antes de qualquer consulta útil da tela.
+		 *
+		 * O preço é a revogação: encerrar uma sessão só faz efeito em outro
+		 * dispositivo quando o cache expira. Cinco minutos é o compromisso — se um
+		 * dia for preciso cortar acesso na hora, baixe o `maxAge` ou passe
+		 * `disableCookieCache` na chamada sensível.
+		 */
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60,
+		},
 	},
 	advanced: {
 		database: {

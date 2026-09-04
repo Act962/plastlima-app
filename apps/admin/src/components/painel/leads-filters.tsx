@@ -9,9 +9,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@plastlima-app/ui/components/select";
+import { cn } from "@plastlima-app/ui/lib/utils";
 import { Download, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 /** Sentinela de "sem filtro": o Select precisa de um valor, a URL não. */
 const ALL = "all";
@@ -40,6 +41,10 @@ type Props = {
 
 export function LeadsFilters({ search, kind, status }: Props) {
 	const router = useRouter();
+	// `useTransition` para o clique não parecer travado: a navegação por
+	// searchParams volta ao servidor, e sem o estado pendente o filtro fica
+	// "surdo" até a resposta chegar. Com ele, a lista escurece e o botão avisa.
+	const [isPending, startTransition] = useTransition();
 	const [term, setTerm] = useState(search ?? "");
 	const [origem, setOrigem] = useState(kind ?? ALL);
 	const [situacao, setSituacao] = useState(status ?? ALL);
@@ -54,7 +59,9 @@ export function LeadsFilters({ search, kind, status }: Props) {
 		if (s !== ALL) params.set("situacao", s);
 
 		const query = params.toString();
-		router.push(query ? `/leads?${query}` : "/leads");
+		startTransition(() => {
+			router.push(query ? `/leads?${query}` : "/leads");
+		});
 	}
 
 	function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -72,7 +79,12 @@ export function LeadsFilters({ search, kind, status }: Props) {
 		: "/leads/exportar";
 
 	return (
-		<div className="flex flex-wrap items-center gap-2">
+		<div
+			className={cn(
+				"flex flex-wrap items-center gap-2 transition-opacity",
+				isPending && "opacity-60",
+			)}
+		>
 			<search className="min-w-[200px] flex-1">
 				<form className="relative" onSubmit={onSubmit}>
 					<Search
@@ -130,8 +142,8 @@ export function LeadsFilters({ search, kind, status }: Props) {
 				</SelectContent>
 			</Select>
 
-			<Button onClick={() => apply()} variant="outline">
-				Filtrar
+			<Button disabled={isPending} onClick={() => apply()} variant="outline">
+				{isPending ? "Filtrando…" : "Filtrar"}
 			</Button>
 
 			<a className={buttonVariants({ className: "ml-auto" })} href={exportHref}>
