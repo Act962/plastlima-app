@@ -1,4 +1,18 @@
-import type { RaffleCampaignContent } from "@/types/raffle";
+import type { RaffleCampaignContent, RaffleImage } from "@/types/raffle";
+
+/**
+ * Peça única da campanha, usada no hero e no pop-up.
+ *
+ * É a arte de rede social (4:5, em pé). O hero foi feito para uma peça
+ * horizontal, então lá ela entra com largura limitada para não virar uma torre
+ * ao lado do texto — ver `raffle-hero.tsx`.
+ */
+const RAFFLE_ART: RaffleImage = {
+	src: "/banners/sorteio-tv-42.jpeg",
+	alt: 'Arte da promoção Plastlima e Vinco: "Compre e concorra" a uma Smart TV de 42 polegadas na compra dos produtos Vinco.',
+	width: 1122,
+	height: 1402,
+};
 
 /**
  * Campanha "Duas TVs de 42" — outubro de 2026".
@@ -11,9 +25,9 @@ import type { RaffleCampaignContent } from "@/types/raffle";
  * dela a página deixa de exibir o formulário e a Server Action recusa envios.
  * O sorteio é em 16/10 e as inscrições fecham na véspera.
  *
- * PENDENTE: a arte da campanha ainda não existe. Enquanto `hero.image` e
- * `popup.image` ficarem sem valor, as telas reservam o espaço com um marcador —
- * basta pôr o arquivo em `public/banners/` e preencher o campo.
+ * A campanha tem uma arte só (`RAFFLE_ART`), a de rede social, servindo o hero e
+ * o pop-up. Se um dia chegar uma peça horizontal feita para o hero, é só apontar
+ * `hero.image` para ela.
  */
 export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 	id: "tv-42-2026",
@@ -27,7 +41,7 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 		title: 'Compre na Plastlima e concorra a uma TV 42"',
 		lead: "São duas TVs: uma para quem compra no Centro de Distribuição e outra para quem compra nas lojas. Qualquer valor de compra já garante sua participação.",
 		ctaLabel: "Quero participar",
-		// image: preencher quando a arte ficar pronta.
+		image: RAFFLE_ART,
 	},
 
 	steps: [
@@ -102,7 +116,7 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 			"São duas TVs sorteadas em 16 de outubro: uma para clientes do Centro de Distribuição e outra para clientes das lojas. Compre e cadastre-se.",
 		ctaLabel: "Quero participar",
 		dismissLabel: "Agora não",
-		// image: preencher quando a arte ficar pronta.
+		image: RAFFLE_ART,
 	},
 
 	seo: {

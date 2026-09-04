@@ -47,12 +47,15 @@ export function RaffleHero() {
 					</a>
 				</div>
 
-				<div className="overflow-hidden rounded-[20px] border border-white/15">
+				{/* A arte da campanha é a peça 4:5 de rede social, em pé. Solta na
+				coluna ela ficaria mais alta que o texto ao lado e esticaria o hero,
+				então a largura é limitada e o bloco fica centrado na célula. */}
+				<div className="mx-auto w-full max-w-[420px] overflow-hidden rounded-[20px] border border-white/15">
 					<RaffleArt
 						image={hero.image}
 						imageClassName="h-auto w-full"
 						priority
-						sizes="(max-width: 1024px) 100vw, 600px"
+						sizes="(max-width: 1024px) 100vw, 420px"
 					/>
 				</div>
 			</Container>
