@@ -1,29 +1,11 @@
 "use client";
 
-import {
-	closestCenter,
-	DndContext,
-	type DragEndEvent,
-	KeyboardSensor,
-	PointerSensor,
-	useSensor,
-	useSensors,
-} from "@dnd-kit/core";
-import {
-	restrictToParentElement,
-	restrictToVerticalAxis,
-} from "@dnd-kit/modifiers";
-import {
-	arrayMove,
-	SortableContext,
-	sortableKeyboardCoordinates,
-	useSortable,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type {
 	HeroBannerContent,
 	HomeContent,
+	MediaItemContent,
 } from "@plastlima-app/core/schemas";
 import { Badge } from "@plastlima-app/ui/components/badge";
 import { Button } from "@plastlima-app/ui/components/button";
@@ -43,6 +25,8 @@ import {
 import { ImageThumb } from "@/components/image-thumb";
 import { BannerDialog } from "./banner-dialog";
 import { HistoryDrawer } from "./history-drawer";
+import { OfferDialog } from "./offer-dialog";
+import { SortableList, useStableIds } from "./sortable-list";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
@@ -80,24 +64,18 @@ export function HomeEditor({
 
 	// `null` = diálogo fechado; `"new"` = criando; número = editando aquele índice.
 	const [editing, setEditing] = useState<"new" | number | null>(null);
+	const [editingOffer, setEditingOffer] = useState<"new" | number | null>(null);
 
 	const router = useRouter();
 	const isFirstRender = useRef(true);
 
-	// Ids estáveis por identidade do objeto: reordenar preserva a referência de
-	// cada banner (o `arrayMove` só embaralha), então o id acompanha o item; ao
-	// editar, o objeto é trocado e ganha um id novo — sem efeito na ordenação.
-	const bannerIds = useRef(new WeakMap<HeroBannerContent, string>());
-	const bannerIdSeq = useRef(0);
+	const bannerId = useStableIds<HeroBannerContent>("banner");
+	const offerId = useStableIds<MediaItemContent>("offer");
 
-	const sensors = useSensors(
-		// Exige mover 6px antes de arrastar, senão um clique em "Editar" viraria
-		// um arrasto.
-		useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		}),
-	);
+	// O rascunho não passa por validação ao ser salvo (é o ponto do autosave),
+	// então um documento antigo pode chegar aqui sem a lista. Ler por uma variável
+	// evita espalhar o `??` por toda a seção.
+	const offers = home.offers ?? [];
 
 	// Autosave com debounce: nada disso afeta o site até publicar, então salvar é
 	// barato e evita a falha nº 1 de painel caseiro — perder trabalho por
@@ -168,30 +146,45 @@ export function HomeEditor({
 		});
 	}
 
-	function bannerId(banner: HeroBannerContent): string {
-		let id = bannerIds.current.get(banner);
-		if (id === undefined) {
-			bannerIdSeq.current += 1;
-			id = `banner-${bannerIdSeq.current}`;
-			bannerIds.current.set(banner, id);
+	function submitOffer(offer: MediaItemContent) {
+		if (editingOffer === "new") {
+			updateHome({ ...home, offers: [...offers, offer] });
+			return;
 		}
-		return id;
+
+		if (typeof editingOffer === "number") {
+			updateHome({
+				...home,
+				offers: offers.map((current, i) =>
+					i === editingOffer ? offer : current,
+				),
+			});
+		}
 	}
 
-	function handleDragEnd(event: DragEndEvent) {
-		const { active, over } = event;
-		if (over === null || active.id === over.id) {
-			return;
-		}
+	function removeOffer(index: number) {
+		const removed = offers[index];
+		updateHome({ ...home, offers: offers.filter((_, i) => i !== index) });
 
-		const ids = home.banners.map(bannerId);
-		const from = ids.indexOf(String(active.id));
-		const to = ids.indexOf(String(over.id));
-		if (from === -1 || to === -1) {
-			return;
-		}
-
-		updateHome({ ...home, banners: arrayMove(home.banners, from, to) });
+		toast("Novidade removida.", {
+			action: {
+				label: "Desfazer",
+				onClick: () => {
+					setHome((current) => {
+						const list = current.offers ?? [];
+						return {
+							...current,
+							offers: [
+								...list.slice(0, index),
+								removed as MediaItemContent,
+								...list.slice(index),
+							],
+						};
+					});
+					setDirty(true);
+				},
+			},
+		});
 	}
 
 	async function handlePublish() {
@@ -271,7 +264,7 @@ export function HomeEditor({
 				<header className="mb-6">
 					<h1 className="font-bold text-2xl tracking-tight">Início</h1>
 					<p className="mt-1 text-muted-foreground text-sm">
-						Banners do carrossel da página inicial.
+						Banners do carrossel e novidades da página inicial.
 					</p>
 				</header>
 
@@ -310,32 +303,75 @@ export function HomeEditor({
 							Nenhum banner ainda. Use “Novo banner” para adicionar o primeiro.
 						</p>
 					) : (
-						<DndContext
-							collisionDetection={closestCenter}
-							modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-							onDragEnd={handleDragEnd}
-							sensors={sensors}
+						<SortableList
+							ids={home.banners.map(bannerId)}
+							onReorder={(from, to) =>
+								updateHome({
+									...home,
+									banners: arrayMove(home.banners, from, to),
+								})
+							}
 						>
-							<SortableContext
-								items={home.banners.map(bannerId)}
-								strategy={verticalListSortingStrategy}
-							>
-								<ul className="flex flex-col gap-2.5">
-									{home.banners.map((banner, index) => (
-										<BannerRow
-											banner={banner}
-											hasIssue={issues.some((issue) =>
-												issue.path.startsWith(`banners.${index}.`),
-											)}
-											id={bannerId(banner)}
-											key={bannerId(banner)}
-											onEdit={() => setEditing(index)}
-											onRemove={() => removeBanner(index)}
-										/>
-									))}
-								</ul>
-							</SortableContext>
-						</DndContext>
+							{home.banners.map((banner, index) => (
+								<BannerRow
+									banner={banner}
+									hasIssue={issues.some((issue) =>
+										issue.path.startsWith(`banners.${index}.`),
+									)}
+									id={bannerId(banner)}
+									key={bannerId(banner)}
+									onEdit={() => setEditing(index)}
+									onRemove={() => removeBanner(index)}
+								/>
+							))}
+						</SortableList>
+					)}
+				</section>
+
+				<section className="mt-10 flex flex-col gap-4">
+					<div className="flex items-center justify-between">
+						<div>
+							<h2 className="font-semibold text-lg">Novidades</h2>
+							<p className="mt-0.5 text-muted-foreground text-sm">
+								Os cards de ofertas e encartes da home. Todos levam ao catálogo.
+							</p>
+						</div>
+						<Button
+							onClick={() => setEditingOffer("new")}
+							size="sm"
+							type="button"
+							variant="outline"
+						>
+							<Plus className="size-4" />
+							Nova novidade
+						</Button>
+					</div>
+
+					{offers.length === 0 ? (
+						<p className="rounded-xl border border-dashed px-6 py-12 text-center text-muted-foreground text-sm">
+							Nenhuma novidade ainda. Use “Nova novidade” para adicionar a
+							primeira.
+						</p>
+					) : (
+						<SortableList
+							ids={offers.map(offerId)}
+							onReorder={(from, to) =>
+								updateHome({ ...home, offers: arrayMove(offers, from, to) })
+							}
+						>
+							{offers.map((offer, index) => (
+								<OfferRow
+									hasIssue={issues.some((issue) =>
+										issue.path.startsWith(`offers.${index}.`),
+									)}
+									id={offerId(offer)}
+									key={offerId(offer)}
+									offer={offer}
+									onEdit={() => setEditingOffer(index)}
+									onRemove={() => removeOffer(index)}
+								/>
+							))}
+						</SortableList>
 					)}
 				</section>
 			</div>
@@ -351,6 +387,21 @@ export function HomeEditor({
 				}}
 				onSubmit={submitBanner}
 				open={editing !== null}
+			/>
+
+			<OfferDialog
+				initial={
+					typeof editingOffer === "number"
+						? (offers[editingOffer] ?? null)
+						: null
+				}
+				onOpenChange={(open) => {
+					if (!open) {
+						setEditingOffer(null);
+					}
+				}}
+				onSubmit={submitOffer}
+				open={editingOffer !== null}
 			/>
 		</div>
 	);
@@ -531,6 +582,93 @@ function BannerRow({
 				</Button>
 				<Button
 					aria-label="Remover banner"
+					onClick={onRemove}
+					size="icon-sm"
+					type="button"
+					variant="ghost"
+				>
+					<Trash2 className="size-4 text-destructive" />
+				</Button>
+			</div>
+		</li>
+	);
+}
+
+function OfferRow({
+	id,
+	offer,
+	hasIssue,
+	onEdit,
+	onRemove,
+}: {
+	id: string;
+	offer: MediaItemContent;
+	hasIssue: boolean;
+	onEdit: () => void;
+	onRemove: () => void;
+}) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id });
+
+	return (
+		<li
+			className={cn(
+				"flex items-center gap-2 rounded-xl border bg-card p-2.5",
+				hasIssue ? "border-destructive/50" : "border-border",
+				isDragging && "z-10 shadow-lg",
+			)}
+			ref={setNodeRef}
+			style={{ transform: CSS.Transform.toString(transform), transition }}
+		>
+			<button
+				aria-label="Arrastar para reordenar"
+				className="flex h-8 w-6 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground hover:text-foreground active:cursor-grabbing"
+				type="button"
+				{...attributes}
+				{...listeners}
+			>
+				<GripVertical className="size-4" />
+			</button>
+
+			{/* Miniatura quadrada: é assim que o card sai no site. */}
+			<button
+				className="size-14 shrink-0 overflow-hidden rounded-lg border border-border"
+				onClick={onEdit}
+				title="Editar novidade"
+				type="button"
+			>
+				<ImageThumb className="h-full w-full" src={offer.src} />
+			</button>
+
+			<div className="min-w-0 flex-1">
+				<p
+					className={cn(
+						"truncate font-medium text-sm",
+						offer.alt ? "" : "text-muted-foreground italic",
+					)}
+				>
+					{offer.alt || "(sem texto alternativo)"}
+				</p>
+				{hasIssue ? (
+					<span className="text-destructive text-xs">
+						Faltam campos obrigatórios
+					</span>
+				) : null}
+			</div>
+
+			<div className="flex items-center gap-1">
+				<Button onClick={onEdit} size="sm" type="button" variant="outline">
+					<Pencil className="size-3.5" />
+					Editar
+				</Button>
+				<Button
+					aria-label="Remover novidade"
 					onClick={onRemove}
 					size="icon-sm"
 					type="button"
