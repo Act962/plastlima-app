@@ -1,7 +1,8 @@
 export type RaffleStep = {
 	id: string;
 	title: string;
-	description: string;
+	/** Um parágrafo por item — passos com mais de uma regra usam vários. */
+	description: string[];
 };
 
 /**

@@ -27,9 +27,11 @@ export function HowItWorks() {
 							<h3 className="mb-2 font-display font-extrabold text-[19px] text-ink">
 								{step.title}
 							</h3>
-							<p className="text-[15.5px] text-body-muted leading-[1.6]">
-								{step.description}
-							</p>
+							<div className="flex flex-col gap-2 text-[15.5px] text-body-muted leading-[1.6]">
+								{step.description.map((paragraph) => (
+									<p key={paragraph}>{paragraph}</p>
+								))}
+							</div>
 						</li>
 					))}
 				</ol>

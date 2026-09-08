@@ -39,7 +39,7 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 	hero: {
 		eyebrow: "Promoção Plastlima",
 		title: 'Compre na Plastlima e concorra a uma TV 42"',
-		lead: "São duas TVs: uma para quem compra no Centro de Distribuição e outra para quem compra nas lojas. Qualquer valor de compra já garante sua participação.",
+		lead: "São duas TVs: uma para quem compra no Centro de Distribuição e outra para quem compra nas lojas.",
 		ctaLabel: "Quero participar",
 		image: RAFFLE_ART,
 	},
@@ -48,25 +48,29 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 		{
 			id: "compre",
 			title: "Faça uma compra",
-			description:
-				"Qualquer valor já garante sua participação — no Centro de Distribuição ou em qualquer uma das nossas lojas.",
+			description: [
+				"Nas franquias: qualquer compra de produtos Vinco garante sua participação.",
+				"No Centro de Distribuição (CD): participe realizando compras a partir de R$ 200,00.",
+			],
 		},
 		{
 			id: "acesse",
 			title: "Acesse o site",
-			description: "Entre na página oficial da campanha.",
+			description: ["Entre na página oficial da campanha."],
 		},
 		{
 			id: "cadastre",
 			title: "Faça seu cadastro",
-			description:
+			description: [
 				"Informe seu nome, WhatsApp e onde você comprou. Se quiser, adicione seu CPF ou CNPJ.",
+			],
 		},
 		{
 			id: "confirme",
 			title: "Participação confirmada",
-			description:
+			description: [
 				"Pronto: você já está concorrendo à TV do seu grupo, no sorteio de 16 de outubro.",
+			],
 		},
 	],
 
