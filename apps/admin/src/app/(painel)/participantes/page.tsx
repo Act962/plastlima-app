@@ -14,6 +14,7 @@ import { Download, Search } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { PageHeader, PageShell } from "@/components/painel/page-shell";
+import { ReceiptThumbnail } from "@/components/receipt-thumbnail";
 import { requireActor } from "@/lib/auth-actor";
 import { createListParticipants } from "@/lib/participants";
 
@@ -195,6 +196,7 @@ export default async function ParticipantsPage({ searchParams }: PageProps) {
 								<TableHead>Grupo</TableHead>
 								<TableHead>Onde comprou</TableHead>
 								<TableHead>CPF/CNPJ</TableHead>
+								<TableHead>Cupom</TableHead>
 								<TableHead className="text-right">Cadastros</TableHead>
 								<TableHead>Data</TableHead>
 							</TableRow>
@@ -236,6 +238,16 @@ export default async function ParticipantsPage({ searchParams }: PageProps) {
 										<TableCell className="tabular-nums">
 											{data.documentDisplay ?? (
 												<span className="text-muted-foreground">—</span>
+											)}
+										</TableCell>
+										<TableCell>
+											{data.receiptImage === null ? (
+												<span className="text-muted-foreground">—</span>
+											) : (
+												<ReceiptThumbnail
+													dataUrl={data.receiptImage}
+													participantName={data.name}
+												/>
 											)}
 										</TableCell>
 										<TableCell className="text-right tabular-nums">

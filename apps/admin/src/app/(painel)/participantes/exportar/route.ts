@@ -46,6 +46,7 @@ export async function GET(request: Request): Promise<Response> {
 			data.city,
 			data.state,
 			data.documentDisplay ?? "",
+			data.receiptImage === null ? "não" : "sim",
 			String(data.participationCount),
 			dateFormatter.format(data.createdAt),
 		];
@@ -54,6 +55,9 @@ export async function GET(request: Request): Promise<Response> {
 	// O grupo vai na planilha mesmo quando o filtro já o restringe: o arquivo
 	// circula fora do painel, e a ata da apuração precisa dizer de qual sorteio
 	// aquela lista é.
+	//
+	// A coluna do cupom é apenas sim/não: a imagem em base64 tornaria o arquivo
+	// inabrível no Excel. Para conferir o cupom, use a miniatura no painel.
 	const csv = toCsv(
 		[
 			"Nome",
@@ -64,6 +68,7 @@ export async function GET(request: Request): Promise<Response> {
 			"Cidade",
 			"Estado",
 			"CPF/CNPJ",
+			"Enviou cupom",
 			"Cadastros",
 			"Data do cadastro",
 		],
