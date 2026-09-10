@@ -23,7 +23,10 @@ const RAFFLE_ART: RaffleImage = {
  *
  * A data de encerramento é a única configuração com efeito funcional: depois
  * dela a página deixa de exibir o formulário e a Server Action recusa envios.
- * O sorteio é em 16/10 e as inscrições fecham na véspera.
+ * Ela vem do regulamento oficial — o período da campanha vai até 14/10, e o
+ * sorteio é em 16/10. Mexer aqui sem mexer lá faz o site aceitar cadastro fora
+ * do prazo que o regulamento promete; a mesma data está em
+ * `apps/admin/src/lib/participants.ts`.
  *
  * A campanha tem uma arte só (`RAFFLE_ART`), a de rede social, servindo o hero e
  * o pop-up. Se um dia chegar uma peça horizontal feita para o hero, é só apontar
@@ -34,7 +37,7 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 	prize: 'TV 42"',
 	prizeCount: 2,
 	drawDateLabel: "16 de outubro de 2026",
-	entriesCloseAt: new Date("2026-10-15T23:59:59-03:00"),
+	entriesCloseAt: new Date("2026-10-14T23:59:59-03:00"),
 
 	hero: {
 		eyebrow: "Promoção Plastlima",
@@ -62,8 +65,8 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 			id: "cadastre",
 			title: "Faça seu cadastro",
 			description: [
-				"Informe seu nome, WhatsApp e onde você comprou.",
-				"Se quiser, anexe a foto do cupom e adicione seu CPF ou CNPJ.",
+				"Informe seu nome, WhatsApp e onde você comprou, e anexe a foto do cupom da compra.",
+				"Se quiser, adicione também seu CPF ou CNPJ.",
 			],
 		},
 		{
@@ -78,7 +81,7 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 	form: {
 		title: "Faça seu cadastro e concorra",
 		description:
-			"Leva menos de um minuto. Usamos o WhatsApp apenas para avisar o ganhador. Comprou de novo? Cadastre outra vez com o mesmo número: cada compra vale mais uma chance.",
+			"Tenha o cupom da compra em mãos — a foto dele é obrigatória. Usamos o WhatsApp apenas para avisar o ganhador. Comprou de novo? Cadastre outra vez com o mesmo número: cada compra vale mais uma chance.",
 
 		poolChoice: {
 			label: "Onde você comprou?",

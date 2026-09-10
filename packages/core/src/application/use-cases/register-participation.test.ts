@@ -44,10 +44,14 @@ const CAMPAIGN: RaffleCampaign = {
 
 const DURING_CAMPAIGN = new Date("2026-08-10T12:00:00-03:00");
 
+/** Cupom mínimo que passa no schema — o conteúdo não importa aqui. */
+const RECEIPT = "data:image/jpeg;base64,QUJD";
+
 const VALID_INPUT: RegisterParticipationInput = {
 	name: "Maria da Silva",
 	phone: "(86) 98897-0955",
 	storeId: CENTRO.id,
+	receiptImage: RECEIPT,
 };
 
 let participants: InMemoryParticipantRepository;
@@ -160,6 +164,7 @@ describe("submissões simultâneas", () => {
 				name: VALID_INPUT.name,
 				phone: phone.value,
 				store: CENTRO,
+				receiptImage: RECEIPT,
 				now: DURING_CAMPAIGN,
 			});
 
@@ -229,6 +234,18 @@ describe("recusas", () => {
 		if (!result.ok) {
 			expect(result.error.code).toBe("INVALID_PARTICIPANT");
 		}
+	});
+
+	it("recusa cadastro sem cupom", async () => {
+		const result = await useCase.execute({ ...VALID_INPUT, receiptImage: "" });
+
+		expect(result.ok).toBe(false);
+
+		if (!result.ok) {
+			expect(result.error.code).toBe("INVALID_PARTICIPANT");
+		}
+
+		expect(participants.size).toBe(0);
 	});
 });
 

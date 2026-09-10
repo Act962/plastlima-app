@@ -24,7 +24,7 @@ export default function RaffleRulesPage() {
 				])}
 			/>
 			<PageHero
-				description={`Condições de participação da promoção ${RAFFLE_CAMPAIGN.prize} — Mês dos Pais.`}
+				description="Condições de participação da campanha Compre e Concorra — Plastlima e Vinco."
 				eyebrow="Promoção"
 				title="Regulamento do sorteio"
 			/>

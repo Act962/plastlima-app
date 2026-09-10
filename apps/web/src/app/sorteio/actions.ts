@@ -51,7 +51,7 @@ export async function registerParticipationAction(
 			phone: parsed.data.phone,
 			storeId: parsed.data.storeId,
 			document: parsed.data.document ?? null,
-			receiptImage: parsed.data.receiptImage ?? null,
+			receiptImage: parsed.data.receiptImage,
 		});
 	} catch (error) {
 		console.error("[sorteio] falha ao registrar participação", error);

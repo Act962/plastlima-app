@@ -3,28 +3,38 @@ import { RAFFLE_CAMPAIGN } from "./raffle";
 import { SITE } from "./site";
 
 /**
- * Regulamento da campanha das duas TVs.
+ * Regulamento da campanha "Compre e Concorra — Plastlima e Vinco".
  *
- * ⚠️ PENDENTES a confirmar com o cliente antes de publicar:
- * 1. A **data de início** da campanha (§2) — só o encerramento está definido.
- * 2. O modelo/especificação exata das TVs (§6).
- * 3. Se haverá Certificado de Autorização: sorteio condicionado a compra é
- *    "distribuição gratuita de prêmios a título de propaganda" (Lei 5.768/71 e
- *    Decreto 70.951/72) e depende de autorização prévia da Secretaria de
- *    Prêmios e Apostas do Ministério da Fazenda.
+ * Transcrição do regulamento oficial entregue pelo cliente (PDF "REGULAMENTO
+ * PLASTLIMA+VINCO"), que é o documento com valor jurídico. Ao atualizar, siga
+ * o PDF: cláusula que não está lá não deve aparecer aqui, porque o site não
+ * pode impor ao participante uma regra que o cliente não aprovou.
  *
- * A cláusula de comprovação em §8 não é decorativa: o grupo do participante é
- * autodeclarado no cadastro e o grupo do Centro de Distribuição tende a ser bem
- * menor, o que dá vantagem a quem mentir. Exigir a nota fiscal no resgate é o
- * que torna a declaração falsa inútil.
+ * Dois pontos vão além do PDF, ambos porque descrevem o que o formulário
+ * realmente faz:
+ * 1. §5 exige a foto do cupom. O PDF lista o cupom entre as informações do
+ *    cadastro, mas não o descreve como obrigatório — o cliente confirmou que é.
+ * 2. §5 explica que o grupo é fixado no primeiro cadastro. É o índice único
+ *    `(campaignId, phone)` do banco, e sem essa frase a pessoa que se recadastra
+ *    por outro canal não entende por que continua no grupo anterior.
+ *
+ * O período de §2 é o mesmo `RAFFLE_CAMPAIGN.entriesCloseAt` (14/10/2026), que
+ * é o que fecha o formulário de fato. Os dois andam juntos: se um mudar sem o
+ * outro, o site passa a aceitar cadastro fora do prazo que promete aqui.
+ *
+ * ⚠️ PENDENTE:
+ * - Certificado de Autorização: sorteio condicionado a compra é "distribuição
+ *   gratuita de prêmios a título de propaganda" (Lei 5.768/71 e Decreto
+ *   70.951/72) e depende de autorização prévia da Secretaria de Prêmios e
+ *   Apostas do Ministério da Fazenda. O regulamento oficial não menciona
+ *   certificado.
  */
 export const RAFFLE_RULES: LegalDocument = {
-	updatedAt: "3 de setembro de 2026",
+	updatedAt: "10 de setembro de 2026",
 
 	intro: [
-		`Este regulamento estabelece as condições de participação na campanha "Ganhe uma ${RAFFLE_CAMPAIGN.prize} Plastlima", realizada pela ${SITE.name}.`,
-		`Serão sorteadas ${RAFFLE_CAMPAIGN.prizeCount} (duas) TVs, em dois sorteios independentes: uma entre os clientes do Centro de Distribuição e outra entre os clientes das lojas.`,
-		"Ao se cadastrar, o participante declara ter lido e aceito integralmente as regras descritas abaixo.",
+		'Regulamento completo da campanha promocional "Compre e Concorra — Plastlima e Vinco".',
+		`Campanha válida de 9 de setembro a 14 de outubro de 2026, com sorteio em ${RAFFLE_CAMPAIGN.drawDateLabel}.`,
 	],
 
 	sections: [
@@ -34,75 +44,86 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: `A campanha "Ganhe uma ${RAFFLE_CAMPAIGN.prize} Plastlima" é uma ação promocional realizada pela ${SITE.name} com o objetivo de presentear seus clientes.`,
+					text: `A campanha promocional "Compre e Concorra — Plastlima e Vinco", denominada neste documento como CAMPANHA, é realizada pela ${SITE.name} em parceria com a marca Vinco.`,
+				},
+				{
+					type: "paragraph",
+					text: "A participação implica na aceitação integral das regras estabelecidas neste regulamento.",
 				},
 			],
 		},
 		{
 			id: "periodo",
-			title: "2. Período da campanha",
+			title: "2. Do período da campanha",
 			blocks: [
 				{
 					type: "paragraph",
-					text: "A campanha é válida até 15 de outubro de 2026, conforme divulgado nos materiais oficiais. Cadastros enviados após essa data não concorrem.",
+					text: "A campanha será realizada no período de 9 de setembro de 2026 a 14 de outubro de 2026.",
 				},
 				{
 					type: "paragraph",
-					text: `O sorteio será realizado no dia ${RAFFLE_CAMPAIGN.drawDateLabel}.`,
+					text: `O sorteio está previsto para o dia ${RAFFLE_CAMPAIGN.drawDateLabel}.`,
 				},
 			],
 		},
 		{
-			id: "quem-pode",
-			title: "3. Quem pode participar",
+			id: "locais",
+			title: "3. Dos locais participantes",
 			blocks: [
 				{
 					type: "list",
-					lead: "Podem participar pessoas físicas que, cumulativamente:",
+					lead: "A campanha será válida em:",
 					items: [
-						"tenham 18 anos completos ou mais;",
-						"sejam residentes no Brasil;",
-						"tenham realizado compra no Centro de Distribuição ou em qualquer loja Plastlima durante o período da campanha;",
-						"tenham concluído o cadastro na página oficial da campanha.",
-						"ESTÁ VEDADA A PARTICIPAÇÃO DE COLABORADORES DO GRUPO PLASTLIMA.",
+						`todas as franquias ${SITE.name};`,
+						`Centro de Distribuição ${SITE.name}.`,
 					],
 				},
 			],
 		},
 		{
-			id: "como-participar",
-			title: "4. Como participar",
+			id: "mecanica",
+			title: "4. Da mecânica de participação",
 			blocks: [
 				{
-					type: "list",
-					lead: "Para participar é necessário:",
-					items: [
-						"realizar uma compra no Centro de Distribuição ou em qualquer loja Plastlima durante o período da campanha;",
-						`acessar o site oficial da campanha — ${new URL(SITE.url).host};`,
-						"preencher corretamente o formulário com nome completo, WhatsApp e onde realizou a compra — no Centro de Distribuição ou em uma das lojas.",
-					],
+					type: "paragraph",
+					text: `4.1. Nas franquias — para participar através das franquias ${SITE.name}, o cliente deverá adquirir qualquer produto da marca Vinco durante o período da campanha. Após a compra, deverá realizar o cadastro no site oficial da campanha.`,
 				},
 				{
 					type: "paragraph",
-					text: "O participante pode também informar seu CPF ou CNPJ, o que facilita a conferência dos dados na entrega do prêmio. Após o envio do formulário, a participação está automaticamente registrada.",
+					text: "4.2. No Centro de Distribuição — para participar, é necessário realizar compras a partir de R$ 200,00 (duzentos reais). A cada compra que atingir esse valor mínimo, o cliente estará apto a participar da promoção, conforme as regras estabelecidas neste regulamento. Após cumprir a condição de compra, deverá realizar o cadastro no site oficial da campanha.",
 				},
 			],
 		},
 		{
-			id: "participacao",
-			title: "5. Da participação",
+			id: "cadastro",
+			title: "5. Do cadastro",
 			blocks: [
 				{
 					type: "paragraph",
-					text: "Quanto mais você comprar, mais chance tem de ganhar.",
+					text: `O participante deverá acessar o site oficial da campanha — ${new URL(SITE.url).host} — e preencher corretamente as informações solicitadas.`,
+				},
+				{
+					type: "list",
+					lead: "Entre as informações que poderão ser solicitadas estão:",
+					items: [
+						"nome;",
+						"número de WhatsApp;",
+						"local onde realizou a compra;",
+						"foto do cupom da compra;",
+						"CPF ou CNPJ, quando necessário.",
+					],
 				},
 				{
 					type: "paragraph",
-					text: "O cadastro deve ser realizado dentro do período de vigência da promoção. Cadastros incompletos ou com informações incorretas podem ser desclassificados.",
+					text: "O envio da foto do cupom é obrigatório: é o comprovante da compra que dá direito à participação. Cadastros sem cupom não são registrados.",
 				},
 				{
 					type: "paragraph",
-					text: "Cada participante concorre em um único grupo, definido pelo local de compra informado no primeiro cadastro. Novos cadastros com o mesmo WhatsApp somam participações no mesmo grupo e não transferem o participante para o outro sorteio.",
+					text: "Cada participante concorre em um único grupo, definido pelo local de compra informado no primeiro cadastro. Novos cadastros com o mesmo número de WhatsApp somam participações no mesmo grupo e não transferem o participante para o outro sorteio.",
+				},
+				{
+					type: "paragraph",
+					text: "O participante é responsável pela veracidade das informações fornecidas.",
 				},
 			],
 		},
@@ -112,117 +133,109 @@ export const RAFFLE_RULES: LegalDocument = {
 			blocks: [
 				{
 					type: "paragraph",
-					text: `Serão sorteadas ${RAFFLE_CAMPAIGN.prizeCount} (duas) TVs de 42 polegadas, uma para cada grupo de participantes.`,
-				},
-				{
-					type: "list",
-					lead: "Os grupos são:",
-					items: [
-						"Centro de Distribuição — clientes que realizaram a compra diretamente no Centro de Distribuição;",
-						"Lojas — clientes que realizaram a compra em qualquer uma das lojas Plastlima.",
-					],
-				},
-				{
-					type: "paragraph",
-					text: `Cada grupo tem seu próprio sorteio e seu próprio ganhador. A ${SITE.name} pode substituir o aparelho por outro de igual ou superior valor, caso haja indisponibilidade.`,
+					text: "Será disponibilizado como prêmio 01 (uma) TV de 42 polegadas para as franquias e 01 (uma) para o Centro de Distribuição.",
 				},
 			],
 		},
 		{
-			id: "sorteio",
-			title: "7. Do sorteio",
+			id: "apuracao",
+			title: "7. Da apuração",
 			blocks: [
 				{
 					type: "paragraph",
-					text: `Os dois sorteios ocorrerão em ${RAFFLE_CAMPAIGN.drawDateLabel}, em horário e formato definidos pela ${SITE.name}, apurados separadamente — um por grupo.`,
+					text: `A definição dos participantes contemplados ocorrerá no dia ${RAFFLE_CAMPAIGN.drawDateLabel}.`,
 				},
 				{
-					type: "list",
-					lead: "O resultado será divulgado:",
-					items: [
-						"no site oficial;",
-						`nas redes sociais da ${SITE.name}, podendo também ser divulgado nas lojas participantes.`,
-					],
+					type: "paragraph",
+					text: "A apuração seguirá a mecânica definida oficialmente pela organização da campanha.",
 				},
 			],
 		},
 		{
-			id: "entrega",
-			title: "8. Entrega do prêmio",
+			id: "validacao",
+			title: "8. Da validação",
 			blocks: [
 				{
-					type: "paragraph",
-					text: "O ganhador será contatado através do telefone ou WhatsApp informado no cadastro.",
-				},
-				{
-					type: "paragraph",
-					text: "A participação é provisória até a conferência da compra. Para receber o prêmio, o ganhador deve apresentar comprovante de compra (cupom fiscal ou nota fiscal) do período da campanha, emitido pelo grupo em que concorreu. Não havendo comprovação, o participante é desclassificado e novo sorteio é realizado naquele grupo.",
-				},
-				{
-					type: "paragraph",
-					text: `Caso não seja localizado em até 7 (sete) dias corridos, a ${SITE.name} pode realizar novo sorteio, conforme critérios estabelecidos pela organização da campanha.`,
-				},
-				{
-					type: "paragraph",
-					text: "O prêmio é pessoal e intransferível, não podendo ser convertido em dinheiro.",
+					type: "list",
+					lead: "Antes da entrega do prêmio, a organização poderá solicitar informações e documentos para confirmar:",
+					items: [
+						"a identidade do participante;",
+						"os dados cadastrados;",
+						"o cumprimento das regras da campanha;",
+						"a realização da compra dentro das condições exigidas.",
+					],
 				},
 			],
 		},
 		{
 			id: "desclassificacao",
-			title: "9. Desclassificação",
+			title: "9. Da desclassificação",
 			blocks: [
 				{
 					type: "list",
-					lead: "São desclassificados os participantes que:",
+					lead: "Poderá ser desclassificado o participante que:",
 					items: [
-						"preencherem informações falsas, inclusive quanto ao local da compra;",
-						"não comprovarem a compra no grupo em que concorreram;",
-						"realizarem cadastros duplicados utilizando dados de terceiros;",
-						"não atenderem aos critérios deste regulamento.",
+						"fornecer informações falsas;",
+						"não cumprir as condições de participação;",
+						"tentar utilizar meios fraudulentos;",
+						"não atender às solicitações necessárias para validação da participação.",
 					],
 				},
 			],
 		},
 		{
-			id: "dados",
-			title: "10. Tratamento de dados pessoais",
+			id: "divulgacao",
+			title: "10. Da divulgação",
 			blocks: [
 				{
 					type: "paragraph",
-					text: `Os dados informados no cadastro são tratados pela ${SITE.name} para administrar esta campanha, apurar o resultado e contatar o ganhador, em conformidade com a Lei nº 13.709/2018 (LGPD).`,
+					text: `O resultado será divulgado através dos canais oficiais da ${SITE.name} e da Vinco.`,
 				},
 				{
 					type: "paragraph",
-					text: `Os dados também podem ser utilizados pela ${SITE.name} para comunicações institucionais e promocionais, conforme a legislação aplicável e a Política de Privacidade da empresa.`,
+					text: "O participante contemplado poderá ser comunicado por meio do WhatsApp cadastrado.",
+				},
+			],
+		},
+		{
+			id: "elegibilidade",
+			title: "11. Da elegibilidade e impedimentos",
+			blocks: [
+				{
+					type: "paragraph",
+					text: `Não poderão participar desta campanha colaboradores da ${SITE.name}, das franquias participantes, do Centro de Distribuição, da Vinco, bem como seus familiares, independentemente do vínculo ou da unidade em que atuem.`,
 				},
 				{
 					type: "paragraph",
-					text: "O participante pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo e-mail informado na Política de Privacidade.",
+					text: "Caso seja identificado que o participante possui vínculo como colaborador ou seja familiar de colaborador, sua participação será automaticamente invalidada e, caso tenha sido contemplado, será desclassificado.",
+				},
+			],
+		},
+		{
+			id: "dados",
+			title: "12. Proteção de dados",
+			blocks: [
+				{
+					type: "paragraph",
+					text: "Os dados fornecidos pelos participantes serão utilizados para fins relacionados à operacionalização e validação da campanha, observando-se a legislação aplicável.",
+				},
+				{
+					type: "paragraph",
+					text: `O tratamento observa a Lei nº 13.709/2018 (LGPD). O participante pode solicitar acesso, correção ou exclusão dos seus dados pelo e-mail informado na Política de Privacidade da ${SITE.name}.`,
 				},
 			],
 		},
 		{
 			id: "disposicoes",
-			title: "11. Disposições gerais",
+			title: "13. Disposições gerais",
 			blocks: [
 				{
 					type: "paragraph",
-					text: "Ao participar da campanha, o cliente declara estar de acordo com este regulamento.",
+					text: "A participação na campanha implica na concordância com todas as regras deste regulamento.",
 				},
 				{
 					type: "paragraph",
-					text: "Os casos omissos são analisados pela organização da campanha.",
-				},
-			],
-		},
-		{
-			id: "duvidas",
-			title: "12. Dúvidas",
-			blocks: [
-				{
-					type: "paragraph",
-					text: `Em caso de dúvidas, o participante pode entrar em contato pelos canais oficiais da ${SITE.name} ou procurar atendimento em qualquer uma das lojas participantes.`,
+					text: "Situações não previstas serão analisadas pela organização da campanha, respeitando as normas aplicáveis.",
 				},
 			],
 		},

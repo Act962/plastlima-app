@@ -27,8 +27,13 @@ export type RegisterParticipationInput = {
 	storeId: string;
 	/** CPF/CNPJ como digitado. Opcional; quando vier, precisa ser válido. */
 	document?: string | null;
-	/** Data URL da imagem do cupom, já comprimida pelo navegador. */
-	receiptImage?: string | null;
+	/**
+	 * Data URL da imagem do cupom, já comprimida pelo navegador.
+	 *
+	 * Obrigatória para um cadastro novo: é o comprovante da compra que dá
+	 * direito à participação.
+	 */
+	receiptImage: string;
 };
 
 export type RegisterParticipationOutput = {
