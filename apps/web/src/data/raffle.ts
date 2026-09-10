@@ -62,7 +62,8 @@ export const RAFFLE_CAMPAIGN: RaffleCampaignContent = {
 			id: "cadastre",
 			title: "Faça seu cadastro",
 			description: [
-				"Informe seu nome, WhatsApp e onde você comprou. Se quiser, adicione seu CPF ou CNPJ.",
+				"Informe seu nome, WhatsApp e onde você comprou.",
+				"Se quiser, anexe a foto do cupom e adicione seu CPF ou CNPJ.",
 			],
 		},
 		{

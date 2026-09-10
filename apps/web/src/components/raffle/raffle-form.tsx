@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { registerParticipationAction } from "@/app/sorteio/actions";
 import { CheckboxField } from "@/components/forms/checkbox-field";
 import { ChoiceField } from "@/components/forms/choice-field";
+import { FileField } from "@/components/forms/file-field";
 import { FormError } from "@/components/forms/form-feedback";
 import { SelectField } from "@/components/forms/select-field";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -154,6 +155,19 @@ export function RaffleForm() {
 					{...register("storeId")}
 				/>
 			) : null}
+
+			{/* Logo depois de onde a pessoa comprou: o cupom é a prova daquela
+			compra, e o grupo sorteado é autodeclarado. */}
+			<FileField
+				error={errors.receiptImage?.message}
+				hint="Opcional. Ajuda a confirmar sua compra se houver dúvida."
+				label="Foto do cupom"
+				onChange={(image) => {
+					setValue("receiptImage", image?.dataUrl, {
+						shouldValidate: true,
+					});
+				}}
+			/>
 
 			<TextField
 				autoComplete="off"
