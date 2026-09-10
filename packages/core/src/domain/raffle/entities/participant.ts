@@ -23,6 +23,11 @@ export type ParticipantSnapshot = {
 	/** CPF/CNPJ só com dígitos, ou `null` quando não informado. */
 	document: string | null;
 	documentDisplay: string | null;
+	/**
+	 * Cupom da compra. Obrigatório em cadastros novos, mas segue anulável aqui
+	 * por compatibilidade: os inscritos da campanha anterior são anteriores à
+	 * regra e alguns não têm cupom.
+	 */
 	receiptImage: string | null;
 	participationCount: number;
 	acceptedTermsAt: Date;
@@ -49,7 +54,8 @@ type CreateParticipantInput = {
 	phone: PhoneNumber;
 	store: RaffleStore;
 	document?: TaxDocument | null;
-	receiptImage?: string | null;
+	/** Cupom da compra. Obrigatório em um cadastro novo. */
+	receiptImage: string;
 	now: Date;
 };
 
@@ -82,6 +88,10 @@ export class Participant {
 			return fail(new InvalidParticipantError("campanha não informada"));
 		}
 
+		if (input.receiptImage.trim().length === 0) {
+			return fail(new InvalidParticipantError("cupom não informado"));
+		}
+
 		return ok(
 			new Participant(
 				{
@@ -90,7 +100,7 @@ export class Participant {
 					phone: input.phone,
 					store: input.store,
 					document: input.document ?? null,
-					receiptImage: input.receiptImage ?? null,
+					receiptImage: input.receiptImage,
 					participationCount: 1,
 					acceptedTermsAt: input.now,
 					createdAt: input.now,

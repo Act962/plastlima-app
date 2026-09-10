@@ -21,7 +21,7 @@ import {
  */
 export const ADMIN_CAMPAIGN: RaffleCampaign = {
 	id: "tv-42-2026",
-	entriesCloseAt: new Date("2026-10-15T23:59:59-03:00"),
+	entriesCloseAt: new Date("2026-10-14T23:59:59-03:00"),
 };
 
 export function createListParticipants(): ListParticipants {

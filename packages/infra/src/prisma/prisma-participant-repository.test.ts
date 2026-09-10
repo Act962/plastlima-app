@@ -37,6 +37,9 @@ const CAMPAIGN: RaffleCampaign = {
 const prisma = createPrismaClient(inject("databaseUrl"));
 const repository = new PrismaParticipantRepository(prisma);
 
+/** Cupom mínimo que passa no schema — o conteúdo não importa aqui. */
+const RECEIPT = "data:image/jpeg;base64,QUJD";
+
 function buildParticipant(
 	phone: string,
 	name = "Maria da Silva",
@@ -53,6 +56,7 @@ function buildParticipant(
 		name,
 		phone: parsed.value,
 		store,
+		receiptImage: RECEIPT,
 		now: new Date("2026-08-10T12:00:00Z"),
 	});
 
@@ -201,6 +205,7 @@ describe("RegisterParticipation contra o banco real", () => {
 				name: "Maria da Silva",
 				phone,
 				storeId: CENTRO.id,
+				receiptImage: RECEIPT,
 			});
 
 			expect(result.ok).toBe(true);
@@ -344,6 +349,7 @@ describe("busca por documento", () => {
 			phone: parsed.value,
 			store: CENTRO,
 			document: TaxDocument.restore("52998224725"),
+			receiptImage: RECEIPT,
 			now: new Date("2026-08-10T12:00:00Z"),
 		});
 

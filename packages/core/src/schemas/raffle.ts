@@ -54,12 +54,18 @@ export const raffleRegistrationSchema = z.object({
 		)
 		.optional(),
 
-	/** Foto do cupom, opcional, já comprimida pelo navegador. */
+	/**
+	 * Foto do cupom, já comprimida pelo navegador.
+	 *
+	 * Obrigatória: é o comprovante da compra que dá direito à participação. O
+	 * `error` cobre o campo ausente — sem ele, quem envia o formulário sem
+	 * anexar nada receberia a mensagem genérica do zod.
+	 */
 	receiptImage: z
-		.string()
+		.string({ error: "Anexe a foto do cupom da sua compra." })
+		.min(1, "Anexe a foto do cupom da sua compra.")
 		.regex(RECEIPT_DATA_URL_PATTERN, "Envie uma imagem válida.")
-		.max(MAX_RECEIPT_DATA_URL_LENGTH, "A imagem do cupom é muito grande.")
-		.optional(),
+		.max(MAX_RECEIPT_DATA_URL_LENGTH, "A imagem do cupom é muito grande."),
 
 	acceptedTerms: z
 		.boolean()

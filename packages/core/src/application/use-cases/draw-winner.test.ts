@@ -41,6 +41,7 @@ async function addParticipant(
 		name: options.name ?? `Participante ${rawPhone.slice(-4)}`,
 		phone: phone.value,
 		store: CENTRO,
+		receiptImage: "data:image/jpeg;base64,QUJD",
 		now: options.at ?? DURING_CAMPAIGN,
 	});
 

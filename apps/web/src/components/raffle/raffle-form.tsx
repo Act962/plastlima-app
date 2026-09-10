@@ -57,6 +57,7 @@ export function RaffleForm() {
 			phone: "",
 			storeId: "",
 			document: "",
+			receiptImage: "",
 			acceptedTerms: false,
 		},
 	});
@@ -160,10 +161,12 @@ export function RaffleForm() {
 			compra, e o grupo sorteado é autodeclarado. */}
 			<FileField
 				error={errors.receiptImage?.message}
-				hint="Opcional. Ajuda a confirmar sua compra se houver dúvida."
+				hint="É o comprovante da compra que dá direito à participação."
 				label="Foto do cupom"
 				onChange={(image) => {
-					setValue("receiptImage", image?.dataUrl, {
+					// String vazia, e não `undefined`, ao remover: assim o schema
+					// responde com a mensagem do campo em vez do erro genérico de tipo.
+					setValue("receiptImage", image?.dataUrl ?? "", {
 						shouldValidate: true,
 					});
 				}}
