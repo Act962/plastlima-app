@@ -39,6 +39,20 @@ const nextConfig: NextConfig = {
 	 * do Turbopack conclui que precisa empacotar o projeto inteiro na função.
 	 */
 	serverExternalPackages: ["@prisma/client", "@plastlima-app/infra"],
+	/**
+	 * Sorteio fora do ar entre campanhas: o pop-up saiu do layout e qualquer
+	 * acesso a `/sorteio` (cadastro, confirmação, regulamento e a Server Action)
+	 * volta para a home. O código da campanha continua em `app/sorteio` e
+	 * `components/raffle` para a próxima — reativar é remover este redirect,
+	 * devolver `<RafflePopup />` ao layout e as rotas ao `sitemap.ts`.
+	 * Temporário (307) de propósito, para o navegador não memorizar o desvio.
+	 */
+	async redirects() {
+		return [
+			{ source: "/sorteio", destination: "/", permanent: false },
+			{ source: "/sorteio/:path*", destination: "/", permanent: false },
+		];
+	},
 };
 
 export default nextConfig;
