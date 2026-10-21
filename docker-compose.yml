@@ -13,6 +13,13 @@ services:
     container_name: plastlima-mongo
     restart: unless-stopped
     command: ["--replSet", "rs0", "--bind_ip_all"]
+    environment:
+      # O MongoDB 8 se recusa a subir em kernel Linux 6.19 a 7.0.13
+      # (SERVER-121912): o TCMalloc embutido conflita com o rseq do glibc. Os
+      # runners do GitHub Actions já têm esse kernel, por isso a CI falhava só
+      # às vezes. Este é o contorno indicado no ticket; em kernel fora da faixa
+      # não muda nada.
+      GLIBC_TUNABLES: glibc.pthread.rseq=1
     ports:
       - "27017:27017"
     volumes:
