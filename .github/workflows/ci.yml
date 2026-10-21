@@ -51,12 +51,11 @@ jobs:
       - name: Lint e formatação (Biome)
         run: pnpm exec biome ci .
 
-      # Não usa `pnpm run db:up` (`docker compose up --wait`) aqui: no runner o
-      # `--wait` já desistiu com "unhealthy" meio segundo depois de o container
-      # subir, sem respeitar o `start_period`/`retries` do healthcheck. O laço
-      # abaixo espera o "healthy" até o limite, tratando qualquer outro status
-      # como transitório, e em caso de falha mostra o log do banco e do
-      # healthcheck em vez de só "unhealthy".
+      # Não usa `pnpm run db:up` (`docker compose up --wait`) aqui: quando o
+      # banco não sobe, o `--wait` só diz "unhealthy". O laço abaixo espera o
+      # "healthy" até o limite e, se falhar, imprime o log do mongo — foi assim
+      # que apareceu a incompatibilidade com o kernel do runner tratada no
+      # `docker-compose.yml`.
       - name: Sobe o MongoDB (replica set de um nó)
         run: |
           docker compose up -d
