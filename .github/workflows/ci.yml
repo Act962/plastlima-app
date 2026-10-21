@@ -51,8 +51,28 @@ jobs:
       - name: Lint e formatação (Biome)
         run: pnpm exec biome ci .
 
+      # Não usa `pnpm run db:up` (`docker compose up --wait`) aqui: no runner o
+      # `--wait` já desistiu com "unhealthy" meio segundo depois de o container
+      # subir, sem respeitar o `start_period`/`retries` do healthcheck. O laço
+      # abaixo espera o "healthy" até o limite, tratando qualquer outro status
+      # como transitório, e em caso de falha mostra o log do banco e do
+      # healthcheck em vez de só "unhealthy".
       - name: Sobe o MongoDB (replica set de um nó)
-        run: pnpm run db:up
+        run: |
+          docker compose up -d
+          for _ in $(seq 1 60); do
+            status=$(docker inspect -f '{{.State.Health.Status}}' plastlima-mongo)
+            if [ "$status" = "healthy" ]; then
+              echo "MongoDB pronto."
+              exit 0
+            fi
+            echo "MongoDB: $status"
+            sleep 3
+          done
+          echo "::error::MongoDB não ficou healthy em 3 minutos."
+          docker compose logs mongo
+          docker inspect -f '{{json .State.Health}}' plastlima-mongo
+          exit 1
 
       - name: Tipos, testes e build
         run: pnpm turbo run check-types test build
